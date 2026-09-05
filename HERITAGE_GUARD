@@ -1,0 +1,810 @@
+# HERITAGE GUARD (हेरिटेज गार्ड)
+## National Blueprint & Engineering Specification
+**SIH 2026 · Heritage & Culture · Problem Statement PS 26197**
+*Team Sinister Six · Living Heritage Intelligence & Safeguarding Atlas for India*
+
+---
+
+# SECTION 1: PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+## 1.1 Executive Summary & National Thesis
+Most Indian heritage platforms function purely as discovery or tourism directories—providing static photographs, ticket booking links, and tourist trivia. However, India's heritage is fundamentally dual-natured: **Tangible** (monuments, stepwells, sacred groves, historic settlements, temple complexes) and **Intangible / Living** (rituals, artisanal crafts, oral memories, seasonal festivals, traditional stewardship).
+
+When a heritage asset begins to degrade, experience unauthorized peripheral construction, or lose its associated cultural traditions, observations from residents, visitors, and researchers remain fragmented across social media, WhatsApp groups, and lost complaints.
+
+**Heritage Guard** solves this through a **provenance-aware digital twin for Indian heritage clusters**. It bridges the critical chasm between public cultural appreciation and responsible administrative safeguarding. It treats preservation not as accusatory citizen policing, but as an **evidence continuity layer** that connects cultural significance, verified spatial boundaries, GPS uncertainty, and institutional review into defensible, reproducible dossiers.
+
+```
++---------------------------------------------------------------------------------------------------+
+|                                  THE HERITAGE GUARD CORE THESIS                                   |
+|                                                                                                   |
+|   "Most heritage platforms help people discover a place.                                          |
+|    Heritage Guard helps a place remain legible, lived, and protectable."                          |
+|                                                                                                   |
+|   1. Showcases living practice & oral context as structural first-class assets, not decoration.  |
+|   2. Ingests neutral citizen observations without generating slanderous accusations.              |
+|   3. Computes spatial truth using polygon geometry & device uncertainty circles (no fake radii).   |
+|   4. Maintains an immutable, dated change ledger of physical and contextual continuity.          |
+|   5. Generates standardized, audit-ready evidence packets for curators and ASI/State custodians.  |
++---------------------------------------------------------------------------------------------------+
+```
+
+---
+
+## 1.2 The 5-Layer Heritage Twin Concept
+The atomic object of Heritage Guard is the **Heritage Twin**. Every site is not a point on Google Maps, but a versioned 5-layer entity:
+
+| Layer | Name | Description | Key Attributes | SIH Significance |
+|---|---|---|---|---|
+| **Layer 1** | **Cultural Identity** | Core tangible history, local vernacular names, architectural taxonomy, community origin stories. | Site IDs, vernacular aliases, historical period, patron dynasty, architectural school, public narrative. | Eliminates anglicized-only lookup; honors indigenous designations. |
+| **Layer 2** | **Living Practice** | The intangible heritage giving the site its pulse: rituals, artisanal crafts, folklore, seasonal fairs. | Associated craft communities, sacred routes, festival calendar, consent status (`public`, `community-only`, `withheld`). | Meets UNESCO 2003 Convention compliance for community participation. |
+| **Layer 3** | **Spatial Truth** | Source-attributed geospatial polygons for protected monument, prohibited zone (100m), regulated zone (200m). | GeoJSON MultiPolygons, source URL (Bhuvan/ASI gazette), datum, capture date, known boundary limitations. | Replaces naive circle approximations with legal/scientific GIS boundaries. |
+| **Layer 4** | **Condition & Change** | Chronological record of physical condition, environmental impact, and neutral crowd observations. | Date-stamped observations, concern taxonomy, photo provenance, GPS error margins, non-accusatory notes. | Converts isolated complaints into longitudinal condition trends. |
+| **Layer 5** | **Safeguarding Workflow** | Administrative review chain, expert triage, and formal institutional export. | Reviewer triage status (`pending`, `reviewed`, `referred`, `archived`), confidence score, official dossier PDF/JSON-LD. | Provides ASI and district collectors with actionable, uncorrupted evidence. |
+
+---
+
+## 1.3 User Personas & Value Propositions
+
+### Persona 1: Ananya (The Cultural Explorer / Student)
+* **Goal**: Visit a heritage site (e.g., Mehrauli Archaeological Park or Champaner-Pavagadh) and understand its deep history, hidden stepwells, and living traditions.
+* **Pain Point**: Tourist boards only list the main gate and monument entry ticket. No details on living artisans or ritual routes.
+* **Heritage Guard Solution**: Interactive Heritage Twin showcase with vernacular names, oral history audio clips, and living practice cards.
+
+### Persona 2: Rajesh (The Local Resident / Heritage Enthusiast)
+* **Goal**: Document deep cracking in a 14th-century arch or dumping of construction debris along a temple tank boundary.
+* **Pain Point**: Afraid of legal backlash if naming developers; existing portals are complex, bug-ridden, and ignore GPS accuracy.
+* **Heritage Guard Solution**: Rapid, anonymous-capable, neutral-vocabulary field observation capture with offline caching and transparent GPS accuracy feedback.
+
+### Persona 3: Dr. V. Sundaram (The Heritage Curator / ASI Conservation Assistant)
+* **Goal**: Verify if incoming crowd reports represent legitimate buffer-zone encroachments or natural weathering.
+* **Pain Point**: Flooded with blurry photos, ambiguous locations, and angry accusations lacking coordinates or dates.
+* **Heritage Guard Solution**: Curator Console providing a single review packet containing raw EXIF data, SHA-256 media hash, distance-to-boundary calculation, and historical timeline.
+
+---
+
+## 1.4 Product Principles & Ethical Guardrails
+
+```
++----------------------------------------------------------------------------------------------------+
+|                                    ETHICAL & LEGAL BOUNDARIES                                      |
+|                                                                                                    |
+|  [X] NO ACCUSATION FIELDS: Forms never ask "Who is doing this?" or "Is this illegal?".             |
+|  [X] NO ACCUSATION BADGES: System never outputs "Encroachment Found" or "Guilty".                 |
+|  [V] THREE-STATEMENT SEPARATION:                                                                   |
+|      1. What the user reported: "Piles of stone masonry observed 4m from north wall."             |
+|      2. What the spatial engine computed: "Coordinate falls within 100m Prohibited Zone (ASI 2021)|
+|         with +/- 14m GPS uncertainty margin."                                                      |
+|      3. What remains required: "Administrative and legal determination by Competent Authority."    |
+|  [V] CULTURAL CONSENT: Sensitive tribal/ritual knowledge can be designated 'withheld' or           |
+|      'community-only' to prevent sacred site exploitation or theft.                                |
+|  [V] DPDP ACT 2023 COMPLIANCE: No PII collected on observers; faces & license plates stripped.    |
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+## 1.5 Functional Feature Matrix
+
+| ID | Feature | Priority | Description | Acceptance Criteria |
+|---|---|---|---|---|
+| **FR-01** | **Heritage Twin Showcase** | P0 | Multi-tab interactive view of Tangible Site + Living Practice + Map. | Renders in < 1.5s; showcases vernacular names, history, crafts, and audio stories. |
+| **FR-02** | **Provenance GIS Explorer** | P0 | Leaflet/MapLibre map showing protected monument polygon, prohibited buffer (100m), and regulated buffer (200m). | Displays active layer metadata, source date (e.g., "ASI Bhuvan 2023"), and explicit data limitation badge. |
+| **FR-03** | **Offline Field Capture** | P0 | Mobile-optimized progressive web capture: Category, photo, neutral observation text, device geolocation. | Operates seamlessly without internet connection; queues submission into IndexedDB with "Pending Sync" pill. |
+| **FR-04** | **Spatial Reasoning Engine** | P0 | Point-in-polygon and distance-to-boundary analysis accounting for device horizontal accuracy radius. | Correctly classifies report into 1 of 5 explainable states (Inside, Edge/Uncertain, Outside, Low GPS, Weak Source). |
+| **FR-05** | **Cryptographic Evidence Chain**| P1 | Generates SHA-256 checksums of photos and forms an immutable audit trail. | Every observation record has tamper-evident hash linked to layer version ID. |
+| **FR-06** | **Temporal Change Ledger** | P1 | Chronological audit log of observations, restoration milestones, and seasonal practices for a cluster. | Users can view past records for the exact site cluster over time. |
+| **FR-07** | **Curator Review Console** | P1 | Desktop/tablet dashboard for authorized reviewers to evaluate packets, request more info, or export dossiers. | Enables status change (`Reviewed`, `Needs Info`, `Referred to ASI`) without legal overreach. |
+| **FR-08** | **Standardized Dossier Export** | P1 | Generates downloadable, printable single-page PDF and JSON-LD safeguarding packets. | Contains map snapshot, accuracy buffer, photo, hash, timestamp, and reviewer notes. |
+
+---
+
+## 1.6 Success Metrics & SIH Evaluation Targets
+* **Showcase Comprehension**: 85%+ of first-time evaluators can explain both the tangible site and at least one living practice within 60 seconds.
+* **Spatial Reliability**: 100% deterministic classification across 4 edge cases (Definitive Inside, Definitive Outside, Boundary Intersection / Uncertain, Degraded GPS > 30m).
+* **Field Efficiency**: End-to-end field observation submission completed in under 90 seconds.
+* **Institutional Utility**: Curator can review an observation and generate an official referral dossier in under 2 minutes without reconstructing raw metadata.
+
+---
+---
+
+# SECTION 2: TECHNICAL REQUIREMENTS DOCUMENT (TRD)
+
+## 2.1 Technology Architecture Stack
+
+```
++----------------------------------------------------------------------------------------------------+
+|                                    HERITAGE GUARD TECH STACK                                       |
++----------------------------------------------------------------------------------------------------+
+|  CLIENT TIER          | React 19 (Vite) + Tailwind CSS + Lucide Icons                             |
+|  OFFLINE STORAGE      | IndexedDB (Dexie.js) + PWA ServiceWorker Cache Storage                     |
+|  MAPPING / GIS        | Leaflet.js / MapLibre GL + Turf.js (Client-side geospatial computation)   |
+|  BACKEND API          | Node.js (Express) OR Python (FastAPI) + GeoPandas / Shapely                |
+|  DATABASE TIER        | PostgreSQL 16 + PostGIS 3.4 Spatial Extension                              |
+|  OBJECT STORAGE       | MinIO / S3 compatible store (Content-addressable SHA-256 storage)          |
+|  DOSSIER GENERATION   | Server-side Puppeteer / PDFKit + GeoJSON vector map rendering              |
++----------------------------------------------------------------------------------------------------+
+```
+
+---
+
+## 2.2 Provenance-Aware Spatial Reasoning Algorithm
+
+Traditional applications place a pin on a map and draw a naive 100m circular radius from a centroid. Centroid buffers fail catastrophically on irregular, asymmetric Indian heritage complexes (e.g., Hampi ruins, Qutub complex, Chittorgarh fort).
+
+Heritage Guard implements **rigorous polygon and multi-ring boundary intersection**, explicitly factoring in **Device Horizontal Accuracy ($r_{gps}$)**:
+
+### Mathematical Definition:
+Let:
+* $\mathcal{P}_{monument}$ be the polygon representing the core monument footprint.
+* $\mathcal{P}_{prohibited}$ be the 100-meter statutory prohibited buffer polygon.
+* $\mathcal{P}_{regulated}$ be the 200-meter statutory regulated buffer polygon.
+* $C_{obs} = (lat, lon)$ be the observation coordinate reported by the client device.
+* $r_{gps}$ be the 68% confidence horizontal dilution of precision / accuracy reported by the GPS sensor in meters.
+* $\mathcal{D}(C_{obs}, r_{gps})$ be the circle disk centered at $C_{obs}$ with radius $r_{gps}$.
+* $\delta(C_{obs}, \partial \mathcal{P})$ be the minimum Euclidean distance from $C_{obs}$ to the nearest edge of boundary polygon $\mathcal{P}$.
+* $\tau_{gps\_max}$ be the maximum acceptable GPS uncertainty threshold (Default: $35.0\text{ m}$).
+* $\sigma_{margin}$ be the safety buffer tolerance (Default: $5.0\text{ m}$).
+
+### Deterministic Classification Logic:
+
+```python
+def classify_observation(obs_coord, gps_accuracy_m, cluster_layer):
+    """
+    Provenance-aware spatial classification algorithm.
+    Never produces an accusation; produces an uncertainty-bounded spatial statement.
+    """
+    # Check 1: Source Data Integrity
+    if cluster_layer.source_confidence < 0.70 or cluster_layer.is_stale:
+        return {
+            "status_code": "SRC_INSUFFICIENT",
+            "badge": "Source Data Insufficient",
+            "statement": "Spatial boundary layer for this cluster requires re-survey verification.",
+            "requires_human_survey": True
+        }
+    
+    # Check 2: Device Accuracy Threshold
+    if gps_accuracy_m > 35.0:
+        return {
+            "status_code": "LOC_UNCERTAIN",
+            "badge": "High Location Uncertainty",
+            "statement": f"Device reported +/- {gps_accuracy_m:.1f}m error margin, which exceeds scientific threshold.",
+            "requires_human_survey": True
+        }
+    
+    # Calculate Distances to Prohibited & Regulated Boundaries
+    dist_prohibited = turf_distance_to_polygon(obs_coord, cluster_layer.prohibited_polygon)
+    is_inside_prohibited = turf_point_in_polygon(obs_coord, cluster_layer.prohibited_polygon)
+    
+    # Check 3: Boundary Uncertainty (Accuracy circle intersects boundary)
+    if dist_prohibited <= (gps_accuracy_m + 5.0):
+        return {
+            "status_code": "BOUNDARY_UNCERTAIN",
+            "badge": "Boundary Boundary Overlap",
+            "statement": f"Observation point is {dist_prohibited:.1f}m from the statutory boundary, within device error margin (+/- {gps_accuracy_m:.1f}m).",
+            "distance_m": dist_prohibited,
+            "uncertainty_overlap": True
+        }
+        
+    # Check 4: Definitive Polygon Containment
+    if is_inside_prohibited:
+        return {
+            "status_code": "INSIDE_PROHIBITED_ZONE",
+            "badge": "Within Statutory Prohibited Buffer",
+            "statement": "Observed coordinates fall inside the 100m Prohibited Buffer according to official survey data.",
+            "distance_m": 0.0,
+            "requires_authority_verification": True
+        }
+        
+    # Check 5: Inside Regulated Zone
+    is_inside_regulated = turf_point_in_polygon(obs_coord, cluster_layer.regulated_polygon)
+    if is_inside_regulated:
+        return {
+            "status_code": "INSIDE_REGULATED_ZONE",
+            "badge": "Within Statutory Regulated Buffer",
+            "statement": "Observed coordinates fall inside the 200m Regulated Buffer.",
+            "distance_m": dist_prohibited,
+            "requires_authority_verification": True
+        }
+
+    # Check 6: Outside Buffer
+    return {
+        "status_code": "OUTSIDE_STATUTORY_ZONES",
+        "badge": "Peripheral / Outside Sourced Layer",
+        "statement": f"Observed coordinate is {dist_prohibited:.1f}m outside known statutory zones.",
+        "distance_m": dist_prohibited,
+        "requires_authority_verification": False
+    }
+```
+
+---
+
+## 2.3 Cryptographic Provenance & Hash Chain Specification
+
+To ensure evidence presented to conservation authorities cannot be repudiated, falsified, or tampered with:
+
+1. **Payload Hash**: When an observation is captured on the device, the canonical JSON payload (coordinates, timestamp, accuracy, category, observation text) is normalized and hashed via SHA-256.
+2. **Media Hash**: The original image binary is hashed client-side via Web Crypto API (`crypto.subtle.digest('SHA-256', buffer)`).
+3. **Composite Evidence Signature**:
+$$\text{EvidenceSignature} = \text{HMAC-SHA256}(\text{PayloadHash} \parallel \text{MediaHash} \parallel \text{LayerVersionID}, K_{device\_nonce})$$
+4. **Audit Immutability**: Any modification to spatial polygons requires publishing a new `LayerVersion` row; past observations remain forever bound to the exact `layer_version_id` active at the moment of submission.
+
+---
+
+## 2.4 Offline Synchronization Protocol
+
+```
++---------------+              +--------------------+              +-------------------+
+|  Field Device |              | IndexedDB Queue    |              | Backend API       |
++---------------+              +--------------------+              +-------------------+
+        |                                |                                   |
+        | [User captures offline]        |                                   |
+        |------------------------------->| Store observation in 'drafts'     |
+        |                                | status = 'PENDING_SYNC'           |
+        |                                |                                   |
+        | [Network Event: 'online']      |                                   |
+        |------------------------------->| Trigger background sync worker    |
+        |                                |                                   |
+        |                                | POST /api/v1/observations/sync    |
+        |                                | (Idempotency-Key: UUIDv4)         |
+        |                                |---------------------------------->|
+        |                                |                                   | [Verify hash & GIS]
+        |                                |                                   | [Insert to PostGIS]
+        |                                |                                   | [Return Case ID]
+        |                                |<----------------------------------|
+        |                                | Update status = 'SYNCED'          |
+        |<-------------------------------| Update UI Pill to 'Saved & Synced'|
+```
+
+---
+---
+
+# SECTION 3: UI/UX DESIGN & DESIGN IMPLEMENTATION PLAN
+
+## 3.1 Design System & Aesthetic Identity
+
+The visual language of Heritage Guard is engineered to balance **rich Indian cultural dignity** with **scientific geospatial precision**:
+
+```
++----------------------------------------------------------------------------------------------------+
+|                                    HERITAGE GUARD COLOR TOKENS                                     |
++--------------------+-------------------------+-----------------------------------------------------+
+| Sandstone Ochre    | #D97706 / #B45309       | Architectural roots, Jaisalmer fort stone, accents  |
+| Terracotta Crimson | #DC2626 / #991B1B       | Prohibited 100m zones, critical condition alerts    |
+| Indigo Night       | #0F172A / #1E293B       | Deep dark mode background, sovereign prestige       |
+| Temple Emerald     | #059669 / #047857       | Consented living practice, verified status badges   |
+| Brass Amber        | #F59E0B / #D97706       | Regulated 200m zones, uncertainty warnings          |
+| Slate Parchment    | #F8FAFC / #F1F5F9       | Light card surfaces, official dossier paper print   |
++--------------------+-------------------------+-----------------------------------------------------+
+```
+
+### Typography Hierarchy:
+* **Display / Brand**: *Cinzel* or *Rozha One* (Latin/Devanagari serif with stone-inscription resonance).
+* **Headings & Structural UI**: *Outfit* or *Plus Jakarta Sans* (clean geometric sans-serif).
+* **Data, Telemetry & GIS Coordinates**: *JetBrains Mono* or *Fira Code* (tabular coordinates, GPS metrics, hashes).
+
+---
+
+## 3.2 Screen-by-Screen UX Specifications
+
+### Screen 1: The Living Heritage Twin Showcase (Hero Screen)
+* **Header**: Cluster title in vernacular + English (`चाँद बावड़ी / Chand Baori Stepwell`), ASI protection status pill, district & state tag.
+* **Dual-View Toggle**:
+  * `Living View`: Highlights oral history, craft communities, stepwell water festival traditions, and local caretaker stories.
+  * `Continuity View`: Switches to interactive GIS map, change ledger summary, and latest condition monitoring score.
+* **Living Practice Cards**: Carousel of expandable cards showing craft/ritual photos, seasonal calendar, and cultural consent label (`Consented by Abhaneri Community Council`).
+
+### Screen 2: Spatial Truth & Boundary Explorer
+* **Map Canvas**: Custom styled vector tiles with monument polygon (gold fill), 100m Prohibited Buffer (crimson hatched stroke), and 200m Regulated Buffer (amber dashed stroke).
+* **Provenance Drawer**: Bottom sheet revealing:
+  * Official Source: "ASI Bhuvan NRSC Geospatial Registry (Notification SO 1928)".
+  * Last Boundary Revision Date: "14 November 2022".
+  * Boundary Limitation Note: "Western boundary subject to ground demarcated revenue pillar survey".
+* **Interactive Test Scenarios Button**: Pre-seeded demo buttons for judges:
+  * `Inside 100m Zone (Pillar B)`
+  * `Edge Case (95m +/- 12m GPS)`
+  * `Outside Regulated Zone (260m)`
+  * `Degraded GPS Signal (Error: 48m)`
+
+### Screen 3: Field Observation Studio (Neutral Capture)
+* **Live GPS HUD**: Real-time accuracy indicator:
+  * Green: `High Precision (+/- 3.2m)`
+  * Yellow: `Moderate Precision (+/- 8.5m)`
+  * Red: `Uncertain (+/- 42m - Re-centering required)`
+* **Non-Accusatory Concern Categorization**:
+  * Architectural Wear / Masonry Displacement
+  * Water Accumulation / Moisture Infiltration
+  * Construction Material Accumulation
+  * Vegetation / Root Overgrowth
+  * Access Obstruction / Signage Damage
+* **Capture Inputs**:
+  * Camera viewfinder with client-side EXIF extractor and auto-timestamp watermark.
+  * Objective observation notes field with neutral guidance placeholder: *"Describe physical state observed, e.g. 'Displaced stone blocks near south revetment'..."*
+* **Offline Status Pill**: Persistent badge showing `Online (Instant Sync)` or `Offline (1 draft queued)`.
+
+### Screen 4: Spatial Reasoning & Uncertainty Verdict Modal
+Once submitted, the system performs instantaneous polygon calculation and presents the **Three-Tier Truth Screen**:
+1. **Tier 1 (What You Reported)**: "Masonry displacement documented at 28.5244°N, 77.1855°E on 05 Sept 2026, 14:30 IST."
+2. **Tier 2 (What Sourced GIS Calculates)**: "Coordinate falls 84.2m from monument wall. Because GPS error is +/- 7.5m, the observation is classified as **Potential 100m Statutory Prohibited Zone Concern**."
+3. **Tier 3 (Authority Disclaimer)**: "Heritage Guard does not determine legal violation or guilt. A verified review packet has been cataloged for designated conservation authority triage."
+
+### Screen 5: Temporal Change Ledger (Continuity Timeline)
+* Chronological vertical stream of events for the cluster:
+  * `05-09-2026`: Crowd observation (Case #HG-2026-0841) logged.
+  * `12-04-2026`: Conservation clearance for pathway repair (Gazette ref #AZ-44).
+  * `18-10-2025`: Seasonal stepwell cleaning ritual conducted by local youth wing.
+  * `03-01-2024`: Baseline photogrammetric laser scan registered (ASI Central Circle).
+
+### Screen 6: Curator Safeguarding Console & Dossier Inspector
+* **Split View**: Left side has searchable/filterable observation inbox; right side displays the **Institutional Review Packet**.
+* **Audit Inspection Panel**:
+  * High-resolution photo with overlay accuracy circle on the cadastral map.
+  * SHA-256 cryptographic verification status (`VERIFIED AUTHENTIC`).
+  * Full EXIF breakdown (shutter, camera model, hardware timestamp).
+* **Action Buttons**:
+  * `Request Clarifying Evidence`: Sends a notification back to the field documenter.
+  * `Mark Reviewed & Cataloged`: Updates change ledger status.
+  * `Refer to ASI / District Collector`: Generates formal safeguarding dossier with tamper-evident QR code.
+
+---
+---
+
+# SECTION 4: COMPLETE APP FLOW & SYSTEM ARCHITECTURE
+
+```mermaid
+flowchart TD
+    %% Global Entry
+    Start([User Arrives at Heritage Guard]) --> Home[Heritage Twin Showcase Hub]
+    
+    %% Dual Modes
+    Home -->|Explore Culture & History| LivingView[Layer 1 & 2: Living Heritage View]
+    Home -->|Inspect Geospatial Boundary| SpatialView[Layer 3: Spatial Truth Explorer]
+    Home -->|Document Field Condition| CaptureFlow[Layer 4: Field Observation Flow]
+    Home -->|Curator Credentials| ConsoleFlow[Layer 5: Safeguarding Review Console]
+
+    %% Living View Details
+    subgraph Showcase ["Showcase Experience"]
+        LivingView --> OralStories[Oral History & Vernacular Names]
+        LivingView --> CraftCards[Living Artisanal Practices]
+        LivingView --> RitualCalendar[Community Rituals & Sacred Seasons]
+        CraftCards --> ConsentCheck{Consent State?}
+        ConsentCheck -->|Public| ShowFull[Display Details & Audio]
+        ConsentCheck -->|Community Only| ShowRestricted[Display Redacted Overview]
+    end
+
+    %% Field Capture Subgraph
+    subgraph Capture ["Field Capture & Offline Workflow"]
+        CaptureFlow --> CheckNet{Device Online?}
+        CheckNet -->|No| StoreLocal[Store Draft in IndexedDB]
+        CheckNet -->|Yes| StreamDirect[Prepare Direct Payload]
+        
+        CaptureFlow --> SensorCheck[Acquire Geolocation & Accuracy]
+        SensorCheck --> AccJudge{Accuracy <= 35m?}
+        AccJudge -->|No| WarnAcc[Display Yellow Warning: High Uncertainty]
+        AccJudge -->|Yes| PhotoCapture[Capture Photo + Strip PII]
+        
+        PhotoCapture --> ComputeHash[Compute Client SHA-256 Checksums]
+        ComputeHash --> SaveRecord[Generate Observation Record]
+        StoreLocal --> SyncDaemon[Wait for Online Event]
+        SyncDaemon --> StreamDirect
+    end
+
+    %% Geospatial Reasoning Engine
+    subgraph Reasoning ["Spatial Reasoning Engine"]
+        StreamDirect --> FetchLayer[Pin Active Layer Version]
+        FetchLayer --> PIPCheck{Point in Polygon?}
+        
+        PIPCheck -->|Inside Prohibited Buffer| CheckEdge1{Distance to Edge <= Acc + 5m?}
+        PIPCheck -->|Inside Regulated Buffer| CheckEdge2{Distance to Edge <= Acc + 5m?}
+        PIPCheck -->|Outside| CheckEdge3{Distance to Edge <= Acc + 5m?}
+        
+        CheckEdge1 -->|Yes| StatusUncertain[Verdict: Boundary Uncertain]
+        CheckEdge1 -->|No| StatusProhibited[Verdict: Inside 100m Prohibited Zone]
+        
+        CheckEdge2 -->|Yes| StatusUncertain
+        CheckEdge2 -->|No| StatusRegulated[Verdict: Inside 200m Regulated Zone]
+        
+        CheckEdge3 -->|Yes| StatusUncertain
+        CheckEdge3 -->|No| StatusOutside[Verdict: Outside Statutory Zones]
+    end
+
+    %% Change Ledger & Curator Flow
+    subgraph Safeguarding ["Safeguarding & Change Ledger"]
+        StatusProhibited --> AppendLedger[Append to Immutable Change Ledger]
+        StatusRegulated --> AppendLedger
+        StatusUncertain --> AppendLedger
+        StatusOutside --> AppendLedger
+        
+        AppendLedger --> ConsoleFlow
+        ConsoleFlow --> CuratorReview[Curator Inspects Dossier]
+        CuratorReview --> ActionChoice{Curator Decision}
+        ActionChoice -->|Need Info| ReqInfo[Request Community Follow-up]
+        ActionChoice -->|Reviewed| MarkDone[Update Ledger: Condition Noted]
+        ActionChoice -->|Escalate| GenDossier[Generate Official PDF/JSON-LD Dossier for ASI]
+    end
+```
+
+---
+---
+
+# SECTION 5: BACKEND SCHEME & POSTGIS DATABASE SCHEMA
+
+Below is the complete, production-grade PostgreSQL + PostGIS SQL Data Definition Language (DDL) code. It includes spatial indexes, foreign keys, cryptographic checksum fields, and audit triggers.
+
+```sql
+-- ============================================================================
+-- HERITAGE GUARD: CORE POSTGIS DATABASE SCHEMA
+-- Compatible with PostgreSQL 15+ and PostGIS 3.3+
+-- ============================================================================
+
+-- Enable Required Extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "postgis";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Enum Definitions
+CREATE TYPE consent_status_enum AS ENUM (
+    'PUBLIC',
+    'COMMUNITY_ONLY',
+    'REVIEWER_ONLY',
+    'WITHHELD'
+);
+
+CREATE TYPE spatial_classification_enum AS ENUM (
+    'INSIDE_PROHIBITED_ZONE',
+    'INSIDE_REGULATED_ZONE',
+    'BOUNDARY_UNCERTAIN',
+    'OUTSIDE_STATUTORY_ZONES',
+    'LOC_UNCERTAIN',
+    'SRC_INSUFFICIENT'
+);
+
+CREATE TYPE review_status_enum AS ENUM (
+    'PENDING_TRIAGE',
+    'ADDITIONAL_INFO_REQUESTED',
+    'REVIEWED_CATALOGED',
+    'REFERRED_TO_AUTHORITY',
+    'ARCHIVED_DUPLICATE'
+);
+
+CREATE TYPE concern_category_enum AS ENUM (
+    'MASONRY_DISPLACEMENT',
+    'MOISTURE_INFILTRATION',
+    'CONSTRUCTION_DEBRIS',
+    'VEGETATION_OVERGROWTH',
+    'UNAUTHORIZED_EXCAVATION',
+    'ACCESS_OBSTRUCTION',
+    'STRUCTURAL_CRACKING',
+    'SURFACE_DEFACEMENT'
+);
+
+-- ----------------------------------------------------------------------------
+-- 1. HERITAGE CLUSTERS (Layer 1: Identity Root)
+-- ----------------------------------------------------------------------------
+CREATE TABLE heritage_clusters (
+    cluster_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    official_name_en VARCHAR(255) NOT NULL,
+    vernacular_name_hi VARCHAR(255) NOT NULL,
+    alternate_names TEXT[] DEFAULT '{}',
+    state_province VARCHAR(100) NOT NULL,
+    district VARCHAR(100) NOT NULL,
+    historical_summary TEXT NOT NULL,
+    architectural_school VARCHAR(150),
+    established_period VARCHAR(100),
+    centroid_location GEOMETRY(Point, 4326) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_heritage_clusters_centroid ON heritage_clusters USING GIST(centroid_location);
+CREATE INDEX idx_heritage_clusters_slug ON heritage_clusters(slug);
+
+-- ----------------------------------------------------------------------------
+-- 2. LIVING PRACTICES (Layer 2: Intangible Heritage & Cultural Consent)
+-- ----------------------------------------------------------------------------
+CREATE TABLE living_practices (
+    practice_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    cluster_id UUID NOT NULL REFERENCES heritage_clusters(cluster_id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    practice_type VARCHAR(100) NOT NULL, -- 'RITUAL', 'ARTISAN_CRAFT', 'ORAL_FOLKLORE', 'FESTIVAL_ROUTE'
+    cultural_bearer_group VARCHAR(200),
+    description TEXT NOT NULL,
+    seasonality VARCHAR(100), -- e.g., 'Kartik Purnima', 'Monsoon Season'
+    consent_status consent_status_enum DEFAULT 'PUBLIC',
+    custodian_contact_hash VARCHAR(64), -- SHA-256 of contact (Privacy preserving)
+    media_urls TEXT[] DEFAULT '{}',
+    audio_narrative_url VARCHAR(500),
+    is_verified_by_community BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_living_practices_cluster ON living_practices(cluster_id);
+
+-- ----------------------------------------------------------------------------
+-- 3. SPATIAL LAYER VERSIONS (Layer 3: Sourced Geometry & Buffer Polygons)
+-- ----------------------------------------------------------------------------
+CREATE TABLE spatial_layer_versions (
+    layer_version_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    cluster_id UUID NOT NULL REFERENCES heritage_clusters(cluster_id) ON DELETE RESTRICT,
+    version_label VARCHAR(50) NOT NULL, -- e.g., 'ASI_BHUVAN_V2023.1'
+    source_agency VARCHAR(150) NOT NULL, -- 'Archaeological Survey of India / NRSC'
+    gazette_notification_ref VARCHAR(200),
+    source_publication_date DATE NOT NULL,
+    source_confidence_score NUMERIC(3, 2) CHECK (source_confidence_score BETWEEN 0.00 AND 1.00),
+    
+    -- Exact Geometric Entities (WGS84 EPSG:4326)
+    monument_boundary GEOMETRY(MultiPolygon, 4326) NOT NULL,
+    prohibited_zone_100m GEOMETRY(MultiPolygon, 4326) NOT NULL,
+    regulated_zone_200m GEOMETRY(MultiPolygon, 4326) NOT NULL,
+    
+    limitation_disclaimer TEXT NOT NULL,
+    is_active_version BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_spatial_monument ON spatial_layer_versions USING GIST(monument_boundary);
+CREATE INDEX idx_spatial_prohibited ON spatial_layer_versions USING GIST(prohibited_zone_100m);
+CREATE INDEX idx_spatial_regulated ON spatial_layer_versions USING GIST(regulated_zone_200m);
+
+-- ----------------------------------------------------------------------------
+-- 4. FIELD OBSERVATIONS (Layer 4: Neutral Observations & Raw Telemetry)
+-- ----------------------------------------------------------------------------
+CREATE TABLE field_observations (
+    observation_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    cluster_id UUID NOT NULL REFERENCES heritage_clusters(cluster_id),
+    layer_version_id UUID NOT NULL REFERENCES spatial_layer_versions(layer_version_id),
+    case_tracking_code VARCHAR(30) UNIQUE NOT NULL, -- Human-readable e.g., 'HG-DEL-2026-0042'
+    
+    -- Categorization & Neutral Content
+    category concern_category_enum NOT NULL,
+    observation_notes TEXT NOT NULL, -- Enforced objective, non-accusatory language
+    
+    -- Geospatial Telemetry
+    coordinate GEOMETRY(Point, 4326) NOT NULL,
+    gps_accuracy_meters NUMERIC(6, 2) NOT NULL,
+    device_altitude_meters NUMERIC(6, 2),
+    device_heading_deg NUMERIC(5, 2),
+    client_captured_at TIMESTAMPTZ NOT NULL,
+    server_received_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Computed Spatial Reasoning Cache
+    computed_classification spatial_classification_enum NOT NULL,
+    distance_to_prohibited_boundary_meters NUMERIC(8, 2),
+    spatial_reasoning_explanation TEXT NOT NULL,
+    
+    -- Cryptographic Integrity
+    client_payload_sha256 CHAR(64) NOT NULL,
+    evidence_media_sha256 CHAR(64) NOT NULL,
+    
+    -- Privacy & Anonymity
+    submitter_pseudonym_token VARCHAR(64) NOT NULL, -- Nonce-derived anonymous token
+    is_anonymized BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX idx_observations_coordinate ON field_observations USING GIST(coordinate);
+CREATE INDEX idx_observations_cluster_date ON field_observations(cluster_id, client_captured_at DESC);
+CREATE INDEX idx_observations_tracking_code ON field_observations(case_tracking_code);
+
+-- ----------------------------------------------------------------------------
+-- 5. EVIDENCE ARTIFACTS (Media Files & Content-Addressed Storage)
+-- ----------------------------------------------------------------------------
+CREATE TABLE evidence_artifacts (
+    artifact_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    observation_id UUID NOT NULL REFERENCES field_observations(observation_id) ON DELETE CASCADE,
+    storage_url VARCHAR(500) NOT NULL,
+    file_mime_type VARCHAR(50) NOT NULL,
+    file_size_bytes BIGINT NOT NULL,
+    sha256_checksum CHAR(64) NOT NULL,
+    exif_camera_make VARCHAR(100),
+    exif_camera_model VARCHAR(100),
+    exif_timestamp TIMESTAMPTZ,
+    face_blur_applied BOOLEAN DEFAULT TRUE,
+    license_plate_redacted BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_evidence_observation ON evidence_artifacts(observation_id);
+CREATE INDEX idx_evidence_checksum ON evidence_artifacts(sha256_checksum);
+
+-- ----------------------------------------------------------------------------
+-- 6. CHANGE LEDGER (Layer 4 & 5: Temporal Event Log)
+-- ----------------------------------------------------------------------------
+CREATE TABLE change_ledger_events (
+    ledger_event_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    cluster_id UUID NOT NULL REFERENCES heritage_clusters(cluster_id),
+    event_timestamp TIMESTAMPTZ NOT NULL,
+    event_type VARCHAR(50) NOT NULL, -- 'CITIZEN_OBSERVATION', 'RESTORATION_MILESTONE', 'BOUNDARY_UPDATE'
+    related_observation_id UUID REFERENCES field_observations(observation_id),
+    title VARCHAR(255) NOT NULL,
+    summary TEXT NOT NULL,
+    before_media_url VARCHAR(500),
+    after_media_url VARCHAR(500),
+    is_publicly_visible BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_ledger_cluster_time ON change_ledger_events(cluster_id, event_timestamp DESC);
+
+-- ----------------------------------------------------------------------------
+-- 7. SAFEGUARDING WORKFLOW & AUDIT TRAIL (Layer 5: Review Actions)
+-- ----------------------------------------------------------------------------
+CREATE TABLE safeguarding_reviews (
+    review_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    observation_id UUID NOT NULL REFERENCES field_observations(observation_id),
+    reviewer_user_id VARCHAR(100) NOT NULL, -- Authorized institutional curator ID
+    reviewer_organization VARCHAR(150) NOT NULL, -- e.g., 'Delhi State Archaeology Dept'
+    previous_status review_status_enum NOT NULL,
+    updated_status review_status_enum NOT NULL,
+    reviewer_rationale TEXT NOT NULL,
+    referral_reference_number VARCHAR(100),
+    official_dossier_pdf_url VARCHAR(500),
+    action_timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_reviews_observation ON safeguarding_reviews(observation_id);
+
+-- ----------------------------------------------------------------------------
+-- 8. AUTOMATIC SPATIAL COMPUTATION TRIGGER FUNCTION
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION fn_compute_observation_spatial_status()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_prohibited GEOMETRY;
+    v_regulated GEOMETRY;
+    v_dist_prohibited NUMERIC;
+    v_inside_prohibited BOOLEAN;
+    v_inside_regulated BOOLEAN;
+    v_acc NUMERIC;
+BEGIN
+    -- Fetch active spatial layers for the cluster
+    SELECT prohibited_zone_100m, regulated_zone_200m 
+    INTO v_prohibited, v_regulated
+    FROM spatial_layer_versions
+    WHERE layer_version_id = NEW.layer_version_id;
+
+    v_acc := NEW.gps_accuracy_meters;
+
+    -- Check GPS accuracy limits
+    IF v_acc > 35.0 THEN
+        NEW.computed_classification := 'LOC_UNCERTAIN';
+        NEW.spatial_reasoning_explanation := 'Device horizontal error margin exceeds the 35m scientific threshold.';
+        NEW.distance_to_prohibited_boundary_meters := NULL;
+        RETURN NEW;
+    END IF;
+
+    -- Compute minimum distance to prohibited boundary in meters
+    v_dist_prohibited := ST_Distance(NEW.coordinate::geography, v_prohibited::geography);
+    v_inside_prohibited := ST_Covers(v_prohibited, NEW.coordinate);
+    v_inside_regulated := ST_Covers(v_regulated, NEW.coordinate);
+
+    NEW.distance_to_prohibited_boundary_meters := ROUND(v_dist_prohibited, 2);
+
+    -- Evaluation with uncertainty buffer
+    IF v_dist_prohibited <= (v_acc + 5.0) AND NOT v_inside_prohibited THEN
+        NEW.computed_classification := 'BOUNDARY_UNCERTAIN';
+        NEW.spatial_reasoning_explanation := 'Point is within ' || ROUND(v_dist_prohibited, 1) || 
+            'm of boundary, intersecting device uncertainty circle (+/- ' || ROUND(v_acc, 1) || 'm).';
+    ELSIF v_inside_prohibited THEN
+        NEW.computed_classification := 'INSIDE_PROHIBITED_ZONE';
+        NEW.spatial_reasoning_explanation := 'Point strictly contained inside 100m Prohibited Buffer according to official survey.';
+    ELSIF v_inside_regulated THEN
+        NEW.computed_classification := 'INSIDE_REGULATED_ZONE';
+        NEW.spatial_reasoning_explanation := 'Point strictly contained inside 200m Regulated Buffer.';
+    ELSE
+        NEW.computed_classification := 'OUTSIDE_STATUTORY_ZONES';
+        NEW.spatial_reasoning_explanation := 'Point is outside statutory zones (' || ROUND(v_dist_prohibited, 1) || 'm from prohibited edge).';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_before_insert_observation_spatial
+BEFORE INSERT ON field_observations
+FOR EACH ROW
+EXECUTE FUNCTION fn_compute_observation_spatial_status();
+```
+
+---
+---
+
+# SECTION 6: DESIGN IMPLEMENTATION PLAN & BUILD SEQUENCE
+
+To guarantee flawless execution and a zero-failure demonstration at the Smart India Hackathon (SIH), development is sequenced strictly in **evidence-continuity order**:
+
+```
++---------------------------------------------------------------------------------------------------+
+|                                 6-PHASE IMPLEMENTATION ROADMAP                                    |
++---------+----------------------------+------------------------------------------------------------+
+| Phase 1 | Cluster Seed & Data Pack   | Prepare 1 fully validated Heritage Twin (e.g. Qutub       |
+|         |                            | Complex or Chand Baori) with high-fidelity GeoJSON.        |
++---------+----------------------------+------------------------------------------------------------+
+| Phase 2 | Spatial Engine & Contract  | Implement Turf.js & PostGIS boundary distance algorithm,   |
+|         |                            | uncertainty disk tests, and cryptographic SHA-256 hashing. |
++---------+----------------------------+------------------------------------------------------------+
+| Phase 3 | Heritage Twin UI (PWA)     | Build responsive mobile-first UI with Sandstone & Indigo   |
+|         |                            | aesthetic; showcase tangible history & living practices.   |
++---------+----------------------------+------------------------------------------------------------+
+| Phase 4 | Offline Field Capture      | Implement IndexedDB drafting, camera EXIF extraction,      |
+|         |                            | live GPS accuracy meter, and background sync manager.      |
++---------+----------------------------+------------------------------------------------------------+
+| Phase 5 | Curator Console & Dossiers | Build curator review triage dashboard, PDF evidence packet |
+|         |                            | generator, and tamper-evident QR verification.             |
++---------+----------------------------+------------------------------------------------------------+
+| Phase 6 | 120-Second SIH Demo Script | Rehearse the 4 deterministic test scenarios: Inside, Edge, |
+|         | & Rehearsal                | Outside, and High-Error GPS. Zero external API failure risk|
++---------+----------------------------+------------------------------------------------------------+
+```
+
+---
+
+## 6.1 Directory Structure for the Implementation Codebase
+
+```
+heritage-guard/
+├── frontend/
+│   ├── public/
+│   │   ├── manifests/manifest.json
+│   │   └── data/seeds/chand_baori_twin.json   # Offline cached cluster seed
+│   ├── src/
+│   │   ├── assets/styles/tokens.css           # Sandstone/Terracotta/Indigo tokens
+│   │   ├── components/
+│   │   │   ├── showcase/
+│   │   │   │   ├── HeritageTwinHero.jsx       # Layer 1 Showcase
+│   │   │   │   ├── LivingPracticeCard.jsx     # Layer 2 Intangible Cards
+│   │   │   │   └── OralStoryPlayer.jsx        # Vernacular audio stories
+│   │   │   ├── map/
+│   │   │   │   ├── SpatialTruthMap.jsx        # Leaflet/MapLibre polygon layers
+│   │   │   │   ├── AccuracyCircle.jsx         # Dynamic GPS uncertainty disk
+│   │   │   │   └── ProvenanceBadge.jsx        # Data source & date citation
+│   │   │   ├── capture/
+│   │   │   │   ├── FieldCaptureModal.jsx      # Neutral observation intake
+│   │   │   │   ├── GpsAccuracyMeter.jsx       # Real-time sensor error HUD
+│   │   │   │   └── OfflineSyncPill.jsx        # IndexedDB queue indicator
+│   │   │   ├── review/
+│   │   │   │   ├── CuratorInbox.jsx           # Triage table for reviewers
+│   │   │   │   └── DossierPreviewModal.jsx    # Institutional export viewer
+│   │   ├── services/
+│   │   │   ├── spatialEngine.js               # Turf.js point-in-polygon & distance
+│   │   │   ├── cryptoHash.js                  # Client-side WebCrypto SHA-256
+│   │   │   └── offlineStore.js                # Dexie.js IndexedDB wrapper
+│   │   ├── App.jsx
+│   │   └── index.css
+│   └── vite.config.js
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   │   ├── clusterController.js
+│   │   │   ├── observationController.js
+│   │   │   └── dossierController.js
+│   │   ├── db/
+│   │   │   ├── schema.sql                     # PostGIS DDL provided in Sec 5
+│   │   │   └── seed_abhaneri.sql              # Validated test polygons
+│   │   ├── middleware/
+│   │   │   └── piiSanitizer.js                # Strips metadata & private identifiers
+│   │   └── utils/
+│   │       ├── spatialReasoning.js            # Server verification
+│   │       └── pdfGenerator.js                # Standardized evidence packet
+│   └── package.json
+└── docs/
+    ├── PRD.md
+    ├── TRD.md
+    └── SIH_DEMO_SCRIPT.md
+```
+
+---
+
+## 6.2 The 120-Second SIH Jury Demo Script
+
+| Timestamp | Screen / Flow | Action & What Judges See | Script / Voiceover |
+|---|---|---|---|
+| **0:00 - 0:25** | `Heritage Twin Showcase` | Open *Chand Baori* twin. Toggle between history and **Living Practice** card showing seasonal stepwell cleanup. | *"Honorable jury, India's heritage is not just stone; it is living practice. Heritage Guard presents a source-labeled Digital Twin connecting architectural history with community stewardship."* |
+| **0:25 - 0:50** | `Spatial Truth Map` | Show high-precision GeoJSON polygons for the monument, 100m Prohibited Zone, and 200m Regulated Zone with source citation. | *"Existing apps use crude pins or fake circular buffers. We source validated ASI polygons with explicit provenance, gazette references, and data limitation notices."* |
+| **0:50 - 1:15** | `Field Capture (Offline)` | Turn on airplane mode. Capture neutral observation (*"Stone dislodgement noted"*). Show GPS meter reading +/- 6m error. Tap Submit. | *"In the field, connectivity drops. Heritage Guard stores a signed draft into IndexedDB with SHA-256 media hashing. No accusations or names asked—only objective observation."* |
+| **1:15 - 1:40** | `Spatial Verdict Reveal` | Reconnect. Sync triggers. Modal displays 3-part verdict: User reported, GIS calculated (Inside 100m zone), Authority determination required. | *"Notice our spatial engine: it factors device GPS uncertainty against the boundary edge. It never calls anyone an illegal encroacher. It calculates explainable proximity."* |
+| **1:40 - 2:00** | `Curator Console & Dossier` | Switch to Curator View. Open Case HG-2026-0042. Click "Export Official Safeguarding Dossier". Show PDF with audit QR code. | *"The curator receives an uncorrupted, tamper-evident evidence packet ready for ASI referral. That is how Heritage Guard preserves the continuity between cultural knowledge, field observation, and responsible protection."* |
+
+---
+*End of Master Technical & Product Blueprint for HERITAGE GUARD (SIH 2026).*
