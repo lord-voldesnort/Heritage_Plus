@@ -1,0 +1,12 @@
+{
+  "geometryGate": {
+    "status": "NOT_PASSED",
+    "targetSite": null,
+    "sourceUrl": null,
+    "sourceDate": null,
+    "testPointsValidated": false,
+    "poorGpsHandled": false,
+    "passedBy": null,
+    "passedAt": null
+  }
+}
