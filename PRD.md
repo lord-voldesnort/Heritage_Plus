@@ -1,139 +1,109 @@
 # PRODUCT REQUIREMENTS DOCUMENT (PRD)
-## HERITAGE GUARD (हेरिटेज गार्ड)
-### A Living Heritage Intelligence & Safeguarding Atlas for India
+## HERITAGE PULSE (हेरिटेज पल्स)
+### A Provenance-Aware, Uncertainty-Driven Change Ledger for Community-Sourced Safeguarding of India’s Protected Heritage Sites
 **Smart India Hackathon 2026 · Heritage & Culture · Problem Statement PS 26197**
 *Team Sinister Six*
 
 ---
 
 ## 1. Executive Summary & Problem Context
-India possesses one of the richest cultural ecosystems in the world, encompassing over 3,690 Centrally Protected Monuments under the Archaeological Survey of India (ASI), tens of thousands of state-protected structures, and millions of unlisted community sacred spaces, stepwells, and historic precincts. 
 
-However, existing digital initiatives suffer from two structural shortcomings:
-1. **The Tourism-Only Trap**: Most applications focus solely on visitor discovery (ticket booking, itineraries, 360-degree virtual photos). They omit the *intangible living practice* (craft communities, oral lore, ritual calendars) that sustains the physical monument.
-2. **The Fragmented Complaint Trap**: When unauthorized construction, masonry displacement, or environmental dumping occurs within statutory buffer zones (e.g., 100m Prohibited Zone under the AMASR Act), citizen reports remain scattered across Twitter/X, local grievance portals, or police complaints. These reports lack exact coordinate accuracy, tamper-evident media provenance, and boundary context—rendering them legally and administratively unusable.
+India’s protected heritage sites are exposed to visible changes and threats: unauthorized or unclear construction, extensions, physical damage, dumping, blocked access, alterations, visual obstruction, and changes to surrounding settings. A visitor, resident, student, or volunteer may notice one of these changes, but a photograph or informal message is often insufficient for serious review.
 
-### 1.1 The Heritage Guard Vision
-**Heritage Guard** transforms cultural sites into **provenance-aware digital twins**. It bridges the gap between public appreciation and institutional safeguarding by:
-* Making living culture, oral history, and indigenous craft practices the **structural primary view**, not an afterthought.
-* Providing a **neutral, non-accusatory field observation studio** with offline resilience and real-time GPS accuracy measurement.
-* Computing boundary proximity through **provenance-aware spatial reasoning**, openly acknowledging uncertainty rather than making dangerous, slanderous accusations.
-* Maintaining an **immutable temporal change ledger** that records condition continuity over time.
-* Generating **institutional-grade safeguarding dossiers** for curators and conservation authorities (ASI, State Archaeology, District Administrations).
+Existing official applications (such as Indian Heritage, Bhuvan ASI application, and National Monuments Authority NOC portals) provide monument information, interactive maps, or authority-side permission workflows. However, Bhuvan explicitly notes that mapped locations and protected boundaries require verification and cannot be used for legal purposes.
+
+**Heritage Pulse** addresses the specific **evidence-continuity gap** between field observation and responsible review:
+
+> *Can an unstructured field observation be converted into a trustworthy, uncertainty-labelled, source-linked heritage change case that another person can review?*
+
+Heritage Pulse is protection-first. It is deliberately **not** a tourism application, digital twin, 3D reconstruction platform, social network, generic complaint portal, legal-verdict engine, or automatic encroachment detector.
 
 ---
 
-## 2. Competitive & Strategic Differentiation
+## 2. Honest SIH Positioning
 
-| Dimension | Conventional Tourism / Map Apps | Government Grievance Portals | Generic AI Heritage Apps | **HERITAGE GUARD** |
-|---|---|---|---|---|
-| **Core Objective** | Ticket sales & itineraries | Filing complaints against violations | Auto-generating descriptive labels | **Continuity between living culture & spatial safeguarding** |
-| **Living Culture** | Incidental background text | Completely absent | Synthesized / Unconsented | **Consented Living Practice cards with custodian provenance** |
-| **Spatial Boundary** | Single pin on Google Maps | Text address / pin drop | None or circular radius | **Sourced MultiPolygon boundaries (100m Prohibited / 200m Regulated)** |
-| **GPS Uncertainty** | Hidden or ignored | Ignored (leads to false disputes) | Ignored | **Explicitly computed: Disk intersection with boundary margin** |
-| **Field Capture** | Requires live high-speed 4G/5G | Fails offline in rural heritage sites | Online LLM inference | **Offline-first PWA with IndexedDB sync queue & SHA-256 seals** |
-| **Institutional Output** | None | Raw unstructured ticket number | Generic AI summary | **Standardized, audit-ready PDF/JSON-LD Safeguarding Dossier** |
+PS 26197 asks for student innovations that showcase India’s rich cultural heritage and traditions. Heritage Pulse interprets safeguarding protected heritage as a legitimate, essential way of sustaining and preserving cultural heritage.
+
+* **Core Innovation**: Converting community field observations into structured, uncertainty-aware change-ledger records that support responsible review.
+* **Showcase Component**: A concise **Site Context Card** (site name, one verified significance paragraph, one representative image, and sourced map layer) establishes cultural importance as context for evidence workflows.
 
 ---
 
-## 3. Target User Personas
+## 3. Product Thesis: The 5 Connected Layers
 
-### Persona A: Heritage Explorer & Youth Citizen ("Aarav")
-* **Profile**: University student, amateur photographer, cultural traveler.
-* **Needs**: Discover authentic cultural backstories, local vernacular names, and seasonal rituals not found in generic travel blogs.
-* **Key Flow**: Explores the Heritage Twin showcase, listens to oral history clips, views interactive boundary maps.
-
-### Persona B: Local Community Bearer / Artisan ("Lakshmi Bai")
-* **Profile**: Traditional textile weaver or temple community elder living near a heritage cluster.
-* **Needs**: Ensure their traditional practices and sacred traditions are respected, documented accurately, and not exploited without consent.
-* **Key Flow**: Reviews living practice documentation, exercises visibility consent (`public`, `community-only`, `withheld`).
-
-### Persona C: Field Documenter / Conservation Volunteer ("Tariq")
-* **Profile**: Architecture student or heritage NGO volunteer conducting field surveys.
-* **Needs**: Document physical distress (e.g., masonry displacement, moisture seepage) in remote or low-connectivity zones without being accused of vigilantism.
-* **Key Flow**: Opens mobile PWA offline, records neutral physical observation, verifies GPS accuracy circle, syncs upon returning to cell network.
-
-### Persona D: Conservation Officer / Institutional Curator ("Dr. Sharma")
-* **Profile**: Superintending Archaeologist or District Heritage Committee curator.
-* **Needs**: High-fidelity, verifiable evidence packs with clear provenance to evaluate whether ground inspections are warranted.
-* **Key Flow**: Inspects triage inbox in Curator Console, reviews photo EXIF and SHA-256 integrity, reviews distance-to-boundary calculations, issues official referral dossiers.
+1. **Site Context Card**: Contains site identity, short significance description, representative photograph, target geometry/zone source, and statement of limitations.
+2. **Field Capture Layer**: Mobile-first capture of observation category, factual description, photo evidence, device GPS coordinates, accuracy radius, timestamp, and consent options.
+3. **Spatial Reasoning Layer**: Performs Point-in-Polygon testing, Distance-to-Boundary calculation, and GPS Accuracy-Circle overlap checking against source-labelled GeoJSON geometry.
+4. **Change Ledger**: The hero feature—an append-only, traceable record of observation events, location captures, source versions, classifications, evidence uploads, review requests, and status changes.
+5. **Reviewer Packet**: Structured exportable HTML/PDF packet containing complete case evidence, uncertainty statement, map context, and review timeline.
 
 ---
 
-## 4. Product Principles & Ethical Guardrails
+## 4. Scope & Visible Change Categories
 
-### Principle 1: Showcasing is Structural, Not Decorative
-Preservation begins with appreciation. A site cannot be protected if its community meaning is erased. The digital twin must celebrate local names, oral histories, and living practices before presenting monitoring workflows.
-
-### Principle 2: Restraint and Non-Accusation
-Heritage Guard is an evidence continuity platform, not an accusation portal.
-* **Forbidden Fields**: No fields for "Accused Name", "Contractor", "Suspected Offender", or "Is this illegal?".
-* **Forbidden Output Badges**: The system never issues badges like "Illegal Encroacher" or "Guilty".
-* **The 3-Statement Separation**:
-  1. *What the citizen documented*: "Granite blocks stacked 5 meters from south pavilion."
-  2. *What the GIS spatial engine calculated*: "Point falls within the 100m Prohibited Buffer (+/- 6.4m GPS uncertainty)."
-  3. *What authority remains required*: "Statutory determination rests exclusively with the designated competent authority."
-
-### Principle 3: Cultural Consent & Indigenous Data Sovereignty
-In alignment with the **UNESCO 2003 Convention for the Safeguarding of the Intangible Cultural Heritage (Article 15)**:
-* Community knowledge is never extracted without attribution.
-* Communities can mark practices as `public`, `community-only`, or `withheld` (to prevent commercial exploitation or desecration of sacred rituals).
-
-### Principle 4: Data Protection & DPDP Act 2023 Compliance
-* Observers can contribute anonymously using cryptographic device-nonce tokens.
-* Automated client-side face and license-plate blurring ensures no PII is inadvertently ingested into conservation dossiers.
+The umbrella concept is **visible heritage change**. Supported categories include:
+* **Possible Construction**: New structure, extension, wall, or foundation near site.
+* **Possible Encroachment**: Activity or structure appearing to occupy sensitive zone area.
+* **Physical Damage**: Wall, carving, gateway, staircase, or feature damaged.
+* **Dumping or Waste**: Debris or waste near protected feature or access route.
+* **Blocked Access**: Route, entrance, path, or public access obstructed.
+* **Alteration**: Repair, painting, extension, signage, or visual modification changing site appearance.
+* **Visual Obstruction**: New object/structure affecting visibility or setting.
 
 ---
 
-## 5. Functional Requirements Matrix
+## 5. Ethical & Privacy Guardrails
 
-### Epic 1: The 5-Layer Heritage Twin
-* **FR-1.1**: Display official monument name alongside regional vernacular designations (Hindi, Tamil, Marathi, etc.).
-* **FR-1.2**: Provide structured tabs: *Overview & Identity*, *Living Practices*, *Spatial Truth Map*, *Change Ledger*.
-* **FR-1.3**: Support playable audio clips of oral histories narrated by local elders or custodians.
-* **FR-1.4**: Render living practice cards indicating seasonal calendar, associated artisan castes/guilds, and cultural consent badges.
-
-### Epic 2: Provenance-Aware Geospatial Mapping
-* **FR-2.1**: Render statutory boundaries: Monument Core Footprint, 100m Prohibited Buffer, 200m Regulated Buffer.
-* **FR-2.2**: Display provenance metadata: Sourcing Agency (e.g., ASI/NRSC Bhuvan), Gazette notification number, publication date, and known survey limitations.
-* **FR-2.3**: Interactive test buttons allowing jury/users to simulate test coordinates (Definitive Inside, Boundary Intersection, Outside, Degraded GPS).
-
-### Epic 3: Neutral Field Capture & Offline Engine
-* **FR-3.1**: Single-screen mobile capture form: Category selection, camera snapshot, objective notes, auto-geocoding.
-* **FR-3.2**: Live GPS Accuracy Meter ($r_{gps}$) with dynamic threshold feedback (Green $\le 10\text{m}$, Amber $\le 35\text{m}$, Red $> 35\text{m}$).
-* **FR-3.3**: Offline caching via IndexedDB (Dexie.js). When offline, submissions are saved locally as `PENDING_SYNC` and auto-dispatched upon network reconnection.
-* **FR-3.4**: Client-side WebCrypto generation of SHA-256 hashes for raw image blobs and metadata payloads.
-
-### Epic 4: Spatial Reasoning Engine
-* **FR-4.1**: Server-side and client-side point-in-polygon (PIP) and minimum Euclidean distance-to-boundary calculations.
-* **FR-4.2**: Evaluation of boundary intersection against GPS uncertainty radius: if $\delta \le (r_{gps} + 5\text{m})$, classify as `BOUNDARY_UNCERTAIN`.
-* **FR-4.3**: Transparent three-statement verdict breakdown displayed to the submitter upon submission.
-
-### Epic 5: Temporal Change Ledger
-* **FR-5.1**: Chronological feed of validated observations, historical conservation works, and seasonal community rituals.
-* **FR-5.2**: Before-and-after photographic comparison slider for documented structural points over time.
-
-### Epic 6: Curator Safeguarding Console & Dossier Generator
-* **FR-6.1**: Role-based access for verified conservation personnel and district curators.
-* **FR-6.2**: Observation inbox with spatial classification filters, category filters, and date range pickers.
-* **FR-6.3**: Interactive Dossier Inspector displaying satellite overlay, GPS uncertainty ring, EXIF verification, and audit trail.
-* **FR-6.4**: Single-click PDF and JSON-LD Safeguarding Dossier export featuring cryptographic checksums and verification QR code.
+1. **No Accusations or Guilt**: The form asks "What did you observe?" rather than "Who is the encroacher?".
+2. **No Names or Faces**: Form explicitly warns against including personal names, faces, private details, or allegations.
+3. **Refusal to Overclaim**: System returns cautious engineering outputs (e.g., `Location uncertain`, `Potential zone concern – authority verification required`) and never claims legal violation.
+4. **3-Statement Verdict Separation**:
+   * *What the reporter said*
+   * *What the map calculation returned*
+   * *What an authorized reviewer must check*
 
 ---
 
-## 6. Non-Functional Requirements (NFR)
+## 6. Functional Requirements Matrix
 
-* **Performance**: First Contentful Paint (FCP) $\le 1.2\text{s}$ on 3G networks; map vector tile rendering $\le 800\text{ms}$.
-* **Reliability & Offline Capability**: 100% data retention of offline drafts during complete network blackout; zero draft loss upon browser close.
-* **Security & Integrity**: All API transactions over TLS 1.3; tamper-evident SHA-256 media validation; automated PII redaction.
-* **Accessibility**: WCAG 2.1 AA compliant; bilingual interface (English + Hindi initially; scalable to 22 scheduled languages).
-* **Portability**: Progressive Web App (PWA) compatible with Android Chrome, iOS Safari, and desktop Chromium browsers.
+### Epic 1: Site Context Card (Shivneri Fort Prototype)
+* **FR-1.1**: Display official site name (`Shivneri Fort`), location (Junnar, Pune, Maharashtra), and brief historical significance paragraph.
+* **FR-1.2**: Display sourced spatial layer metadata, source date, agency, and explicit limitation disclaimer.
+
+### Epic 2: Field Capture Studio
+* **FR-2.1**: Select from 7 standardized visible-change categories.
+* **FR-2.2**: Capture photo context with automatic hardware timestamp and GPS coordinate extraction.
+* **FR-2.3**: Display real-time GPS Accuracy HUD ($r_{gps}$) with dynamic feedback.
+* **FR-2.4**: Enforce objective, non-accusatory text prompt guidelines.
+
+### Epic 3: Spatial Reasoning Engine
+* **FR-3.1**: Point-in-polygon evaluation against source GeoJSON geometry.
+* **FR-3.2**: Minimum distance-to-boundary computation.
+* **FR-3.3**: GPS accuracy-circle overlap detection against boundary perimeters.
+* **FR-3.4**: Return explainable outputs: `Potential zone-related concern`, `No spatial concern indicated by this layer`, `Location uncertain`, `Classification unavailable`.
+
+### Epic 4: Change Ledger & Timeline
+* **FR-4.1**: Append-only event store recording observation created, location captured, source applied, classification generated, evidence added, and review actions.
+* **FR-4.2**: Immutable case ID assignment (`HP-MH-2026-XXXX`).
+
+### Epic 5: Reviewer Console & Packet Export
+* **FR-5.1**: Simulated reviewer workflow with status states (`Submitted`, `Additional info needed`, `Field verification recommended`, `Referred manually`, `Closed – insufficient location`, `Closed – reviewed`).
+* **FR-5.2**: One-click generation of exportable Reviewer Evidence Packets (HTML/PDF).
 
 ---
 
-## 7. SIH Success Criteria & Evaluation Rubric
+## 7. Target Personas
 
-1. **Thesis Defensibility**: Clear distinction between tourism discovery and evidence continuity; zero feature creep into legal accusation.
-2. **Technical Depth**: Demonstration of non-trivial GIS boundary math and uncertainty buffer handling rather than simple radius circles.
-3. **Institutional Viability**: Evaluators can verify that generated dossiers conform to the administrative evidentiary needs of ASI/State custodians.
-4. **Field Usability**: A complete observation can be logged offline in $< 90$ seconds with full provenance preservation.
+* **Visitor / Tourist**: Captures a visible change safely without making legal claims.
+* **Local Resident**: Reports site concerns near a protected site with privacy and structure.
+* **Student / Volunteer**: Conducts field documentation for heritage research or conservation.
+* **NGO / Curator / Reviewer**: Examines evidence packets and decides next official verification steps.
+
+---
+
+## 8. Success Metrics
+
+* 1 Target Site (Shivneri Fort) with reviewed source geometry.
+* 4 Seeded Demo Scenarios (Inside, Outside, Near Boundary, Poor GPS) producing 100% correct explainable output.
+* 0 False Certainty in ambiguous edge cases.
+* Field submission completed in under 90 seconds.

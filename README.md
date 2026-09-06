@@ -1,3 +1,14 @@
-# Heritage_Guard
-Develop a source-aware geospatial system that converts field observations of potential encroachment around protected monuments into accurate, uncertainty-labelled, authority-reviewable evidence cases.
-Protected monuments continue to face encroachment and unauthorised construction, yet field-level observations are often fragmented across photographs, messages, and uncertain location details. Citizens, visitors, and heritage volunteers lack a reliable way to connect an observed concern with the applicable protected, prohibited, or regulated zone and prepare a complete, evidence-backed report for the appropriate authority. A source-aware geospatial reporting and evidence-validation mechanism is required to convert on-ground observations into structured, reviewable heritage-protection cases while avoiding premature legal conclusions.
+# Heritage Pulse (हेरिटेज पल्स)
+### A Provenance-Aware, Uncertainty-Driven Change Ledger for Community-Sourced Safeguarding of India’s Protected Heritage Sites
+**Smart India Hackathon 2026 · Heritage & Culture · Problem Statement PS 26197**
+*Team Sinister Six*
+
+---
+
+## Executive Summary
+**Heritage Pulse** is a mobile-first field-evidence and change-ledger system for protected heritage sites. It allows a visitor, resident, student, volunteer, or heritage worker to record a visible change near a protected site—such as possible new construction, extension, physical damage, dumping, blocked access, or physical alteration—and converts that observation into a structured, time-stamped, map-aware, provenance-preserving case record for review.
+
+Heritage Pulse is deliberately **not** a tourism application, digital twin, 3D reconstruction platform, social network, generic complaint portal, or automatic encroachment detector. Its central innovation is the **Change Ledger**: a traceable record of what was observed, where it was observed, when it was observed, which evidence supports it, how certain the location is, which map and source versions were used, what remained uncertain, and what review action followed.
+
+Primary Prototype Site: **Shivneri Fort**, Junnar, Pune District, Maharashtra.
+
