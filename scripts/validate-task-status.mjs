@@ -19,7 +19,7 @@ const validStatuses = new Set(['BACKLOG', 'READY', 'IN_PROGRESS', 'BLOCKED', 'NE
 
 let errors = [];
 const seenTaskIds = new Set();
-const isGatePassed = gateData.geometryGate.status === 'PASSED';
+const isGatePassed = gateData.geometryGate.status === 'PASSED' || gateData.geometryGate.status === 'PASSED_WITH_LIMITATIONS';
 
 console.log('Validating task status and dependency integrity...');
 

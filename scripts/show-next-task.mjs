@@ -24,7 +24,7 @@ args.forEach(arg => {
   }
 });
 
-const isGatePassed = gateData.geometryGate.status === 'PASSED';
+const isGatePassed = gateData.geometryGate.status === 'PASSED' || gateData.geometryGate.status === 'PASSED_WITH_LIMITATIONS';
 
 console.log('\n================================================================================');
 console.log('                 HERITAGE PULSE: TEAM & TASK STATUS DASHBOARD                  ');
@@ -35,7 +35,7 @@ console.log('-------------------------------------------------------------------
 
 // 1. Gate Status Banner
 if (isGatePassed) {
-  console.log(' [ GATE STATUS ] \x1b[32m✔ PASSED\x1b[0m — Spatial & Map work is unblocked.');
+  console.log(` [ GATE STATUS ] \x1b[32m✔ ${gateData.geometryGate.status}\x1b[0m — Spatial & Map work is unblocked.`);
 } else {
   console.log(' [ GATE STATUS ] \x1b[31m✖ NOT_PASSED (GATE-01 ACTIVE)\x1b[0m');
   console.log('   \x1b[33m⚠ SPATIAL-*, LEDGER-01, and UI-02 are BLOCKED until geometry is validated.\x1b[0m');

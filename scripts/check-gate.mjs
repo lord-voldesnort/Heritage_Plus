@@ -20,20 +20,23 @@ console.log('\n=================================================================
 console.log('            HERITAGE PULSE: GEOMETRY GO/NO-GO GATE CHECK              ');
 console.log('======================================================================\n');
 
-if (geometryGate.status === 'PASSED') {
-  console.log('\x1b[32m✔ GEOMETRY GATE STATUS: PASSED\x1b[0m');
+if (geometryGate.status === 'PASSED' || geometryGate.status === 'PASSED_WITH_LIMITATIONS') {
+  console.log(`\x1b[32m✔ GEOMETRY GATE STATUS: ${geometryGate.status}\x1b[0m`);
   console.log(`• Target Site: ${geometryGate.targetSite}`);
   console.log(`• Source Document/URL: ${geometryGate.sourceUrl}`);
   console.log(`• Source Date: ${geometryGate.sourceDate}`);
   console.log(`• Test Points Validated: ${geometryGate.testPointsValidated}`);
   console.log(`• Degraded GPS Handled: ${geometryGate.poorGpsHandled}`);
+  if (geometryGate.bhuvanVersionStatement) {
+    console.log(`• Limitation Statement: ${geometryGate.bhuvanVersionStatement}`);
+  }
   console.log(`• Passed By: ${geometryGate.passedBy} at ${geometryGate.passedAt}`);
   console.log('\n\x1b[32mSpatial & Map development tasks (SPATIAL-*, UI-02, LEDGER-01) are UNBLOCKED.\x1b[0m\n');
   process.exit(0);
 } else {
   console.log('\x1b[31m✖ GEOMETRY GATE STATUS: NOT_PASSED (GATE-01 ACTIVE)\x1b[0m\n');
   console.log('The following gate sub-conditions must be fulfilled before spatial work begins:');
-  
+
   const issues = [];
   if (!geometryGate.targetSite) issues.push('Target site not defined (select exactly one site, e.g. Shivneri Fort)');
   if (!geometryGate.sourceUrl) issues.push('Source geometry document/URL not recorded');

@@ -1,0 +1,29 @@
+{
+  "retrievalDate": "2026-09-07",
+  "sourcePortal": "https://bhuvan-app1.nrsc.gov.in/culture_monuments/",
+  "wmsEndpoint": "https://bhuvan-vec2.nrsc.gov.in/bhuvan/wms",
+  "monumentNumber": "MUMMH015",
+  "monumentName": "Fort of Shivner",
+  "files": [
+    {
+      "filename": "asi_protected_areas_7068.geojson",
+      "layer": "asi:protected_areas",
+      "gid": 7068,
+      "sha256": "4ba4be0672dd46703760c3022f5e1391ea592262b11209f06a9ed3045f69761e"
+    },
+    {
+      "filename": "asi_prohibited_boundary_9785.geojson",
+      "layer": "asi:prohibited_boundary",
+      "gid": 9785,
+      "buff_dist": 100,
+      "sha256": "928fc7aa8f98c92f13411f76cc7df18693eb86d4bf333faa4e0804da8d51b168"
+    },
+    {
+      "filename": "asi_regulated_boundary_2394.geojson",
+      "layer": "asi:regulated_boundary",
+      "gid": 2394,
+      "buff_dist": 300,
+      "sha256": "9d03d5f3bbfb0b8913b7569a597f4dd4097d363bb7d0143c250d301c9afd85f2"
+    }
+  ]
+}

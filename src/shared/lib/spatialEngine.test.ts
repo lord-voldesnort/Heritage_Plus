@@ -6,12 +6,12 @@ import { OBSERVATION_CATEGORIES } from '../constants/categories';
 import { CASE_STATUSES } from '../constants/caseStatuses';
 import { SPATIAL_CLASSIFICATIONS } from '../constants/spatialClassifications';
 
-describe('Spatial Reasoning Engine', () => {
+describe('Spatial Reasoning Engine (Real Bhuvan Shivneri Geometry)', () => {
   it('Scenario 1: correctly classifies point clearly inside zone as POTENTIAL_ZONE_CONCERN', () => {
     const result = calculateSpatialResult(
       {
-        latitude: 19.1982,
-        longitude: 73.8624,
+        latitude: 19.1980,
+        longitude: 73.8580,
         gpsAccuracyMeters: 4.5,
         factualDescription: 'Stone masonry foundation work near gateway.',
       },
@@ -40,13 +40,12 @@ describe('Spatial Reasoning Engine', () => {
     expect(result.isUncertaintyOverlap).toBe(false);
   });
 
-  it('Scenario 3: refuses to overclaim and returns LOCATION_UNCERTAIN when GPS error disk overlaps boundary', () => {
-    // Point right on the boundary edge with ±14.5m accuracy
+  it('Scenario 3: refuses to overclaim and returns LOCATION_UNCERTAIN when GPS error disk overlaps boundary (real reference coordinate)', () => {
     const result = calculateSpatialResult(
       {
-        latitude: 19.2020,
-        longitude: 73.8660,
-        gpsAccuracyMeters: 14.5,
+        latitude: 19.1931225,
+        longitude: 73.8528893,
+        gpsAccuracyMeters: 30.0,
         factualDescription: 'Displaced masonry near boundary stone.',
       },
       SHIVNERI_GEOMETRY
@@ -60,8 +59,8 @@ describe('Spatial Reasoning Engine', () => {
   it('Scenario 4: flags EVIDENCE_INSUFFICIENT when GPS error exceeds 35m threshold', () => {
     const result = calculateSpatialResult(
       {
-        latitude: 19.1982,
-        longitude: 73.8624,
+        latitude: 19.1980,
+        longitude: 73.8580,
         gpsAccuracyMeters: 46.0,
         factualDescription: 'Debris noted in deep rock crevice.',
       },
