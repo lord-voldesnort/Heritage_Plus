@@ -9,6 +9,7 @@ interface MapLibreViewProps {
     longitude: number;
     accuracyMeters?: number;
   };
+  classification?: string;
   className?: string;
 }
 
