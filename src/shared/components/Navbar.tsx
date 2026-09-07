@@ -4,6 +4,7 @@ import {
   ShieldCheck, 
   MapPin, 
   PlusCircle, 
+  Compass,
   History, 
   UserCheck, 
   Users, 
@@ -20,6 +21,7 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { to: '/site', label: 'Site Context', icon: MapPin },
     { to: '/capture', label: 'Field Capture', icon: PlusCircle },
+    { to: '/spatial-demo', label: 'Spatial Demo', icon: Compass },
     { to: '/ledger', label: 'Change Ledger', icon: History },
     { to: '/reviewer', label: 'Reviewer', icon: UserCheck },
     { to: '/team-status', label: 'Team Status', icon: Users },

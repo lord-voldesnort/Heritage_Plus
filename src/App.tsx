@@ -23,7 +23,9 @@ export const App: React.FC = () => {
             <Route path="/" element={<Navigate to="/site" replace />} />
             <Route path="/site" element={<SiteContextPage />} />
             <Route path="/capture" element={<FieldCapturePage />} />
+            <Route path="/result" element={<SpatialResultPage />} />
             <Route path="/result/:caseId" element={<SpatialResultPage />} />
+            <Route path="/spatial-demo" element={<SpatialResultPage />} />
             <Route path="/ledger" element={<ChangeLedgerPage />} />
             <Route path="/case/:caseId" element={<CaseDetailPage />} />
             <Route path="/cases/:caseId" element={<CaseDetailPage />} />
