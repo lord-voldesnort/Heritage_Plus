@@ -65,7 +65,7 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
             <div className="flex items-start p-3 bg-amber-50/80 border border-amber-200/80 rounded-lg text-amber-900 text-xs leading-relaxed">
                 <ShieldAlert className="w-4 h-4 text-amber-700 mr-2 mt-0.5 shrink-0" />
                 <span>
-                    <strong>Evidence guideline:</strong> Record only visible physical conditions. Do not capture private individuals, identifiable faces, personal belongings, or license plates.
+                    <strong>Evidence guideline:</strong> Record only visible physical conditions. Do not photograph human faces or private property signage.
                 </span>
             </div>
 

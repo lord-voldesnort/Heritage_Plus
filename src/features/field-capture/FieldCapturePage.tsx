@@ -8,6 +8,8 @@ import {
 } from '../../shared/components';
 import { GpsAccuracyHud } from './GpsAccuracyHud';
 
+import { getGuidelineById, APPROVED_PRIVACY_WARNING } from '../site-context/observationGuidelines';
+
 interface PhotoEvidencePayload {
   file: File;
   previewUrl: string;
@@ -22,6 +24,11 @@ export const FieldCapturePage: React.FC = () => {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [description, setDescription] = useState('');
   const [photo, setPhoto] = useState<PhotoEvidencePayload | null>(null);
+
+  const activeGuideline = categoryId ? getGuidelineById(categoryId) : undefined;
+  const currentPromptPlaceholder = activeGuideline
+    ? activeGuideline.neutralPromptPlaceholder
+    : 'Describe what was observed factually (e.g. wall damage, debris accumulation). Do not make accusations or include names.';
 
   // GPS states with explicit coordinate tuple type
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
@@ -146,10 +153,27 @@ export const FieldCapturePage: React.FC = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={isSubmitting}
-            placeholder="Describe what was observed factually (e.g. wall damage, debris accumulation). Do not make accusations or include names."
+            placeholder={currentPromptPlaceholder}
             className="w-full text-sm p-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500/50 placeholder:text-slate-400"
           />
         </div>
+
+        {/* Category Guidance & Photo Examples */}
+        {activeGuideline && (
+          <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl space-y-2 text-xs text-amber-950">
+            <div>
+              <strong className="font-semibold block font-mono text-[11px] uppercase tracking-wide text-amber-900">
+                Category Guidance & Evidence Guidelines:
+              </strong>
+              <div className="text-slate-700 mt-0.5">
+                <strong>Examples to photograph:</strong> {activeGuideline.photoExamples.join(' · ')}.
+              </div>
+            </div>
+            <div className="text-amber-900 font-semibold flex items-center gap-1.5 pt-1 border-t border-amber-200/60 text-[11px]">
+              <span>Privacy Warning: {APPROVED_PRIVACY_WARNING}</span>
+            </div>
+          </div>
+        )}
 
         {/* Photo Upload Dropzone */}
         <PhotoDropzone
