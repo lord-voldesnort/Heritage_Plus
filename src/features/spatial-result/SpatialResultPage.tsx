@@ -19,11 +19,11 @@ export const SpatialResultPage: React.FC = () => {
   // Determine initial scenario ID if caseRecord is linked to one
   let initialScenarioId = 'scenario-1-inside';
   if (caseRecord) {
-    if (caseRecord.computedClassification === 'NO_SPATIAL_CONCERN_INDICATED') {
+    if (caseRecord.spatialResult.classification === 'NO_SPATIAL_CONCERN_INDICATED') {
       initialScenarioId = 'scenario-2-outside';
-    } else if (caseRecord.computedClassification === 'LOCATION_UNCERTAIN') {
+    } else if (caseRecord.spatialResult.classification === 'LOCATION_UNCERTAIN') {
       initialScenarioId = 'scenario-3-near-boundary';
-    } else if (caseRecord.computedClassification === 'EVIDENCE_INSUFFICIENT') {
+    } else if (caseRecord.spatialResult.classification === 'EVIDENCE_INSUFFICIENT') {
       initialScenarioId = 'scenario-4-poor-gps';
     }
   }

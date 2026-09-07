@@ -16,6 +16,7 @@ import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
 import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
 import { OBSERVATION_CATEGORIES } from '../../shared/constants/categories';
 import {
   Badge,
@@ -59,9 +60,9 @@ export const CaseDetailPage: React.FC = () => {
     const storeRecord = ledgerStore.getCaseById(caseId);
     if (storeRecord) {
       const isOverlap =
-        storeRecord.computedClassification === 'LOCATION_UNCERTAIN' ||
-        (storeRecord.distanceToBoundaryMeters !== null &&
-          storeRecord.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
+        storeRecord.spatialResult.classification === 'LOCATION_UNCERTAIN' ||
+        (storeRecord.spatialResult.distanceToBoundaryMeters !== null &&
+          storeRecord.spatialResult.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
 
       return {
         source: 'ledgerStore' as const,
@@ -72,10 +73,10 @@ export const CaseDetailPage: React.FC = () => {
         latitude: storeRecord.latitude,
         longitude: storeRecord.longitude,
         accuracyMeters: storeRecord.gpsAccuracyMeters,
-        distanceToBoundaryMeters: storeRecord.distanceToBoundaryMeters,
-        computedClassification: storeRecord.computedClassification,
+        distanceToBoundaryMeters: storeRecord.spatialResult.distanceToBoundaryMeters,
+        computedClassification: storeRecord.spatialResult.classification,
         isUncertaintyOverlap: isOverlap,
-        explanation: storeRecord.spatialReasoningExplanation,
+        explanation: storeRecord.spatialResult.explanation,
         timestamp: storeRecord.observedTimestamp,
         photoUrl: storeRecord.evidenceList?.[0]?.fileUrl || null,
         photoMetadata: storeRecord.evidenceList?.[0]
@@ -178,7 +179,7 @@ export const CaseDetailPage: React.FC = () => {
   };
 
   const classificationMeta =
-    SPATIAL_CLASSIFICATIONS[resolvedCase.computedClassification] || {
+    SPATIAL_CLASSIFICATIONS[resolvedCase.computedClassification as keyof typeof SPATIAL_CLASSIFICATIONS] || {
       badgeLabel: resolvedCase.computedClassification,
       badgeVariant: 'slate',
       summaryDescription: 'Classification pending evaluation.',
@@ -294,7 +295,7 @@ export const CaseDetailPage: React.FC = () => {
 
       {/* Mandatory Advisory Notice */}
       <NoticeBanner variant="advisory">
-        Indicative decision support only. This prototype does not determine legal status or property boundaries. Authority verification is required.
+        {CANONICAL_LEGAL_DISCLAIMER}
       </NoticeBanner>
 
       {/* Primary Classification Result Card */}

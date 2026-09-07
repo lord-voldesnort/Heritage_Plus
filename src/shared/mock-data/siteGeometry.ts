@@ -7,7 +7,7 @@ export const PROVENANCE_METADATA = {
   inlineSourceScript: 'usrtasks/asi_v2/asi.php',
   wmsEndpoint: 'https://bhuvan-vec2.nrsc.gov.in/bhuvan/wms',
   wfsStatus: 'Disabled (https://bhuvan-vec2.nrsc.gov.in/bhuvan/wfs returns OGC ServiceUnavailable)',
-  retrievalMethod: 'WMS GetFeatureInfo with INFO_FORMAT=application/json',
+  retrievalMethod: 'One-time manual offline data extraction via WMS GetFeatureInfo (INFO_FORMAT=application/json) during development; no live in-app network API capability',
   monumentNumber: 'MUMMH015',
   monumentName: 'Fort of Shivner',
   retrievalDate: '2026-09-07',
@@ -169,6 +169,7 @@ export const SHIVNERI_PROTECTED_GEOMETRY: GeometryRecord = {
   captureDate: PROVENANCE_METADATA.retrievalDate,
   limitationNote: PROVENANCE_METADATA.verbatimLimitationText,
   governanceState: 'PILOT_PUBLISHED',
+  // Prototype placeholder estimate (0.95); not derived from official NRSC metadata or statutory certification
   layerConfidenceScore: 0.95,
   geojson: SHIVNERI_PROTECTED_GEOJSON,
 };
@@ -181,6 +182,7 @@ export const SHIVNERI_PROHIBITED_GEOMETRY: GeometryRecord = {
   captureDate: PROVENANCE_METADATA.retrievalDate,
   limitationNote: PROVENANCE_METADATA.verbatimLimitationText,
   governanceState: 'PILOT_PUBLISHED',
+  // Prototype placeholder estimate (0.95); not derived from official NRSC metadata or statutory certification
   layerConfidenceScore: 0.95,
   geojson: SHIVNERI_PROHIBITED_GEOJSON,
 };
@@ -193,6 +195,7 @@ export const SHIVNERI_REGULATED_GEOMETRY: GeometryRecord = {
   captureDate: PROVENANCE_METADATA.retrievalDate,
   limitationNote: PROVENANCE_METADATA.verbatimLimitationText,
   governanceState: 'PILOT_PUBLISHED',
+  // Prototype placeholder estimate (0.95); not derived from official NRSC metadata or statutory certification
   layerConfidenceScore: 0.95,
   geojson: SHIVNERI_REGULATED_GEOJSON,
 };

@@ -7,6 +7,7 @@ import { DEMO_SCENARIOS } from '../../shared/mock-data/mockScenarios';
 import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
 import { DemoScenario, GeometryRecord } from '../../shared/types';
 import { 
   Compass, 
@@ -259,10 +260,10 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
           </div>
 
           {/* Mandatory Advisory Disclaimer Banner */}
-          <div className="p-3 rounded-xl bg-amber-950/20 border border-amber-800/40 flex items-center gap-2.5 text-amber-200/90 text-xs">
-            <Info className="w-4 h-4 text-amber-400 flex-shrink-0" />
+          <div className="p-3 rounded-xl bg-amber-950/20 border border-amber-800/40 flex items-start gap-2.5 text-amber-200/90 text-xs leading-relaxed">
+            <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
             <span>
-              <strong>Advisory Disclaimer:</strong> Indicative decision support only. This prototype does not determine legal status or property boundaries.
+              {CANONICAL_LEGAL_DISCLAIMER}
             </span>
           </div>
         </div>

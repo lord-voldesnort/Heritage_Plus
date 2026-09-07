@@ -13,6 +13,7 @@ import { ledgerStore } from '../../shared/lib/ledgerStore';
 import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
 import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
 import { Badge, Button, Card, NoticeBanner, EmptyState } from '../../shared/components';
 import { ReviewerActionCard } from './ReviewerActionCard';
 import { CaseStatus, SpatialClassification, ObservationType } from '../../shared/types';
@@ -85,7 +86,7 @@ export const ReviewerQueuePage: React.FC = () => {
         description: c.factualDescription,
         coordinates: [c.longitude, c.latitude],
         accuracyMeters: c.gpsAccuracyMeters,
-        computedClassification: c.computedClassification,
+        computedClassification: c.spatialResult.classification,
         currentStatus: c.currentStatus,
         hasPhoto: (c.evidenceList && c.evidenceList.length > 0) || false,
         source: 'ledgerStore',
@@ -214,7 +215,7 @@ export const ReviewerQueuePage: React.FC = () => {
 
       {/* Advisory Banner */}
       <NoticeBanner variant="advisory">
-        Indicative decision support only. This prototype does not determine legal status or property boundaries. Authority verification is required.
+        {CANONICAL_LEGAL_DISCLAIMER}
       </NoticeBanner>
 
       {/* Action Toast Feedback */}

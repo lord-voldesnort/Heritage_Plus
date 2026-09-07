@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldAlert } from 'lucide-react';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../constants/disclaimer';
 
 export const Footer: React.FC = () => {
   return (
@@ -8,7 +9,7 @@ export const Footer: React.FC = () => {
         <div className="flex items-start gap-2.5 max-w-2xl text-left">
           <ShieldAlert className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
           <p>
-            <strong className="text-slate-400">Notice:</strong> Indicative decision support only. Heritage Pulse does not determine illegality, verify permission status, or identify offenders. Statutory preservation determination rests exclusively with the designated competent authority.
+            <strong className="text-slate-400">Notice:</strong> {CANONICAL_LEGAL_DISCLAIMER}
           </p>
         </div>
         <div className="text-center sm:text-right font-mono text-[11px] text-slate-500 flex-shrink-0">

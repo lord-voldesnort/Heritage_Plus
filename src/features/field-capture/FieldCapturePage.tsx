@@ -7,6 +7,7 @@ import {
   NoticeBanner
 } from '../../shared/components';
 import { GpsAccuracyHud } from './GpsAccuracyHud';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
 
 import { getGuidelineById, APPROVED_PRIVACY_WARNING } from '../site-context/observationGuidelines';
 
@@ -131,7 +132,7 @@ export const FieldCapturePage: React.FC = () => {
       </div>
 
       <NoticeBanner variant="advisory">
-        Indicative decision support only. This prototype does not determine legal status or verify property ownership.
+        {CANONICAL_LEGAL_DISCLAIMER}
       </NoticeBanner>
 
       <form onSubmit={handleSubmit} className="space-y-6">

@@ -70,7 +70,7 @@ export const SiteContextPage: React.FC = () => {
               <div className="text-slate-400 font-mono">Active Geometry Layer:</div>
               <div className="text-amber-400 font-medium flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5" />
-                {SHIVNERI_GEOMETRY.versionLabel} (Confidence: {(SHIVNERI_GEOMETRY.layerConfidenceScore * 100).toFixed(0)}%)
+                {SHIVNERI_GEOMETRY.versionLabel} (Confidence Estimate: {(SHIVNERI_GEOMETRY.layerConfidenceScore * 100).toFixed(0)}% [Prototype])
               </div>
             </div>
             <div className="sm:col-span-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 text-[11px] text-slate-400">

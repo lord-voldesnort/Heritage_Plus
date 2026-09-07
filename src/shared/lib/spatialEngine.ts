@@ -1,5 +1,6 @@
 import * as turf from '@turf/turf';
 import { GeometryRecord, SpatialResult } from '../types';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../constants/disclaimer';
 
 export interface SpatialCalculationInput {
   latitude: number;
@@ -36,7 +37,7 @@ export function calculateSpatialResult(
       statements: {
         userReported: factualDescription,
         gisCalculated: 'Spatial classification unavailable due to unreviewed source geometry.',
-        authorityNotice: 'Indicative decision support only. Authority review required.',
+        authorityNotice: CANONICAL_LEGAL_DISCLAIMER,
       },
     };
   }
@@ -54,7 +55,7 @@ export function calculateSpatialResult(
       statements: {
         userReported: factualDescription,
         gisCalculated: `Device accuracy error (±${gpsAccuracyMeters.toFixed(1)}m) is too high for reliable spatial calculation.`,
-        authorityNotice: 'Indicative decision support only. Authority verification required.',
+        authorityNotice: CANONICAL_LEGAL_DISCLAIMER,
       },
     };
   }
@@ -91,7 +92,7 @@ export function calculateSpatialResult(
       statements: {
         userReported: factualDescription,
         gisCalculated: `Point is ${distanceMeters.toFixed(1)}m from boundary line, within device error margin (±${gpsAccuracyMeters.toFixed(1)}m).`,
-        authorityNotice: 'Indicative decision support only. Authority verification required.',
+        authorityNotice: CANONICAL_LEGAL_DISCLAIMER,
       },
     };
   }
@@ -108,7 +109,7 @@ export function calculateSpatialResult(
       statements: {
         userReported: factualDescription,
         gisCalculated: `Point falls within the surveyed boundary polygon (version: ${version}).`,
-        authorityNotice: 'Indicative decision support only. Authority verification required.',
+        authorityNotice: CANONICAL_LEGAL_DISCLAIMER,
       },
     };
   }
@@ -124,7 +125,7 @@ export function calculateSpatialResult(
     statements: {
       userReported: factualDescription,
       gisCalculated: `Point is located ${distanceMeters.toFixed(1)}m outside the active source boundary.`,
-      authorityNotice: 'Indicative decision support only. Authority verification required.',
+      authorityNotice: CANONICAL_LEGAL_DISCLAIMER,
     },
   };
 }

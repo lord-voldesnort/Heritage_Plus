@@ -3,6 +3,8 @@ import { clsx } from 'clsx';
 import { Landmark, Calendar, ShieldCheck, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { NoticeBanner } from './NoticeBanner';
 
+import { CANONICAL_LEGAL_DISCLAIMER } from '../constants/disclaimer';
+
 export interface SiteContextData {
     id: string;
     name: string;
@@ -56,7 +58,7 @@ export const SiteContextCard: React.FC<SiteContextCardProps> = ({
                 </p>
 
                 <NoticeBanner variant="advisory">
-                    Indicative decision support only. This prototype does not determine legal status or property boundaries. Authority verification is required.
+                    {CANONICAL_LEGAL_DISCLAIMER}
                 </NoticeBanner>
 
                 <div className="pt-2 border-t border-slate-100">

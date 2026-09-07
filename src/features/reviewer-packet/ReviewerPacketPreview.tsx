@@ -11,6 +11,7 @@ import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSit
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
 import { CASE_STATUSES } from '../../shared/constants/caseStatuses';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
 import {
   Badge,
   Button,
@@ -62,9 +63,9 @@ export const ReviewerPacketPreview: React.FC = () => {
     const storeRecord = ledgerStore.getCaseById(caseId);
     if (storeRecord) {
       const isOverlap =
-        storeRecord.computedClassification === 'LOCATION_UNCERTAIN' ||
-        (storeRecord.distanceToBoundaryMeters !== null &&
-          storeRecord.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
+        storeRecord.spatialResult.classification === 'LOCATION_UNCERTAIN' ||
+        (storeRecord.spatialResult.distanceToBoundaryMeters !== null &&
+          storeRecord.spatialResult.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
 
       return {
         id: storeRecord.caseId,
@@ -75,10 +76,10 @@ export const ReviewerPacketPreview: React.FC = () => {
         latitude: storeRecord.latitude,
         longitude: storeRecord.longitude,
         accuracyMeters: storeRecord.gpsAccuracyMeters,
-        distanceToBoundaryMeters: storeRecord.distanceToBoundaryMeters,
-        computedClassification: storeRecord.computedClassification,
+        distanceToBoundaryMeters: storeRecord.spatialResult.distanceToBoundaryMeters,
+        computedClassification: storeRecord.spatialResult.classification,
         isUncertaintyOverlap: isOverlap,
-        explanation: storeRecord.spatialReasoningExplanation,
+        explanation: storeRecord.spatialResult.explanation,
         currentStatus: storeRecord.currentStatus,
         timestamp: storeRecord.observedTimestamp,
         photoUrl: storeRecord.evidenceList?.[0]?.fileUrl || null,
@@ -292,7 +293,7 @@ export const ReviewerPacketPreview: React.FC = () => {
 
       {/* 4. Legal Safety & Non-Accusatory Advisory Banner (print:hidden) */}
       <NoticeBanner variant="advisory" className="print:hidden">
-        Indicative decision support only. This prototype does not determine legal status or property boundaries. Official field verification required.
+        {CANONICAL_LEGAL_DISCLAIMER}
       </NoticeBanner>
 
       {/* 2. Standalone, Print-Ready Document Container */}
@@ -323,7 +324,7 @@ export const ReviewerPacketPreview: React.FC = () => {
 
         {/* Printable Mandatory Legal Disclaimer */}
         <div className="mb-6 p-3 rounded border border-slate-300 bg-slate-50 text-[11px] text-slate-700 leading-relaxed">
-          <strong>Mandatory Notice:</strong> Indicative decision support only. This prototype does not determine legal status or property boundaries. Official field verification required.
+          <strong>Mandatory Notice:</strong> {CANONICAL_LEGAL_DISCLAIMER}
         </div>
 
         <div className="space-y-6">

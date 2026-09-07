@@ -78,7 +78,7 @@ export const ChangeLedgerPage: React.FC = () => {
       {/* Cases Stream */}
       <div className="space-y-3">
         {filteredCases.map(c => {
-          const classificationMeta = SPATIAL_CLASSIFICATIONS[c.computedClassification];
+          const classificationMeta = SPATIAL_CLASSIFICATIONS[c.spatialResult.classification];
           const statusMeta = CASE_STATUSES[c.currentStatus];
 
           return (
@@ -112,10 +112,10 @@ export const ChangeLedgerPage: React.FC = () => {
 
                   <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
                     <Badge variant={classificationMeta.badgeVariant}>
-                      {c.computedClassification === 'POTENTIAL_ZONE_CONCERN' && 'Zone Concern'}
-                      {c.computedClassification === 'LOCATION_UNCERTAIN' && 'Location Uncertain'}
-                      {c.computedClassification === 'NO_SPATIAL_CONCERN_INDICATED' && 'Outside Zone'}
-                      {c.computedClassification === 'EVIDENCE_INSUFFICIENT' && 'Poor GPS'}
+                      {c.spatialResult.classification === 'POTENTIAL_ZONE_CONCERN' && 'Zone Concern'}
+                      {c.spatialResult.classification === 'LOCATION_UNCERTAIN' && 'Location Uncertain'}
+                      {c.spatialResult.classification === 'NO_SPATIAL_CONCERN_INDICATED' && 'Outside Zone'}
+                      {c.spatialResult.classification === 'EVIDENCE_INSUFFICIENT' && 'Poor GPS'}
                     </Badge>
 
                     <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1">

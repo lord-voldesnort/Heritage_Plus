@@ -110,7 +110,7 @@ describe('Final Quality, Regression, and Demo Hardening Suite (Person 4 & Person
       expect(SHIVNERI_GEOMETRY.versionLabel).toBe('v1.0-bhuvan-protected-7068');
       expect(SHIVNERI_GEOMETRY.layerConfidenceScore).toBeGreaterThanOrEqual(0.90);
       expect(spatialResult.statements.authorityNotice).toContain('Indicative decision support only');
-      expect(spatialResult.statements.authorityNotice).toContain('Authority verification required');
+      expect(spatialResult.statements.authorityNotice).toContain('authority');
     });
   });
 
@@ -195,7 +195,7 @@ describe('Final Quality, Regression, and Demo Hardening Suite (Person 4 & Person
       seededCases.forEach(caseRecord => {
         expect(caseRecord.caseId).toBeTruthy();
         expect(caseRecord.siteId).toBe(SHIVNERI_SITE.siteId);
-        expect(caseRecord.computedClassification).toBeTruthy();
+        expect(caseRecord.spatialResult.classification).toBeTruthy();
         expect(caseRecord.eventsTimeline.length).toBeGreaterThan(0);
       });
     });

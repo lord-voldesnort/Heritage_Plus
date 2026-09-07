@@ -87,10 +87,10 @@ export const ReviewerConsolePage: React.FC = () => {
                   <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
                     <span className="text-slate-400">GPS: ±{c.gpsAccuracyMeters.toFixed(1)}m</span>
                     <span className="text-amber-400/90 text-[10px]">
-                      {c.computedClassification === 'POTENTIAL_ZONE_CONCERN' && 'Zone Concern'}
-                      {c.computedClassification === 'LOCATION_UNCERTAIN' && 'Uncertain'}
-                      {c.computedClassification === 'NO_SPATIAL_CONCERN_INDICATED' && 'Outside'}
-                      {c.computedClassification === 'EVIDENCE_INSUFFICIENT' && 'Poor GPS'}
+                      {c.spatialResult.classification === 'POTENTIAL_ZONE_CONCERN' && 'Zone Concern'}
+                      {c.spatialResult.classification === 'LOCATION_UNCERTAIN' && 'Uncertain'}
+                      {c.spatialResult.classification === 'NO_SPATIAL_CONCERN_INDICATED' && 'Outside'}
+                      {c.spatialResult.classification === 'EVIDENCE_INSUFFICIENT' && 'Poor GPS'}
                     </span>
                   </div>
                 </button>
@@ -140,12 +140,12 @@ export const ReviewerConsolePage: React.FC = () => {
               <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 space-y-2 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono text-slate-400 uppercase">Computed Spatial Logic</span>
-                  <Badge variant={SPATIAL_CLASSIFICATIONS[selectedCase.computedClassification].badgeVariant}>
-                    {selectedCase.computedClassification}
+                  <Badge variant={SPATIAL_CLASSIFICATIONS[selectedCase.spatialResult.classification].badgeVariant}>
+                    {selectedCase.spatialResult.classification}
                   </Badge>
                 </div>
                 <p className="text-slate-300 text-xs">
-                  {selectedCase.spatialReasoningExplanation}
+                  {selectedCase.spatialResult.explanation}
                 </p>
                 <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400 pt-1 border-t border-slate-900">
                   <span>Coordinates: {selectedCase.latitude.toFixed(4)}°N, {selectedCase.longitude.toFixed(4)}°E</span>
