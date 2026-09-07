@@ -6,8 +6,7 @@ import {
   FileText
 } from 'lucide-react';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
-import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
-import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
+import { SHIVNERI_SITE } from '../../shared/mock-data/mockSite';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
 import { CASE_STATUSES } from '../../shared/constants/caseStatuses';
@@ -20,26 +19,6 @@ import {
   LedgerTimeline
 } from '../../shared/components';
 import { TimelineEventItem } from '../../shared/components/LedgerTimeline';
-import { CaseStatus, ObservationType } from '../../shared/types';
-
-interface SessionCasePayload {
-  id: string;
-  siteId: string;
-  siteName: string;
-  categoryId: string;
-  description: string;
-  coordinates: [number, number]; // [lng, lat]
-  accuracyMeters: number;
-  photoMetadata?: {
-    fileName: string;
-    sizeKb: number;
-    capturedDate: string;
-  } | null;
-  photoUrl?: string | null;
-  timestamp: string;
-  currentStatus?: CaseStatus;
-  eventsTimeline?: any[];
-}
 
 // Approved neutral labels
 const APPROVED_CATEGORY_LABELS: Record<string, string> = {
@@ -56,94 +35,43 @@ const APPROVED_CATEGORY_LABELS: Record<string, string> = {
 export const ReviewerPacketPreview: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
 
-  // 1. Data Retrieval: Read active case by ID from route params, falling back to local session storage or seeded data
+  // 1. Data Retrieval: Exclusively read active case by ID from ledgerStore (canonical source of truth)
   const resolvedCase = useMemo(() => {
     if (!caseId) return null;
 
-    // Check in-memory ledger store
     const storeRecord = ledgerStore.getCaseById(caseId);
-    if (storeRecord) {
-      const isOverlap =
-        storeRecord.spatialResult.classification === 'LOCATION_UNCERTAIN' ||
-        (storeRecord.spatialResult.distanceToBoundaryMeters !== null &&
-          storeRecord.spatialResult.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
+    if (!storeRecord) return null;
 
-      return {
-        id: storeRecord.caseId,
-        siteName: SHIVNERI_SITE.name,
-        category: storeRecord.category,
-        categoryLabel: APPROVED_CATEGORY_LABELS[storeRecord.category] || storeRecord.category.replace(/_/g, ' '),
-        description: storeRecord.factualDescription,
-        latitude: storeRecord.latitude,
-        longitude: storeRecord.longitude,
-        accuracyMeters: storeRecord.gpsAccuracyMeters,
-        distanceToBoundaryMeters: storeRecord.spatialResult.distanceToBoundaryMeters,
-        computedClassification: storeRecord.spatialResult.classification,
-        isUncertaintyOverlap: isOverlap,
-        explanation: storeRecord.spatialResult.explanation,
-        currentStatus: storeRecord.currentStatus,
-        timestamp: storeRecord.observedTimestamp,
-        photoUrl: storeRecord.evidenceList?.[0]?.fileUrl || null,
-        photoMetadata: storeRecord.evidenceList?.[0]
-          ? {
-              fileName: 'evidence-capture.jpg',
-              sizeKb: Math.round(storeRecord.evidenceList[0].fileSizeBytes / 1024),
-              capturedDate: storeRecord.evidenceList[0].uploadTimestamp.split('T')[0],
-            }
-          : null,
-        rawEvents: storeRecord.eventsTimeline,
-      };
-    }
+    const isOverlap =
+      storeRecord.spatialResult.classification === 'LOCATION_UNCERTAIN' ||
+      (storeRecord.spatialResult.distanceToBoundaryMeters !== null &&
+        storeRecord.spatialResult.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
 
-    // Check local session storage fallback
-    const rawSession =
-      sessionStorage.getItem(`case_${caseId}`) ||
-      sessionStorage.getItem(caseId);
-
-    if (rawSession) {
-      try {
-        const parsed: SessionCasePayload = JSON.parse(rawSession);
-        const [lng, lat] = parsed.coordinates || [73.8624, 19.1982];
-        const accuracy = parsed.accuracyMeters || 10;
-        const description = parsed.description || '';
-
-        const spatial = calculateSpatialResult(
-          {
-            latitude: lat,
-            longitude: lng,
-            gpsAccuracyMeters: accuracy,
-            factualDescription: description,
-          },
-          SHIVNERI_GEOMETRY
-        );
-
-        return {
-          id: parsed.id,
-          siteName: parsed.siteName || SHIVNERI_SITE.name,
-          category: (parsed.categoryId as ObservationType) || 'OTHER_VISIBLE_CHANGE',
-          categoryLabel:
-            APPROVED_CATEGORY_LABELS[parsed.categoryId] ||
-            (parsed.categoryId ? parsed.categoryId.replace(/_/g, ' ') : 'Observed Change'),
-          description,
-          latitude: lat,
-          longitude: lng,
-          accuracyMeters: accuracy,
-          distanceToBoundaryMeters: spatial.distanceToBoundaryMeters,
-          computedClassification: spatial.classification,
-          isUncertaintyOverlap: spatial.isUncertaintyOverlap,
-          explanation: spatial.explanation,
-          currentStatus: parsed.currentStatus || 'SUBMITTED_FOR_REVIEW',
-          timestamp: parsed.timestamp || new Date().toISOString(),
-          photoUrl: parsed.photoUrl || null,
-          photoMetadata: parsed.photoMetadata || null,
-          rawEvents: parsed.eventsTimeline || [],
-        };
-      } catch (err) {
-        console.error('Error parsing session packet preview:', err);
-      }
-    }
-
-    return null;
+    return {
+      id: storeRecord.caseId,
+      siteName: SHIVNERI_SITE.name,
+      category: storeRecord.category,
+      categoryLabel: APPROVED_CATEGORY_LABELS[storeRecord.category] || storeRecord.category.replace(/_/g, ' '),
+      description: storeRecord.factualDescription,
+      latitude: storeRecord.latitude,
+      longitude: storeRecord.longitude,
+      accuracyMeters: storeRecord.gpsAccuracyMeters,
+      distanceToBoundaryMeters: storeRecord.spatialResult.distanceToBoundaryMeters,
+      computedClassification: storeRecord.spatialResult.classification,
+      isUncertaintyOverlap: isOverlap,
+      explanation: storeRecord.spatialResult.explanation,
+      currentStatus: storeRecord.currentStatus,
+      timestamp: storeRecord.observedTimestamp,
+      photoUrl: storeRecord.evidenceList?.[0]?.fileUrl || null,
+      photoMetadata: storeRecord.evidenceList?.[0]
+        ? {
+            fileName: 'evidence-capture.jpg',
+            sizeKb: Math.round(storeRecord.evidenceList[0].fileSizeBytes / 1024),
+            capturedDate: storeRecord.evidenceList[0].uploadTimestamp.split('T')[0],
+          }
+        : null,
+      rawEvents: storeRecord.eventsTimeline,
+    };
   }, [caseId]);
 
   // If missing, render the shared EmptyState component
@@ -152,7 +80,7 @@ export const ReviewerPacketPreview: React.FC = () => {
       <div className="max-w-xl mx-auto py-12 px-4 print:hidden">
         <EmptyState
           title="Case record not found for review packet generation"
-          description={`No active case record matching ID "${caseId || ''}" could be retrieved from local session storage or the Change Ledger.`}
+          description={`No active case record matching ID "${caseId || ''}" could be retrieved from the Change Ledger.`}
           action={
             <div className="flex items-center gap-3">
               <Link to="/reviewer">
@@ -237,9 +165,17 @@ export const ReviewerPacketPreview: React.FC = () => {
   // Append raw review events from history if present
   if (resolvedCase.rawEvents && resolvedCase.rawEvents.length > 0) {
     resolvedCase.rawEvents.forEach((evt, idx) => {
+      let timelineType: TimelineEventItem['eventType'] = 'STATUS_UPDATED';
+      if (evt.eventType === 'OBSERVATION_CREATED') timelineType = 'OBSERVATION_CREATED';
+      else if (evt.eventType === 'LOCATION_CAPTURED') timelineType = 'LOCATION_CAPTURED';
+      else if (evt.eventType === 'SPATIAL_CALCULATED') timelineType = 'SPATIAL_EVALUATED';
+      else if (evt.eventType === 'EVIDENCE_ATTACHED') timelineType = 'EVIDENCE_ADDED';
+      else if (evt.eventType === 'INFO_REQUESTED') timelineType = 'INFO_REQUESTED';
+      else if (evt.eventType === 'CASE_CLOSED') timelineType = 'CASE_CLOSED';
+
       timelineEvents.push({
         id: evt.eventId || `raw-evt-${idx}`,
-        eventType: evt.eventType || 'STATUS_UPDATED',
+        eventType: timelineType,
         actorRole: evt.actorRole === 'REVIEWER' ? 'REVIEWER' : 'SYSTEM',
         timestamp: evt.timestamp || resolvedCase.timestamp,
         title: evt.title || `Review Action: ${evt.resultingStatus || 'Updated'}`,

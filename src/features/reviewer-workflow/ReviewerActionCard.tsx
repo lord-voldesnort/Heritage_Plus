@@ -20,7 +20,9 @@ export type ReviewerActionKey =
   | 'REQUEST_ADDITIONAL_EVIDENCE'
   | 'RECOMMEND_FIELD_VERIFICATION'
   | 'REFER_OFFICIAL_REVIEW'
-  | 'CLOSE_CASE';
+  | 'CLOSE_NO_ACTION'
+  | 'CLOSE_DUPLICATE'
+  | 'CLOSE_INSUFFICIENT_EVIDENCE';
 
 export interface PermittedActionOption {
   key: ReviewerActionKey;
@@ -61,12 +63,30 @@ export const PERMITTED_ACTIONS: PermittedActionOption[] = [
     badgeVariant: 'blue',
   },
   {
-    key: 'CLOSE_CASE',
-    label: 'Close Case',
+    key: 'CLOSE_NO_ACTION',
+    label: 'Close Case (Reviewed - No Action Needed)',
     targetStatus: 'CLOSED_REVIEWED',
     eventType: 'CASE_CLOSED',
-    description: 'Mark observation reviewed with no further action required. Immutably logged in the Change Ledger.',
+    description: 'Mark observation cataloged in Change Ledger with no further intervention required.',
     icon: CheckCircle2,
+    badgeVariant: 'emerald',
+  },
+  {
+    key: 'CLOSE_DUPLICATE',
+    label: 'Close Case (Duplicate / Unrelated)',
+    targetStatus: 'CLOSED_DUPLICATE',
+    eventType: 'CASE_CLOSED',
+    description: 'Case is a duplicate of an existing record or outside protected heritage scope.',
+    icon: CheckCircle2,
+    badgeVariant: 'slate',
+  },
+  {
+    key: 'CLOSE_INSUFFICIENT_EVIDENCE',
+    label: 'Close Case (Insufficient Location Evidence)',
+    targetStatus: 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE',
+    eventType: 'CASE_CLOSED',
+    description: 'GPS error disk is too wide (>35m or intersects boundary) to determine zone proximity reliably.',
+    icon: AlertTriangle,
     badgeVariant: 'slate',
   },
 ];
@@ -107,13 +127,25 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const isCaseClosed = Boolean(
+    currentStatus &&
+    (currentStatus === 'CLOSED_REVIEWED' ||
+      currentStatus === 'CLOSED_DUPLICATE' ||
+      currentStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE')
+  );
+
   const selectedAction = PERMITTED_ACTIONS.find(
     (a) => a.key === selectedActionKey
-  )!;
+  ) || PERMITTED_ACTIONS[0];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    if (isCaseClosed) {
+      setErrorMessage('This case is closed. Closed cases are immutable and cannot be re-edited.');
+      return;
+    }
 
     const trimmedNotes = notes.trim();
     if (!trimmedNotes) {
@@ -135,7 +167,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
     try {
       const now = new Date().toISOString();
 
-      // 1. Append to in-memory ledger store
+      // Append to in-memory ledger store
       ledgerStore.appendReviewerDecision(
         caseId,
         selectedAction.label,
@@ -144,37 +176,6 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
         selectedAction.eventType,
         'REVIEWER'
       );
-
-      // 2. Append to session storage fallback if case exists there
-      const sessionKey = `case_${caseId}`;
-      const rawSession =
-        sessionStorage.getItem(sessionKey) || sessionStorage.getItem(caseId);
-
-      if (rawSession) {
-        try {
-          const parsed = JSON.parse(rawSession);
-          const newEvent = {
-            id: `evt-${Date.now()}`,
-            caseId,
-            timestamp: now,
-            eventType: selectedAction.eventType,
-            actorRole: 'REVIEWER',
-            title: selectedAction.label,
-            description: trimmedNotes,
-            summary: `${selectedAction.label}: ${trimmedNotes}`,
-            resultingStatus: selectedAction.targetStatus,
-          };
-
-          parsed.eventsTimeline = [
-            ...(parsed.eventsTimeline || []),
-            newEvent,
-          ];
-          parsed.currentStatus = selectedAction.targetStatus;
-          sessionStorage.setItem(sessionKey, JSON.stringify(parsed));
-        } catch (err) {
-          console.error('Failed to update session storage for reviewer action:', err);
-        }
-      }
 
       const payload: ReviewerActionPayload = {
         caseId,
