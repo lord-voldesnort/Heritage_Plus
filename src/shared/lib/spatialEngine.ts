@@ -66,7 +66,15 @@ export function calculateSpatialResult(
 
   // Calculate distance in meters to nearest boundary line string
   const boundaryLines = turf.polygonToLine(geojsonGeom);
-  const distanceKm = turf.pointToLineDistance(point, boundaryLines as any, { units: 'kilometers' });
+  let distanceKm = 0;
+  if (boundaryLines.type === 'FeatureCollection') {
+    const distances = boundaryLines.features.map(lineFeature =>
+      turf.pointToLineDistance(point, lineFeature as any, { units: 'kilometers' })
+    );
+    distanceKm = Math.min(...distances);
+  } else {
+    distanceKm = turf.pointToLineDistance(point, boundaryLines as any, { units: 'kilometers' });
+  }
   const distanceMeters = Math.round(distanceKm * 1000 * 10) / 10;
 
   // Rule 3: Accuracy Circle Overlap (Near Boundary Edge)

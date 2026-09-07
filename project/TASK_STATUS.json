@@ -63,13 +63,14 @@
       "title": "Select Target Site & Authoritative Source Geometry (Go/No-Go Gate)",
       "owner": "ameya",
       "supporters": ["vishwajeet", "person5"],
-      "status": "READY",
+      "status": "DONE",
       "priority": "CRITICAL_GATE",
       "description": "Acquire official GeoJSON boundary for Shivneri Fort with source documentation, test points, and update GATE_STATUS.json to PASSED.",
       "dependencies": ["FOUNDATION-08"],
       "filesLikelyToChange": ["project/GATE_STATUS.json", "src/shared/mock-data/siteGeometry.ts", "docs/GEOMETRY_GATE.md"],
       "definitionOfDone": "GATE_STATUS.json marked PASSED with source URL, capture date, 3 verified test coordinates, and passing npm run gate:check.",
       "nextTaskAfterCompletion": "SPATIAL-01",
+      "completedAt": "2026-09-07T11:59:00Z",
       "blockers": []
     },
     {
@@ -77,14 +78,14 @@
       "title": "Implement Point-in-Polygon & Distance-to-Boundary Engine",
       "owner": "vishwajeet",
       "supporters": ["person5"],
-      "status": "BLOCKED",
+      "status": "READY",
       "priority": "HIGH",
       "description": "Implement Turf.js geodesic point-in-polygon and distance calculations without using circular center points.",
       "dependencies": ["GATE-01"],
       "filesLikelyToChange": ["src/shared/lib/spatialEngine.ts", "src/shared/lib/spatialEngine.test.ts"],
       "definitionOfDone": "Turf.js functions calculate exact distances in meters for polygon boundary perimeters with unit tests passing.",
       "nextTaskAfterCompletion": "SPATIAL-02",
-      "blockers": ["GATE-01 not passed"]
+      "blockers": []
     },
     {
       "id": "SPATIAL-02",
