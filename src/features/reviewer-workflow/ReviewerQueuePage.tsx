@@ -13,7 +13,7 @@ import { ledgerStore } from '../../shared/lib/ledgerStore';
 import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
 import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
-import { Badge, Button, Card, NoticeBanner } from '../../shared/components';
+import { Badge, Button, Card, NoticeBanner, EmptyState } from '../../shared/components';
 import { ReviewerActionCard } from './ReviewerActionCard';
 import { CaseStatus, SpatialClassification, ObservationType } from '../../shared/types';
 
@@ -281,8 +281,23 @@ export const ReviewerQueuePage: React.FC = () => {
             <tbody className="divide-y divide-slate-800/80">
               {filteredQueue.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500">
-                    No cases match the selected filter criteria.
+                  <td colSpan={5} className="p-8">
+                    <EmptyState
+                      title="No cases match search or filter criteria"
+                      description="Try adjusting your search terms or selecting 'All Review Statuses' to view all institutional triage records."
+                      action={
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            setSearchQuery('');
+                            setStatusFilter('ALL');
+                          }}
+                        >
+                          Clear Filters
+                        </Button>
+                      }
+                    />
                   </td>
                 </tr>
               ) : (

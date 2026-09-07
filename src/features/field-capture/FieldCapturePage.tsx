@@ -51,7 +51,15 @@ export const FieldCapturePage: React.FC = () => {
         setGpsLoading(false);
       },
       (err) => {
-        setGpsError(`Unable to retrieve GPS: ${err.message}. Ensure location permissions are granted.`);
+        let msg = `Unable to retrieve GPS: ${err.message}. Ensure location permissions are granted.`;
+        if (err.code === 1) {
+          msg = 'Location permission was declined. Please enable location access in browser settings to record hardware GPS telemetry.';
+        } else if (err.code === 2) {
+          msg = 'GPS signal unavailable. Please ensure your device is under open sky with satellite line-of-sight.';
+        } else if (err.code === 3) {
+          msg = 'GPS acquisition timed out. Re-positioning under open sky required before retrying.';
+        }
+        setGpsError(msg);
         setGpsLoading(false);
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }

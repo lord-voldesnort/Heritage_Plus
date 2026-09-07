@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Navbar } from './shared/components/Navbar';
-import { Footer } from './shared/components/Footer';
+import { Navbar, Footer, DemoQuickbar } from './shared/components';
 import { SiteContextPage } from './features/site-context/SiteContextPage';
 import { FieldCapturePage } from './features/field-capture/FieldCapturePage';
 import { SpatialResultPage } from './features/spatial-result/SpatialResultPage';
@@ -41,6 +40,7 @@ export const App: React.FC = () => {
             <Route path="*" element={<Navigate to="/site" replace />} />
           </Routes>
         </main>
+        <DemoQuickbar />
         <Footer />
       </div>
     </BrowserRouter>

@@ -3,7 +3,7 @@ import { ShieldAlert } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="border-t border-slate-900 bg-slate-950/90 py-6 px-4 mt-auto">
+    <footer className="border-t border-slate-900 bg-slate-950/90 py-6 px-4 mt-auto print:hidden">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
         <div className="flex items-start gap-2.5 max-w-2xl text-left">
           <ShieldAlert className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
