@@ -1,13 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Navbar } from './shared/components/Navbar';
-import { Footer } from './shared/components/Footer';
+import { Navbar, Footer, DemoQuickbar } from './shared/components';
 import { SiteContextPage } from './features/site-context/SiteContextPage';
 import { FieldCapturePage } from './features/field-capture/FieldCapturePage';
 import { SpatialResultPage } from './features/spatial-result/SpatialResultPage';
 import { ChangeLedgerPage } from './features/change-ledger/ChangeLedgerPage';
 import { CaseDetailPage } from './features/change-ledger/CaseDetailPage';
-import { ReviewerConsolePage } from './features/reviewer-workflow/ReviewerConsolePage';
+import { ReviewerConsolePage, ReviewerQueuePage } from './features/reviewer-workflow';
 import { ReviewerPacketPage } from './features/reviewer-packet/ReviewerPacketPage';
 import { TeamStatusPage } from './features/team-status/TeamStatusPage';
 import { PsFitPage } from './features/ps-fit/PsFitPage';
@@ -23,10 +22,14 @@ export const App: React.FC = () => {
             <Route path="/" element={<Navigate to="/site" replace />} />
             <Route path="/site" element={<SiteContextPage />} />
             <Route path="/capture" element={<FieldCapturePage />} />
+            <Route path="/result" element={<SpatialResultPage />} />
             <Route path="/result/:caseId" element={<SpatialResultPage />} />
             <Route path="/ledger" element={<ChangeLedgerPage />} />
             <Route path="/case/:caseId" element={<CaseDetailPage />} />
-            <Route path="/reviewer" element={<ReviewerConsolePage />} />
+            <Route path="/cases/:caseId" element={<CaseDetailPage />} />
+            <Route path="/reviewer" element={<ReviewerQueuePage />} />
+            <Route path="/reviewer/queue" element={<ReviewerQueuePage />} />
+            <Route path="/reviewer/console" element={<ReviewerConsolePage />} />
             <Route path="/reviewer/:caseId" element={<ReviewerConsolePage />} />
             <Route path="/packet/:caseId" element={<ReviewerPacketPage />} />
             <Route path="/team-status" element={<TeamStatusPage />} />
@@ -35,8 +38,10 @@ export const App: React.FC = () => {
             <Route path="*" element={<Navigate to="/site" replace />} />
           </Routes>
         </main>
+        <DemoQuickbar />
         <Footer />
       </div>
     </BrowserRouter>
   );
 };
+
