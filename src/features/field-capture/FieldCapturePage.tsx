@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { OBSERVATION_CATEGORIES } from '../../shared/constants/categories';
 import { DEMO_SCENARIOS } from '../../shared/mock-data/mockScenarios';
 import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
-import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
+import { resolveMultiTierSpatialResult } from '../../shared/lib/spatialEngine';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
 import { containsBannedLanguage } from '../../shared/constants/bannedLanguage';
 import { Card } from '../../shared/components/Card';
@@ -82,16 +82,13 @@ export const FieldCapturePage: React.FC = () => {
 
     setIsSubmitting(true);
 
-    // Calculate Spatial Result using our Turf.js spatial engine
-    const spatialResult = calculateSpatialResult(
-      {
-        latitude,
-        longitude,
-        gpsAccuracyMeters,
-        factualDescription,
-      },
-      SHIVNERI_GEOMETRY
-    );
+    // Calculate Multi-Tier Spatial Result using our Turf.js spatial engine across Protected, Prohibited, and Regulated layers
+    const spatialResult = resolveMultiTierSpatialResult({
+      latitude,
+      longitude,
+      gpsAccuracyMeters,
+      factualDescription,
+    });
 
     // Record in Change Ledger store
     const createdCase = ledgerStore.createCase(
@@ -109,12 +106,33 @@ export const FieldCapturePage: React.FC = () => {
       spatialResult
     );
 
+    // Durable Storage Sync for fallback persistence across refreshes
+    const payload = {
+      id: createdCase.caseId,
+      caseId: createdCase.caseId,
+      siteId: createdCase.siteId,
+      siteName: 'Shivneri Fort',
+      categoryId: category,
+      description: factualDescription,
+      coordinates: [longitude, latitude],
+      accuracyMeters: gpsAccuracyMeters,
+      spatialResult,
+      photoUrl: photoPreview || null,
+      timestamp: createdCase.observedTimestamp,
+      eventsTimeline: createdCase.eventsTimeline,
+      currentStatus: createdCase.currentStatus,
+    };
+    sessionStorage.setItem(`case_${createdCase.caseId}`, JSON.stringify(payload));
+    sessionStorage.setItem(`case_${createdCase.caseId.toLowerCase()}`, JSON.stringify(payload));
+    localStorage.setItem(`case_${createdCase.caseId}`, JSON.stringify(payload));
+
     // Navigate to Spatial Result & Timeline view
     setTimeout(() => {
       setIsSubmitting(false);
       navigate(`/result/${createdCase.caseId}`);
     }, 300);
   };
+
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

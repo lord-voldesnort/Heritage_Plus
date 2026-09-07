@@ -1,5 +1,10 @@
 import * as turf from '@turf/turf';
 import { GeometryRecord, SpatialResult } from '../types';
+import {
+  SHIVNERI_PROTECTED_GEOMETRY,
+  SHIVNERI_PROHIBITED_GEOMETRY,
+  SHIVNERI_REGULATED_GEOMETRY,
+} from '../mock-data/siteGeometry';
 
 export interface SpatialCalculationInput {
   latitude: number;
@@ -208,38 +213,21 @@ export function calculateSpatialResult(
  * 2. Prohibited Tier (100m Zone - Inside Prohibited, Outside Protected)
  * 3. Regulated Tier (300m Zone - Inside Regulated, Outside Prohibited)
  * 4. Outside All Tiers (No Spatial Concern Indicated)
- *
- * Multi-Tier Uncertainty Handling:
- * If a higher tier evaluates to LOCATION_UNCERTAIN (e.g. GPS error margin intersects Protected boundary)
- * but a lower tier evaluates to a confident POTENTIAL_ZONE_CONCERN (e.g. inside Prohibited 100m zone),
- * the lower-tier POTENTIAL_ZONE_CONCERN is retained as the primary classification, and a clear, non-accusatory
- * note is appended to the explanation indicating that the higher-tier relationship could not be reliably determined.
  */
 export function resolveMultiTierSpatialResult(
   input: SpatialCalculationInput,
-  layers: MultiTierGeometryRecord
+  layers?: Partial<MultiTierGeometryRecord>
 ): SpatialResult {
-  if (!layers || !layers.protected || !layers.prohibited || !layers.regulated) {
-    return {
-      classification: 'SOURCE_UNAVAILABLE',
-      distanceToBoundaryMeters: null,
-      gpsAccuracyMeters: Number.isFinite(input?.gpsAccuracyMeters) ? input.gpsAccuracyMeters : 0,
-      isUncertaintyOverlap: false,
-      geometryVersion: 'unknown',
-      explanation: 'One or more required multi-tier source geometry layers are missing.',
-      uncertaintyReason: 'Missing multi-tier geometry layers',
-      statements: {
-        userReported: input?.factualDescription || '',
-        gisCalculated: 'Spatial classification unavailable due to incomplete multi-tier layers.',
-        authorityNotice: 'Indicative decision support only. Authority verification required.',
-      },
-    };
-  }
+  const multiLayers: MultiTierGeometryRecord = {
+    protected: layers?.protected || SHIVNERI_PROTECTED_GEOMETRY,
+    prohibited: layers?.prohibited || SHIVNERI_PROHIBITED_GEOMETRY,
+    regulated: layers?.regulated || SHIVNERI_REGULATED_GEOMETRY,
+  };
 
   let higherTierUncertaintyNote: string | null = null;
 
   // 1. Evaluate against Protected Layer
-  const resProtected = calculateSpatialResult(input, layers.protected);
+  const resProtected = calculateSpatialResult(input, multiLayers.protected);
   if (
     resProtected.classification === 'POTENTIAL_ZONE_CONCERN' ||
     resProtected.classification === 'EVIDENCE_INSUFFICIENT' ||
@@ -248,11 +236,11 @@ export function resolveMultiTierSpatialResult(
     return resProtected;
   }
   if (resProtected.classification === 'LOCATION_UNCERTAIN') {
-    higherTierUncertaintyNote = `Note: The relationship to the more restrictive Protected Area layer (${layers.protected.versionLabel}) could not be reliably determined due to GPS accuracy.`;
+    higherTierUncertaintyNote = `Note: The relationship to the more restrictive Protected Area layer (${multiLayers.protected.versionLabel}) could not be reliably determined due to GPS accuracy.`;
   }
 
   // 2. Evaluate against Prohibited Layer (100m)
-  const resProhibited = calculateSpatialResult(input, layers.prohibited);
+  const resProhibited = calculateSpatialResult(input, multiLayers.prohibited);
   if (
     resProhibited.classification === 'POTENTIAL_ZONE_CONCERN' ||
     resProhibited.classification === 'EVIDENCE_INSUFFICIENT' ||
@@ -260,25 +248,25 @@ export function resolveMultiTierSpatialResult(
   ) {
     if (resProhibited.classification === 'POTENTIAL_ZONE_CONCERN') {
       const explanation =
-        `Potential zone-related concern – point is within the 100m Prohibited Zone layer (${layers.prohibited.versionLabel}). GPS accuracy is ±${input.gpsAccuracyMeters.toFixed(1)}m.` +
+        `Potential zone-related concern – point is within the 100m Prohibited Zone layer (${multiLayers.prohibited.versionLabel}). GPS accuracy is ±${input.gpsAccuracyMeters.toFixed(1)}m.` +
         (higherTierUncertaintyNote ? ` ${higherTierUncertaintyNote}` : '');
       return {
         ...resProhibited,
         explanation,
         statements: {
           ...resProhibited.statements,
-          gisCalculated: `Point is within the 100m Prohibited Boundary layer (${layers.prohibited.versionLabel}).${higherTierUncertaintyNote ? ' Higher-tier Protected Area boundary relationship is uncertain.' : ''}`,
+          gisCalculated: `Point is within the 100m Prohibited Boundary layer (${multiLayers.prohibited.versionLabel}).${higherTierUncertaintyNote ? ' Higher-tier Protected Area boundary relationship is uncertain.' : ''}`,
         },
       };
     }
     return resProhibited;
   }
   if (resProhibited.classification === 'LOCATION_UNCERTAIN' && !higherTierUncertaintyNote) {
-    higherTierUncertaintyNote = `Note: The relationship to the 100m Prohibited Zone layer (${layers.prohibited.versionLabel}) could not be reliably determined due to GPS accuracy.`;
+    higherTierUncertaintyNote = `Note: The relationship to the 100m Prohibited Zone layer (${multiLayers.prohibited.versionLabel}) could not be reliably determined due to GPS accuracy.`;
   }
 
   // 3. Evaluate against Regulated Layer (300m)
-  const resRegulated = calculateSpatialResult(input, layers.regulated);
+  const resRegulated = calculateSpatialResult(input, multiLayers.regulated);
   if (
     resRegulated.classification === 'POTENTIAL_ZONE_CONCERN' ||
     resRegulated.classification === 'EVIDENCE_INSUFFICIENT' ||
@@ -286,14 +274,14 @@ export function resolveMultiTierSpatialResult(
   ) {
     if (resRegulated.classification === 'POTENTIAL_ZONE_CONCERN') {
       const explanation =
-        `Potential zone-related concern – point is within the 300m Regulated Zone layer (${layers.regulated.versionLabel}). GPS accuracy is ±${input.gpsAccuracyMeters.toFixed(1)}m.` +
+        `Potential zone-related concern – point is within the 300m Regulated Zone layer (${multiLayers.regulated.versionLabel}). GPS accuracy is ±${input.gpsAccuracyMeters.toFixed(1)}m.` +
         (higherTierUncertaintyNote ? ` ${higherTierUncertaintyNote}` : '');
       return {
         ...resRegulated,
         explanation,
         statements: {
           ...resRegulated.statements,
-          gisCalculated: `Point is within the 300m Regulated Boundary layer (${layers.regulated.versionLabel}).${higherTierUncertaintyNote ? ' Higher-tier boundary relationship is uncertain.' : ''}`,
+          gisCalculated: `Point is within the 300m Regulated Boundary layer (${multiLayers.regulated.versionLabel}).${higherTierUncertaintyNote ? ' Higher-tier boundary relationship is uncertain.' : ''}`,
         },
       };
     }

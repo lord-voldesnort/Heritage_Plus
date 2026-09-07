@@ -117,6 +117,7 @@ export interface ObservationRecord {
   computedClassification: SpatialClassification;
   distanceToBoundaryMeters: number | null;
   spatialReasoningExplanation: string;
+  spatialResult?: SpatialResult;
   currentStatus: CaseStatus;
   evidenceList: EvidenceRecord[];
   eventsTimeline: ReviewEvent[];
