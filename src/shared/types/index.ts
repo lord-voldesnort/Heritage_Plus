@@ -78,11 +78,15 @@ export interface ReviewEvent {
     | 'LOCATION_CAPTURED' 
     | 'SPATIAL_CALCULATED' 
     | 'EVIDENCE_ATTACHED' 
-    | 'REVIEW_ACTION_RECORDED';
+    | 'REVIEW_ACTION_RECORDED'
+    | 'INFO_REQUESTED'
+    | 'STATUS_UPDATED'
+    | 'CASE_CLOSED';
   actorRole: string;
   summary: string;
   actionTaken?: CaseStatus;
   reviewerNotes?: string;
+  title?: string;
   resultingStatus: CaseStatus;
 }
 

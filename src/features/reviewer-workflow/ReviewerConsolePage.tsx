@@ -6,42 +6,19 @@ import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassific
 import { Card } from '../../shared/components/Card';
 import { Button } from '../../shared/components/Button';
 import { Badge } from '../../shared/components/Badge';
-import { CaseStatus, ObservationRecord } from '../../shared/types';
+import { ObservationRecord } from '../../shared/types';
 import { 
   UserCheck, 
   FileText, 
-  Check, 
-  X
+  Check
 } from 'lucide-react';
+import { ReviewerActionCard } from './ReviewerActionCard';
 
 export const ReviewerConsolePage: React.FC = () => {
   const [cases, setCases] = useState<ObservationRecord[]>(ledgerStore.getCases());
   const [selectedCase, setSelectedCase] = useState<ObservationRecord | null>(cases[0] || null);
   const [actionModalOpen, setActionModalOpen] = useState(false);
-  const [chosenAction, setChosenAction] = useState<CaseStatus>('ADDITIONAL_INFORMATION_NEEDED');
-  const [reviewerNotes, setReviewerNotes] = useState('');
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
-
-  const handleActionSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedCase) return;
-
-    const updated = ledgerStore.recordReviewAction(
-      selectedCase.caseId,
-      chosenAction,
-      reviewerNotes || 'Review action logged by curator.',
-      'Heritage Curator'
-    );
-
-    if (updated) {
-      setCases(ledgerStore.getCases());
-      setSelectedCase(updated);
-      setActionModalOpen(false);
-      setReviewerNotes('');
-      setActionSuccessMessage(`Action "${chosenAction}" successfully recorded into Change Ledger.`);
-      setTimeout(() => setActionSuccessMessage(null), 4000);
-    }
-  };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -217,70 +194,23 @@ export const ReviewerConsolePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Reviewer Action Modal */}
+      {/* Reviewer Action Drawer / Modal */}
       {actionModalOpen && selectedCase && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card variant="elevated" className="max-w-lg w-full space-y-4 border-amber-500/50">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <h3 className="font-bold text-base text-white font-['Outfit']">
-                Record Reviewer Action · {selectedCase.caseId}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setActionModalOpen(false)}
-                className="text-slate-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleActionSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300 uppercase font-mono">
-                  Select Reviewer Action
-                </label>
-                <select
-                  value={chosenAction}
-                  onChange={e => setChosenAction(e.target.value as CaseStatus)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
-                >
-                  <option value="ADDITIONAL_INFORMATION_NEEDED">Request Additional Information</option>
-                  <option value="FIELD_VERIFICATION_RECOMMENDED">Recommend Field Verification</option>
-                  <option value="REFERRED">Refer to Competent Authority</option>
-                  <option value="CLOSED_INSUFFICIENT_LOCATION_EVIDENCE">Close (Insufficient Location Evidence)</option>
-                  <option value="CLOSED_REVIEWED">Close (Reviewed - No Further Action)</option>
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300 uppercase font-mono">
-                  Reviewer Administrative Notes
-                </label>
-                <textarea
-                  value={reviewerNotes}
-                  onChange={e => setReviewerNotes(e.target.value)}
-                  rows={3}
-                  placeholder="Enter objective assessment notes, next steps, or specific evidence needed..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 font-sans"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="md"
-                  onClick={() => setActionModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" variant="primary" size="md">
-                  Append to Change Ledger
-                </Button>
-              </div>
-            </form>
-          </Card>
-        </div>
+        <ReviewerActionCard
+          caseId={selectedCase.caseId}
+          currentStatus={selectedCase.currentStatus}
+          isDrawer={true}
+          onClose={() => setActionModalOpen(false)}
+          onActionComplete={(payload) => {
+            const updated = ledgerStore.getCaseById(selectedCase.caseId);
+            if (updated) {
+              setCases(ledgerStore.getCases());
+              setSelectedCase(updated);
+            }
+            setActionSuccessMessage(`Decision "${payload.actionTitle}" recorded to Change Ledger.`);
+            setTimeout(() => setActionSuccessMessage(null), 4000);
+          }}
+        />
       )}
     </div>
   );

@@ -61,6 +61,7 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
                 <span className="text-xs text-slate-500">Visual context only</span>
             </div>
 
+            {/* Safety & Privacy Notice */}
             <div className="flex items-start p-3 bg-amber-50/80 border border-amber-200/80 rounded-lg text-amber-900 text-xs leading-relaxed">
                 <ShieldAlert className="w-4 h-4 text-amber-700 mr-2 mt-0.5 shrink-0" />
                 <span>
@@ -109,6 +110,7 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
                         className="w-full h-52 object-cover"
                     />
 
+                    {/* Remove Button */}
                     <button
                         type="button"
                         onClick={handleRemove}
@@ -118,6 +120,7 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
                         <X className="w-4 h-4" />
                     </button>
 
+                    {/* Metadata pill */}
                     <div className="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs flex items-center gap-2">
                         <ImageIcon className="w-3.5 h-3.5 text-slate-300" />
                         <span>{photo.sizeKb} KB</span>

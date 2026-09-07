@@ -148,6 +148,44 @@ class LedgerStore {
     this.cases = this.cases.map(c => (c.caseId === targetCase.caseId ? updatedCase : c));
     return updatedCase;
   }
+
+  public appendReviewerDecision(
+    caseId: string,
+    actionTitle: string,
+    resultingStatus: CaseStatus,
+    notes: string,
+    eventType: 'INFO_REQUESTED' | 'STATUS_UPDATED' | 'CASE_CLOSED' = 'STATUS_UPDATED',
+    reviewerRole: string = 'REVIEWER'
+  ): ObservationRecord | null {
+    const targetCase = this.cases.find(c => c.caseId.toLowerCase() === caseId.toLowerCase());
+    if (!targetCase) return null;
+
+    const now = new Date().toISOString();
+    const eventId = generateUUID();
+
+    const newEvent: ReviewEvent = {
+      eventId,
+      caseId: targetCase.caseId,
+      timestamp: now,
+      eventType,
+      actorRole: reviewerRole,
+      title: actionTitle,
+      summary: `${actionTitle}: ${notes}`,
+      actionTaken: resultingStatus,
+      reviewerNotes: notes,
+      resultingStatus,
+    };
+
+    // Append-only: create new case object with appended eventsTimeline
+    const updatedCase: ObservationRecord = {
+      ...targetCase,
+      currentStatus: resultingStatus,
+      eventsTimeline: [...targetCase.eventsTimeline, newEvent],
+    };
+
+    this.cases = this.cases.map(c => (c.caseId === targetCase.caseId ? updatedCase : c));
+    return updatedCase;
+  }
 }
 
 export const ledgerStore = new LedgerStore();
