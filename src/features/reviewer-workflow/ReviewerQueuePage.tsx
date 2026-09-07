@@ -10,6 +10,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
+import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
 import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
 import { Badge, Button, Card, NoticeBanner, EmptyState } from '../../shared/components';
@@ -27,7 +29,7 @@ export interface QueueItem {
   computedClassification: SpatialClassification;
   currentStatus: CaseStatus;
   hasPhoto: boolean;
-  source: 'ledgerStore';
+  source: 'sessionStorage' | 'ledgerStore';
 }
 
 // Category display mapping using approved neutral non-accusatory terminology
@@ -70,24 +72,83 @@ export const ReviewerQueuePage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [actionSuccessToast, setActionSuccessToast] = useState<string | null>(null);
 
-  // Load cases directly from ledgerStore (canonical single source of truth)
+  // Load and merge cases from sessionStorage & ledgerStore
   const queueItems = useMemo(() => {
+    // 1. Load from ledgerStore
     const storeCases = ledgerStore.getCases();
-    return storeCases
-      .map((c) => ({
+    const itemsMap = new Map<string, QueueItem>();
+
+    storeCases.forEach((c) => {
+      itemsMap.set(c.caseId.toLowerCase(), {
         caseId: c.caseId,
         timestamp: c.observedTimestamp || new Date().toISOString(),
         category: c.category,
         categoryLabel: APPROVED_CATEGORY_LABELS[c.category] || c.category.replace(/_/g, ' '),
         description: c.factualDescription,
-        coordinates: [c.longitude, c.latitude] as [number, number],
+        coordinates: [c.longitude, c.latitude],
         accuracyMeters: c.gpsAccuracyMeters,
         computedClassification: c.spatialResult.classification,
         currentStatus: c.currentStatus,
         hasPhoto: (c.evidenceList && c.evidenceList.length > 0) || false,
-        source: 'ledgerStore' as const,
-      }))
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        source: 'ledgerStore',
+      });
+    });
+
+    // 2. Scan sessionStorage for dynamic user submissions (keys: case_*)
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && (key.startsWith('case_') || key.startsWith('case-'))) {
+        try {
+          const raw = sessionStorage.getItem(key);
+          if (!raw) continue;
+          const parsed = JSON.parse(raw);
+          if (!parsed.id) continue;
+
+          const [lng, lat] = parsed.coordinates || [73.8624, 19.1982];
+          const accuracy = parsed.accuracyMeters || 10;
+          const description = parsed.description || '';
+
+          // Deterministic spatial calculation
+          const spatial = calculateSpatialResult(
+            {
+              latitude: lat,
+              longitude: lng,
+              gpsAccuracyMeters: accuracy,
+              factualDescription: description,
+            },
+            SHIVNERI_GEOMETRY
+          );
+
+          const existingKey = parsed.id.toLowerCase();
+          const existingItem = itemsMap.get(existingKey);
+
+          itemsMap.set(existingKey, {
+            caseId: parsed.id,
+            timestamp: parsed.timestamp || new Date().toISOString(),
+            category: (parsed.categoryId as ObservationType) || 'OTHER_VISIBLE_CHANGE',
+            categoryLabel:
+              APPROVED_CATEGORY_LABELS[parsed.categoryId] ||
+              (parsed.categoryId ? parsed.categoryId.replace(/_/g, ' ') : 'Observed Change'),
+            description: description,
+            coordinates: [lng, lat],
+            accuracyMeters: accuracy,
+            computedClassification: spatial.classification,
+            currentStatus: (parsed.currentStatus as CaseStatus) || existingItem?.currentStatus || 'SUBMITTED_FOR_REVIEW',
+            hasPhoto: Boolean(parsed.photoUrl || parsed.photoMetadata),
+            source: 'sessionStorage',
+          });
+        } catch (err) {
+          console.error('Error parsing session queue item:', err);
+        }
+      }
+    }
+
+    // Convert map values to array and sort by timestamp descending (newest first)
+    const list = Array.from(itemsMap.values());
+    list.sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    return list;
   }, [refreshTrigger]);
 
   // Filter items by search query and status filter

@@ -12,6 +12,7 @@ import {
   MapPin
 } from 'lucide-react';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
 import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
@@ -29,47 +30,109 @@ import {
 } from '../../shared/components';
 import { TimelineEventItem } from '../../shared/components/LedgerTimeline';
 import { SiteContextData } from '../../shared/components/SiteContextCard';
+import { ObservationType } from '../../shared/types';
+
+interface SessionCasePayload {
+  id: string;
+  siteId: string;
+  siteName: string;
+  categoryId: string;
+  description: string;
+  coordinates: [number, number]; // [lng, lat]
+  accuracyMeters: number;
+  photoMetadata?: {
+    fileName: string;
+    sizeKb: number;
+    capturedDate: string;
+  } | null;
+  photoUrl?: string | null;
+  timestamp: string;
+}
 
 export const CaseDetailPage: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
 
-  // 1. Data Retrieval: Exclusively check ledgerStore (single source of truth)
+  // 1. Data Retrieval: Check ledgerStore first, then session storage fallback
   const resolvedCase = useMemo(() => {
     if (!caseId) return null;
 
+    // Check ledger store
     const storeRecord = ledgerStore.getCaseById(caseId);
-    if (!storeRecord) return null;
+    if (storeRecord) {
+      const isOverlap =
+        storeRecord.spatialResult.classification === 'LOCATION_UNCERTAIN' ||
+        (storeRecord.spatialResult.distanceToBoundaryMeters !== null &&
+          storeRecord.spatialResult.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
 
-    const isOverlap =
-      storeRecord.spatialResult.classification === 'LOCATION_UNCERTAIN' ||
-      (storeRecord.spatialResult.distanceToBoundaryMeters !== null &&
-        storeRecord.spatialResult.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
+      return {
+        source: 'ledgerStore' as const,
+        id: storeRecord.caseId,
+        siteName: SHIVNERI_SITE.name,
+        category: storeRecord.category,
+        description: storeRecord.factualDescription,
+        latitude: storeRecord.latitude,
+        longitude: storeRecord.longitude,
+        accuracyMeters: storeRecord.gpsAccuracyMeters,
+        distanceToBoundaryMeters: storeRecord.spatialResult.distanceToBoundaryMeters,
+        computedClassification: storeRecord.spatialResult.classification,
+        isUncertaintyOverlap: isOverlap,
+        explanation: storeRecord.spatialResult.explanation,
+        timestamp: storeRecord.observedTimestamp,
+        photoUrl: storeRecord.evidenceList?.[0]?.fileUrl || null,
+        photoMetadata: storeRecord.evidenceList?.[0]
+          ? {
+              fileName: 'evidence-capture.jpg',
+              sizeKb: Math.round(storeRecord.evidenceList[0].fileSizeBytes / 1024),
+              capturedDate: storeRecord.evidenceList[0].uploadTimestamp.split('T')[0],
+            }
+          : null,
+      };
+    }
 
-    return {
-      source: 'ledgerStore' as const,
-      id: storeRecord.caseId,
-      siteName: SHIVNERI_SITE.name,
-      category: storeRecord.category,
-      description: storeRecord.factualDescription,
-      latitude: storeRecord.latitude,
-      longitude: storeRecord.longitude,
-      accuracyMeters: storeRecord.gpsAccuracyMeters,
-      distanceToBoundaryMeters: storeRecord.spatialResult.distanceToBoundaryMeters,
-      computedClassification: storeRecord.spatialResult.classification,
-      isUncertaintyOverlap: isOverlap,
-      explanation: storeRecord.spatialResult.explanation,
-      timestamp: storeRecord.observedTimestamp,
-      photoUrl: storeRecord.evidenceList?.[0]?.fileUrl || null,
-      photoMetadata: storeRecord.evidenceList?.[0]
-        ? {
-            fileName: 'evidence-capture.jpg',
-            sizeKb: Math.round(storeRecord.evidenceList[0].fileSizeBytes / 1024),
-            capturedDate: storeRecord.evidenceList[0].uploadTimestamp.split('T')[0],
-          }
-        : null,
-      eventsTimeline: storeRecord.eventsTimeline,
-      currentStatus: storeRecord.currentStatus,
-    };
+    // Check session storage fallback
+    const rawSession =
+      sessionStorage.getItem(`case_${caseId}`) ||
+      sessionStorage.getItem(caseId);
+
+    if (rawSession) {
+      try {
+        const parsed: SessionCasePayload = JSON.parse(rawSession);
+        const [lng, lat] = parsed.coordinates;
+
+        // Perform deterministic spatial calculation against sourced boundary
+        const spatial = calculateSpatialResult(
+          {
+            latitude: lat,
+            longitude: lng,
+            gpsAccuracyMeters: parsed.accuracyMeters,
+            factualDescription: parsed.description,
+          },
+          SHIVNERI_GEOMETRY
+        );
+
+        return {
+          source: 'sessionStorage' as const,
+          id: parsed.id,
+          siteName: parsed.siteName || SHIVNERI_SITE.name,
+          category: parsed.categoryId as ObservationType,
+          description: parsed.description,
+          latitude: lat,
+          longitude: lng,
+          accuracyMeters: parsed.accuracyMeters,
+          distanceToBoundaryMeters: spatial.distanceToBoundaryMeters,
+          computedClassification: spatial.classification,
+          isUncertaintyOverlap: spatial.isUncertaintyOverlap,
+          explanation: spatial.explanation,
+          timestamp: parsed.timestamp,
+          photoUrl: parsed.photoUrl || null,
+          photoMetadata: parsed.photoMetadata || null,
+        };
+      } catch (err) {
+        console.error('Error parsing session storage case:', err);
+      }
+    }
+
+    return null;
   }, [caseId]);
 
   // If case is not found, render EmptyState component
@@ -78,7 +141,7 @@ export const CaseDetailPage: React.FC = () => {
       <div className="max-w-xl mx-auto py-12 px-4">
         <EmptyState
           title="Case record not found"
-          description={`No observation record matching ID "${caseId || ''}" could be retrieved from the Change Ledger.`}
+          description={`No observation record matching ID "${caseId || ''}" could be retrieved from active session storage or the Change Ledger.`}
           action={
             <div className="flex items-center gap-3">
               <Link to="/capture">
