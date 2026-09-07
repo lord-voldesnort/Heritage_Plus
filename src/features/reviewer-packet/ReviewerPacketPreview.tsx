@@ -249,19 +249,19 @@ export const ReviewerPacketPreview: React.FC = () => {
     });
   }
 
-  // Section 5: Latest Reviewer Decision & Administrative Rationale
+  // Administrative Addendum: Latest Reviewer Decision & Administrative Rationale
   const latestReviewEvent = resolvedCase.rawEvents?.find(
     (e) => e.reviewerNotes || e.actorRole === 'REVIEWER' || e.actorRole === 'Heritage Curator'
   );
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 px-4 py-6 font-sans">
+    <div className="max-w-4xl mx-auto space-y-6 px-4 py-6 font-sans print:p-0 print:m-0 print:space-y-4 print:max-w-none">
       {/* 3. Export Controls Bar (print:hidden) */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800 print:hidden">
         <div className="flex items-center gap-2">
           <Link
             to="/reviewer"
-            className="text-xs text-slate-400 hover:text-amber-400 flex items-center gap-1.5 transition-colors"
+            className="text-xs text-slate-400 hover:text-amber-400 flex items-center gap-1.5 transition-colors min-h-[44px] py-2 px-1"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Reviewer Queue
@@ -274,7 +274,7 @@ export const ReviewerPacketPreview: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <Link to={`/cases/${resolvedCase.id}`}>
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button variant="outline" size="sm" className="gap-1.5 min-h-[44px]">
               <FileText className="w-3.5 h-3.5" />
               Interactive View
             </Button>
@@ -284,7 +284,7 @@ export const ReviewerPacketPreview: React.FC = () => {
             onClick={handlePrint}
             variant="primary"
             size="sm"
-            className="gap-1.5 shadow-sm"
+            className="gap-1.5 shadow-sm min-h-[44px]"
           >
             <Printer className="w-3.5 h-3.5" />
             Print / Save PDF
@@ -298,7 +298,7 @@ export const ReviewerPacketPreview: React.FC = () => {
       </NoticeBanner>
 
       {/* 2. Standalone, Print-Ready Document Container */}
-      <div className="max-w-4xl mx-auto bg-white p-8 sm:p-10 border border-slate-200 rounded-xl shadow-xs text-slate-900 leading-relaxed print:border-none print:shadow-none print:p-0 print:m-0 print:bg-transparent print:text-black">
+      <div className="max-w-4xl mx-auto bg-white p-8 sm:p-10 border border-slate-200 rounded-xl shadow-xs text-slate-900 leading-relaxed print:border-none print:shadow-none print:p-0 print:m-0 print:bg-transparent print:text-black print:max-w-none">
         {/* Printable Formal Document Header */}
         <div className="border-b-2 border-slate-900 pb-5 mb-6 flex items-start justify-between gap-4">
           <div>
@@ -323,14 +323,9 @@ export const ReviewerPacketPreview: React.FC = () => {
           </div>
         </div>
 
-        {/* Printable Mandatory Legal Disclaimer */}
-        <div className="mb-6 p-3 rounded border border-slate-300 bg-slate-50 text-[11px] text-slate-700 leading-relaxed">
-          <strong>Mandatory Notice:</strong> {CANONICAL_LEGAL_DISCLAIMER}
-        </div>
-
         <div className="space-y-6">
           {/* SECTION 1: Site Context & Provenance */}
-          <section className="space-y-3">
+          <section className="space-y-3 print-avoid-break evidence-packet-section">
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 border-b border-slate-300 pb-1 flex items-center justify-between">
               <span>Section 1: Site Context & Provenance</span>
               <span className="font-normal text-[10px] text-slate-500 font-sans">
@@ -393,7 +388,7 @@ export const ReviewerPacketPreview: React.FC = () => {
           </section>
 
           {/* SECTION 2: Factual Observation */}
-          <section className="space-y-3">
+          <section className="space-y-3 print-avoid-break evidence-packet-section">
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 border-b border-slate-300 pb-1 flex items-center justify-between">
               <span>Section 2: Factual Observation Record</span>
               <span className="font-normal text-[10px] text-slate-500 font-sans">
@@ -471,7 +466,7 @@ export const ReviewerPacketPreview: React.FC = () => {
           </section>
 
           {/* SECTION 3: Spatial Engine Finding */}
-          <section className="space-y-3">
+          <section className="space-y-3 print-avoid-break evidence-packet-section">
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 border-b border-slate-300 pb-1 flex items-center justify-between">
               <span>Section 3: Spatial Engine Finding & Trust Analysis</span>
               <span className="font-normal text-[10px] text-slate-500 font-sans">
@@ -529,7 +524,7 @@ export const ReviewerPacketPreview: React.FC = () => {
           </section>
 
           {/* SECTION 4: Change Ledger Timeline */}
-          <section className="space-y-3">
+          <section className="space-y-3 print-avoid-break evidence-packet-section">
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 border-b border-slate-300 pb-1 flex items-center justify-between">
               <span>Section 4: Change Ledger Append-Only Audit History</span>
               <span className="font-normal text-[10px] text-slate-500 font-sans">
@@ -542,10 +537,25 @@ export const ReviewerPacketPreview: React.FC = () => {
             </div>
           </section>
 
-          {/* SECTION 5: Reviewer Decision & Administrative Rationale */}
-          <section className="space-y-3">
+          {/* SECTION 5: Mandatory Advisory Disclaimer */}
+          <section className="space-y-3 print-avoid-break evidence-packet-section">
             <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 border-b border-slate-300 pb-1 flex items-center justify-between">
-              <span>Section 5: Reviewer Decision & Administrative Rationale</span>
+              <span>Section 5: Mandatory Advisory Disclaimer</span>
+              <span className="font-normal text-[10px] text-slate-500 font-sans">
+                Statutory Limitation Notice
+              </span>
+            </h2>
+
+            <div className="p-4 rounded-lg border-2 border-slate-400 bg-slate-50 text-xs text-slate-800 leading-relaxed font-sans">
+              <strong className="block mb-1 text-slate-900 uppercase tracking-wide text-[10px] font-mono">Mandatory Notice — Statutory Limitation:</strong>
+              {CANONICAL_LEGAL_DISCLAIMER}
+            </div>
+          </section>
+
+          {/* Administrative Addendum: Curator Triage Decision & Administrative Rationale */}
+          <section className="space-y-3 print-avoid-break evidence-packet-section">
+            <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-800 border-b border-slate-300 pb-1 flex items-center justify-between">
+              <span>Administrative Addendum: Curator Triage Decision & Administrative Rationale</span>
               <span className="font-normal text-[10px] text-slate-500 font-sans">
                 Curator Triage Record
               </span>

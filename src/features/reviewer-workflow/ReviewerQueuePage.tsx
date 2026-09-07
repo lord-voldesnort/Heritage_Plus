@@ -203,7 +203,7 @@ export const ReviewerQueuePage: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={handleRefresh}
-            className="gap-1.5"
+            className="gap-1.5 min-h-[44px]"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Refresh Queue
@@ -229,7 +229,7 @@ export const ReviewerQueuePage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActionSuccessToast(null)}
-            className="text-slate-400 hover:text-white text-xs font-bold px-2"
+            className="text-slate-400 hover:text-white text-xs font-bold px-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
           >
             Dismiss
           </button>
@@ -245,7 +245,7 @@ export const ReviewerQueuePage: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by Case ID, category, or description..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 font-sans"
+            className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2.5 min-h-[44px] text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 font-sans"
           />
         </div>
 
@@ -254,7 +254,7 @@ export const ReviewerQueuePage: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 min-h-[44px] text-xs text-slate-200 focus:outline-none focus:border-amber-500"
           >
             <option value="ALL">All Review Statuses</option>
             <option value="SUBMITTED">SUBMITTED</option>
@@ -285,19 +285,40 @@ export const ReviewerQueuePage: React.FC = () => {
                 <tr>
                   <td colSpan={5} className="p-8">
                     <EmptyState
-                      title="No cases match search or filter criteria"
-                      description="Try adjusting your search terms or selecting 'All Review Statuses' to view all institutional triage records."
+                      title={
+                        queueItems.length === 0
+                          ? 'Review queue is currently empty'
+                          : 'No cases match search or filter criteria'
+                      }
+                      description={
+                        queueItems.length === 0
+                          ? 'No field observations have been submitted yet. Cases submitted through Field Capture or Demo scenarios will appear here.'
+                          : "Try adjusting your search terms or selecting 'All Review Statuses' to view all institutional triage records."
+                      }
                       action={
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => {
-                            setSearchQuery('');
-                            setStatusFilter('ALL');
-                          }}
-                        >
-                          Clear Filters
-                        </Button>
+                        queueItems.length === 0 ? (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={handleRefresh}
+                            className="gap-1.5 min-h-[44px]"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            Refresh Queue
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => {
+                              setSearchQuery('');
+                              setStatusFilter('ALL');
+                            }}
+                            className="min-h-[44px]"
+                          >
+                            Clear Filters
+                          </Button>
+                        )
                       }
                     />
                   </td>
@@ -365,7 +386,7 @@ export const ReviewerQueuePage: React.FC = () => {
                               e.stopPropagation();
                               setSelectedCaseId(item.caseId);
                             }}
-                            className="gap-1 text-xs"
+                            className="gap-1.5 text-xs min-h-[44px]"
                           >
                             <UserCheck className="w-3.5 h-3.5" />
                             Inspect & Review
@@ -373,10 +394,11 @@ export const ReviewerQueuePage: React.FC = () => {
                           <Link
                             to={`/cases/${item.caseId}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                             title="View Full Detail Page"
+                            aria-label={`View details for case ${item.caseId}`}
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-4 h-4" />
                           </Link>
                         </div>
                       </td>
@@ -391,8 +413,44 @@ export const ReviewerQueuePage: React.FC = () => {
         {/* Mobile View Cards (below md, min 390px support) */}
         <div className="md:hidden divide-y divide-slate-800/80">
           {filteredQueue.length === 0 ? (
-            <div className="p-6 text-center text-slate-500 text-xs">
-              No cases match the selected filter.
+            <div className="p-6">
+              <EmptyState
+                title={
+                  queueItems.length === 0
+                    ? 'Review queue is currently empty'
+                    : 'No cases match search or filter criteria'
+                }
+                description={
+                  queueItems.length === 0
+                    ? 'No field observations have been submitted yet. Cases submitted through Field Capture or Demo scenarios will appear here.'
+                    : "Try adjusting your search terms or selecting 'All Review Statuses' to view all institutional triage records."
+                }
+                action={
+                  queueItems.length === 0 ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleRefresh}
+                      className="gap-1.5 min-h-[44px]"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Refresh Queue
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setStatusFilter('ALL');
+                      }}
+                      className="min-h-[44px]"
+                    >
+                      Clear Filters
+                    </Button>
+                  )
+                }
+              />
             </div>
           ) : (
             filteredQueue.map((item) => {
@@ -443,7 +501,7 @@ export const ReviewerQueuePage: React.FC = () => {
                   <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-900">
                     <Link
                       to={`/cases/${item.caseId}`}
-                      className="px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1"
+                      className="px-3 min-h-[44px] rounded-lg border border-slate-800 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1.5"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       Detail View
@@ -452,7 +510,7 @@ export const ReviewerQueuePage: React.FC = () => {
                       size="sm"
                       variant="primary"
                       onClick={() => setSelectedCaseId(item.caseId)}
-                      className="gap-1 text-xs"
+                      className="gap-1 text-xs min-h-[44px]"
                     >
                       <UserCheck className="w-3.5 h-3.5" />
                       Review & Decision

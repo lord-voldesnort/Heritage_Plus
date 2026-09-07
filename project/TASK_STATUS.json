@@ -237,13 +237,14 @@
       "title": "Reviewer Assessment Console & Action Modal",
       "owner": "vivek",
       "supporters": ["person4", "ameya"],
-      "status": "READY",
+      "status": "DONE",
       "priority": "MEDIUM",
       "description": "Build reviewer queue filtering by status and modal allowing reviewers to record action notes and state changes.",
       "dependencies": ["UI-03"],
       "filesLikelyToChange": ["src/features/reviewer-workflow/ReviewerConsolePage.tsx", "src/features/reviewer-workflow/ReviewActionModal.tsx"],
       "definitionOfDone": "Reviewers can filter cases, enter action rationales, and update case status in the Change Ledger.",
       "nextTaskAfterCompletion": "PACKET-01",
+      "completedAt": "2026-09-07T16:20:00Z",
       "blockers": []
     },
     {
@@ -251,13 +252,14 @@
       "title": "Exportable Reviewer Evidence Packet Generator",
       "owner": "vivek",
       "supporters": ["vishwajeet", "person4"],
-      "status": "READY",
+      "status": "DONE",
       "priority": "MEDIUM",
       "description": "Build printable HTML/PDF reviewer dossier featuring map snapshot, photo evidence, SHA-256 seal, and audit timeline.",
       "dependencies": ["REVIEW-01"],
       "filesLikelyToChange": ["src/features/reviewer-packet/ReviewerPacketPage.tsx"],
       "definitionOfDone": "Standardized, print-ready evidence dossier renders cleanly in browser print dialog.",
       "nextTaskAfterCompletion": "INTEGRATION-01",
+      "completedAt": "2026-09-07T16:20:00Z",
       "blockers": []
     },
     {

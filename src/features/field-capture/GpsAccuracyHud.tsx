@@ -56,10 +56,11 @@ export const GpsAccuracyHud: React.FC<GpsAccuracyHudProps> = ({
           <button
             type="button"
             onClick={onRefresh}
-            className="p-1 rounded hover:bg-slate-900/60 text-slate-400 hover:text-white transition-all text-xs flex items-center gap-1"
+            className="px-3 py-2 min-h-[44px] min-w-[44px] rounded-lg hover:bg-slate-900/60 text-slate-400 hover:text-white transition-all text-xs flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+            aria-label="Re-acquire GPS telemetry"
           >
-            <RefreshCw className="w-3 h-3" />
-            <span className="text-[10px]">Re-acquire</span>
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span className="text-xs">Re-acquire</span>
           </button>
         )}
       </div>

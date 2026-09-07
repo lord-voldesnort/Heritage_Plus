@@ -115,9 +115,9 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
                         type="button"
                         onClick={handleRemove}
                         aria-label="Remove photo"
-                        className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 text-white rounded-full transition-colors"
+                        className="absolute top-2 right-2 min-w-[44px] min-h-[44px] p-2.5 flex items-center justify-center bg-black/70 hover:bg-black/90 text-white rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                     >
-                        <X className="w-4 h-4" />
+                        <X className="w-5 h-5" />
                     </button>
 
                     {/* Metadata pill */}

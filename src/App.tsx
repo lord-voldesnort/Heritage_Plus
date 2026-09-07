@@ -63,7 +63,7 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-500 selection:text-slate-950">
         <Navbar />
-        <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 print:p-0 print:m-0 print:max-w-none">
           <Routes>
             <Route path="/" element={<Navigate to="/site" replace />} />
             <Route path="/site" element={<SiteContextPage />} />
