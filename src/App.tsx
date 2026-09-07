@@ -7,7 +7,7 @@ import { FieldCapturePage } from './features/field-capture/FieldCapturePage';
 import { SpatialResultPage } from './features/spatial-result/SpatialResultPage';
 import { ChangeLedgerPage } from './features/change-ledger/ChangeLedgerPage';
 import { CaseDetailPage } from './features/spatial-result/CaseDetailPage';
-import { ReviewerConsolePage } from './features/reviewer-workflow/ReviewerConsolePage';
+import { ReviewerConsolePage, ReviewerQueuePage } from './features/reviewer-workflow';
 import { ReviewerPacketPage } from './features/reviewer-packet/ReviewerPacketPage';
 import { TeamStatusPage } from './features/team-status/TeamStatusPage';
 import { PsFitPage } from './features/ps-fit/PsFitPage';
@@ -27,7 +27,9 @@ export const App: React.FC = () => {
             <Route path="/ledger" element={<ChangeLedgerPage />} />
             <Route path="/case/:caseId" element={<CaseDetailPage />} />
             <Route path="/cases/:caseId" element={<CaseDetailPage />} />
-            <Route path="/reviewer" element={<ReviewerConsolePage />} />
+            <Route path="/reviewer" element={<ReviewerQueuePage />} />
+            <Route path="/reviewer/queue" element={<ReviewerQueuePage />} />
+            <Route path="/reviewer/console" element={<ReviewerConsolePage />} />
             <Route path="/reviewer/:caseId" element={<ReviewerConsolePage />} />
             <Route path="/packet/:caseId" element={<ReviewerPacketPage />} />
             <Route path="/team-status" element={<TeamStatusPage />} />
