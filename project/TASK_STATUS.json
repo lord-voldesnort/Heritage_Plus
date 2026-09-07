@@ -78,13 +78,14 @@
       "title": "Implement Point-in-Polygon & Distance-to-Boundary Engine",
       "owner": "vishwajeet",
       "supporters": ["person5"],
-      "status": "READY",
+      "status": "DONE",
       "priority": "HIGH",
       "description": "Implement Turf.js geodesic point-in-polygon and distance calculations without using circular center points.",
       "dependencies": ["GATE-01"],
       "filesLikelyToChange": ["src/shared/lib/spatialEngine.ts", "src/shared/lib/spatialEngine.test.ts"],
       "definitionOfDone": "Turf.js functions calculate exact distances in meters for polygon boundary perimeters with unit tests passing.",
       "nextTaskAfterCompletion": "SPATIAL-02",
+      "completedAt": "2026-09-07T12:00:00Z",
       "blockers": []
     },
     {
@@ -92,14 +93,14 @@
       "title": "Implement Accuracy-Circle Overlap & Uncertainty Evaluator",
       "owner": "vishwajeet",
       "supporters": ["person5"],
-      "status": "BLOCKED",
+      "status": "READY",
       "priority": "HIGH",
       "description": "Implement boundary uncertainty evaluation: if distanceToBoundary <= gpsAccuracyMeters, return LOCATION_UNCERTAIN.",
       "dependencies": ["SPATIAL-01"],
       "filesLikelyToChange": ["src/shared/lib/spatialEngine.ts"],
       "definitionOfDone": "Spatial evaluator downgrades classification to LOCATION_UNCERTAIN whenever GPS accuracy circle intersects boundary.",
       "nextTaskAfterCompletion": "SPATIAL-03",
-      "blockers": ["GATE-01 not passed"]
+      "blockers": []
     },
     {
       "id": "SPATIAL-03",
@@ -113,20 +114,21 @@
       "filesLikelyToChange": ["src/shared/lib/spatialEngine.test.ts"],
       "definitionOfDone": "All 4 scenarios produce 100% predictable, explainable outputs in automated test runner.",
       "nextTaskAfterCompletion": "INTEGRATION-01",
-      "blockers": ["GATE-01 not passed"]
+      "blockers": ["SPATIAL-02 not completed"]
     },
     {
       "id": "PRODUCT-01",
       "title": "Finalize Observation Categories & Neutral Prompt Guidelines",
       "owner": "ameya",
       "supporters": ["person6"],
-      "status": "READY",
+      "status": "DONE",
       "priority": "HIGH",
       "description": "Review and approve the 7 visible-change categories and neutral phrasing rules in /docs/PRODUCT_CONTRACT.md.",
       "dependencies": ["FOUNDATION-02"],
       "filesLikelyToChange": ["docs/PRODUCT_CONTRACT.md", "src/shared/constants/categories.ts"],
       "definitionOfDone": "Observation categories and prompt questions confirmed to contain zero accusatory or legal terminology.",
       "nextTaskAfterCompletion": "PRODUCT-02",
+      "completedAt": "2026-09-07T12:00:00Z",
       "blockers": []
     },
     {
@@ -162,13 +164,14 @@
       "title": "Mobile Field Capture Studio & GPS Accuracy HUD",
       "owner": "vivek",
       "supporters": ["person4"],
-      "status": "READY",
+      "status": "DONE",
       "priority": "HIGH",
       "description": "Build touch-optimized mobile capture screen with 7 category buttons, camera upload, neutral description input, and live accuracy HUD.",
       "dependencies": ["FOUNDATION-05"],
       "filesLikelyToChange": ["src/features/field-capture/FieldCapturePage.tsx", "src/features/field-capture/GpsAccuracyHud.tsx"],
       "definitionOfDone": "Field capture form operates cleanly on mobile viewports with simulated or hardware GPS accuracy meter.",
       "nextTaskAfterCompletion": "UI-03",
+      "completedAt": "2026-09-07T12:00:00Z",
       "blockers": []
     },
     {
@@ -176,27 +179,29 @@
       "title": "MapLibre Vector Map & Boundary Overlay Component",
       "owner": "vivek",
       "supporters": ["person4"],
-      "status": "BLOCKED",
+      "status": "DONE",
       "priority": "HIGH",
       "description": "Integrate MapLibre GL with open vector tile styling, site geometry polygon, observation point, and GPS uncertainty circle.",
       "dependencies": ["GATE-01", "FOUNDATION-05"],
       "filesLikelyToChange": ["src/shared/components/MapLibreView.tsx", "src/features/spatial-result/SpatialResultPage.tsx"],
       "definitionOfDone": "Map renders Shivneri boundary and accuracy circle without relying on proprietary paid tile keys.",
       "nextTaskAfterCompletion": "INTEGRATION-01",
-      "blockers": ["GATE-01 not passed"]
+      "completedAt": "2026-09-07T12:00:00Z",
+      "blockers": []
     },
     {
       "id": "UI-03",
       "title": "Case Detail & Change Ledger Timeline Component",
       "owner": "vivek",
       "supporters": ["person4"],
-      "status": "READY",
+      "status": "DONE",
       "priority": "MEDIUM",
       "description": "Build append-only timeline interface showing dated events, observation details, uncertainty pills, and review history.",
       "dependencies": ["FOUNDATION-05"],
       "filesLikelyToChange": ["src/features/change-ledger/ChangeLedgerPage.tsx", "src/features/change-ledger/CaseTimeline.tsx"],
       "definitionOfDone": "Timeline visually renders chronological events with distinct status tags and non-alarming UI palette.",
       "nextTaskAfterCompletion": "REVIEW-01",
+      "completedAt": "2026-09-07T12:00:00Z",
       "blockers": []
     },
     {
@@ -204,14 +209,14 @@
       "title": "Append-Only Event Dispatcher & Store",
       "owner": "vishwajeet",
       "supporters": ["person5"],
-      "status": "BLOCKED",
+      "status": "READY",
       "priority": "HIGH",
       "description": "Build event storage engine ensuring edits create new dated events rather than overwriting historical records.",
       "dependencies": ["GATE-01"],
       "filesLikelyToChange": ["src/shared/lib/ledgerStore.ts"],
       "definitionOfDone": "Store records observation, location capture, spatial classification, and review events immutably.",
       "nextTaskAfterCompletion": "PACKET-01",
-      "blockers": ["GATE-01 not passed"]
+      "blockers": []
     },
     {
       "id": "LEDGER-02",
@@ -267,7 +272,7 @@
       "filesLikelyToChange": ["src/tests/integration.test.ts"],
       "definitionOfDone": "All 12 steps of the user journey execute without runtime errors across all 4 benchmark test scenarios.",
       "nextTaskAfterCompletion": "INTEGRATION-02",
-      "blockers": ["SPATIAL-03 not completed", "UI-02 not completed", "PACKET-01 not completed"]
+      "blockers": ["SPATIAL-03 not completed", "PACKET-01 not completed"]
     },
     {
       "id": "INTEGRATION-02",

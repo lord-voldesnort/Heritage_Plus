@@ -10,7 +10,7 @@ export interface CategoryGuideline {
   privacyWarning: string;
 }
 
-export const APPROVED_PRIVACY_WARNING = "Do not photograph human faces or private property signage.";
+export const APPROVED_PRIVACY_WARNING = "Do not photograph identifiable human faces or private property signage.";
 
 export const OBSERVATION_GUIDELINES: CategoryGuideline[] = [
   {
@@ -27,10 +27,23 @@ export const OBSERVATION_GUIDELINES: CategoryGuideline[] = [
     privacyWarning: APPROVED_PRIVACY_WARNING,
   },
   {
+    id: 'POSSIBLE_ENCROACHMENT',
+    title: 'Possible encroachment',
+    label: 'Possible encroachment',
+    description: 'Activity or temporary structure appearing to occupy a sensitive protected zone.',
+    neutralPromptPlaceholder: 'Describe observed temporary structure, occupation, or zone activity factually without alleging legal violations.',
+    photoExamples: [
+      'Temporary shed or enclosure frame',
+      'Material storage in protected perimeter',
+      'Boundary line activity',
+    ],
+    privacyWarning: APPROVED_PRIVACY_WARNING,
+  },
+  {
     id: 'PHYSICAL_DAMAGE',
     title: 'Physical damage',
     label: 'Physical damage',
-    description: 'Stone fracture, displaced masonry, carving detachment, or wall collapse.',
+    description: 'Stone fracture, displaced masonry, carving detachment, wall collapse, or feature damage.',
     neutralPromptPlaceholder: 'Describe observed stone fracture, masonry displacement, or structural weathering factually.',
     photoExamples: [
       'Crack line in stone wall or masonry plinth',
@@ -53,11 +66,24 @@ export const OBSERVATION_GUIDELINES: CategoryGuideline[] = [
     privacyWarning: APPROVED_PRIVACY_WARNING,
   },
   {
-    id: 'POSSIBLE_ENCROACHMENT',
-    title: 'Possible alteration',
-    label: 'Possible alteration',
-    description: 'Surface painting, repair, signage, or object altering monument visibility.',
-    neutralPromptPlaceholder: 'Describe observed surface painting, plaster repair, or architectural modification factually.',
+    id: 'BLOCKED_ACCESS',
+    title: 'Blocked access',
+    label: 'Blocked access',
+    description: 'Pathway, entrance, gateway, public passage, or access route obstructed.',
+    neutralPromptPlaceholder: 'Describe observed pathway obstruction, gate restriction, or barrier factually.',
+    photoExamples: [
+      'Iron gate locked or pathway obstructed',
+      'Overgrown vegetation blocking entrance',
+      'Temporary barrier across public path',
+    ],
+    privacyWarning: APPROVED_PRIVACY_WARNING,
+  },
+  {
+    id: 'STRUCTURE_ALTERATION',
+    title: 'Structure alteration',
+    label: 'Structure alteration',
+    description: 'Surface painting, plaster repair, masonry modification, or architectural alteration of existing structure.',
+    neutralPromptPlaceholder: 'Describe observed surface painting, plaster repair, or structural alteration factually without assuming authorization status.',
     photoExamples: [
       'Fresh plaster patch or cement coating',
       'Surface paint or wash application',
@@ -66,15 +92,28 @@ export const OBSERVATION_GUIDELINES: CategoryGuideline[] = [
     privacyWarning: APPROVED_PRIVACY_WARNING,
   },
   {
-    id: 'ALTERATION_OR_OBSTRUCTION',
+    id: 'VISUAL_OBSTRUCTION',
     title: 'Visual obstruction',
     label: 'Visual obstruction',
-    description: 'Hoarding, commercial signage, or object obstructing monument visibility.',
+    description: 'Hoarding, commercial signage, or object altering monument visibility or setting.',
     neutralPromptPlaceholder: 'Describe observed hoarding, commercial signage, or object obstructing monument visibility factually.',
     photoExamples: [
       'Commercial advertising hoarding frame',
       'Boundary marker or sightline obstruction',
       'Temporary pole or visual barrier',
+    ],
+    privacyWarning: APPROVED_PRIVACY_WARNING,
+  },
+  {
+    id: 'OTHER_VISIBLE_CHANGE',
+    title: 'Other visible change',
+    label: 'Other visible change',
+    description: 'Any other physical, contextual, or environmental condition noted.',
+    neutralPromptPlaceholder: 'Describe observable physical or environmental changes factually.',
+    photoExamples: [
+      'Water pooling or dampness mark',
+      'Soil erosion near foundation',
+      'Unclassified physical condition',
     ],
     privacyWarning: APPROVED_PRIVACY_WARNING,
   },

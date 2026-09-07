@@ -38,13 +38,14 @@
 
 ## 4. In-Scope Observation Categories
 
-* `POSSIBLE_CONSTRUCTION`: New building foundation, wall, scaffolding, or structural extension.
-* `POSSIBLE_ENCROACHMENT`: Activity or structure appearing to occupy a sensitive protected zone.
-* `PHYSICAL_DAMAGE`: Masonry displacement, fracturing, collapse, or stone detachment.
-* `DUMPING_OR_WASTE`: Debris, garbage, or construction rubble near monument features.
-* `BLOCKED_ACCESS`: Pathway, gateway, or public passage obstruction.
-* `ALTERATION_OR_OBSTRUCTION`: Unauthorized painting, plastering, signage, or visual blockage.
-* `OTHER_VISIBLE_CHANGE`: Other unclassified physical or environmental changes.
+* `Possible construction or extension` (`POSSIBLE_CONSTRUCTION`): New structure, foundation, wall, scaffolding, or structural extension visible near the site.
+* `Possible encroachment` (`POSSIBLE_ENCROACHMENT`): Activity or temporary structure appearing to occupy a sensitive protected zone.
+* `Physical damage` (`PHYSICAL_DAMAGE`): Stone fracture, displaced masonry, structural weathering, wall collapse, or carving detachment.
+* `Dumping or waste` (`DUMPING_OR_WASTE`): Rubble, discarded building materials, or waste accumulation near monument feature or access route.
+* `Blocked access` (`BLOCKED_ACCESS`): Pathway, entrance, gateway, public passage, or access route obstructed.
+* `Structure alteration` (`STRUCTURE_ALTERATION`): Surface painting, plaster repair, masonry modification, or architectural alteration of existing structure.
+* `Visual obstruction` (`VISUAL_OBSTRUCTION`): Temporary structure, commercial signage, hoarding frame, or object altering monument sightlines or setting.
+* `Other visible change` (`OTHER_VISIBLE_CHANGE`): Unclassified physical, contextual, or environmental condition noted.
 
 ---
 
@@ -62,14 +63,20 @@
 
 ---
 
-## 6. Safe Language & Disclaimers
+## 6. Safe Language, Privacy Rules & Disclaimers
 
 The product strictly enforces non-accusatory, scientifically defensible language:
 * **Approved Phrases**: *"Potential zone-related concern"*, *"Possible construction activity"*, *"Location uncertain"*, *"Evidence incomplete"*, *"Authority verification required"*.
 * **Banned Phrases**: *"Illegal construction detected"*, *"Encroacher identified"*, *"Guilty"*, *"Demolition required"*, *"NOC absent"*, *"Violation confirmed"*.
 
-**Mandatory System Disclaimer**:
-> *"Indicative decision support only. Heritage Pulse does not determine illegality or verify permission status. Statutory authority verification is required."*
+**Field Capture Privacy Warning**:
+> *"Do not photograph identifiable human faces or private property signage."*
+
+**Allowed Case Status Progression**:
+> `DRAFT -> SUBMITTED -> ADDITIONAL_INFO_NEEDED | FIELD_VERIFICATION_RECOMMENDED | REFERRED | CLOSED`
+
+**Mandatory Advisory Disclaimer**:
+> *"Indicative decision support only. This system does not determine legal status or property boundaries. Authority verification is required."*
 
 ---
 

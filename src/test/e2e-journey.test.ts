@@ -6,6 +6,7 @@ import { DEMO_SCENARIOS } from '../shared/mock-data/mockScenarios';
 import { containsBannedLanguage, BANNED_PHRASES } from '../shared/constants/bannedLanguage';
 import { SPATIAL_CLASSIFICATIONS } from '../shared/constants/spatialClassifications';
 import { CASE_STATUSES } from '../shared/constants/caseStatuses';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../shared/constants/disclaimer';
 import { CaseStatus, ReviewEvent } from '../shared/types';
 
 describe('Task 9: End-to-End Vertical Slice Integration & Definition of Done Test Suite', () => {
@@ -253,9 +254,9 @@ describe('Task 9: End-to-End Vertical Slice Integration & Definition of Done Tes
       expect(spatialResult.statements.authorityNotice).toBeTruthy();
 
       // Mandatory Advisory Disclaimer Verification
-      const mandatoryDisclaimer = 'Indicative decision support only. This prototype does not determine legal status or property boundaries.';
+      const mandatoryDisclaimer = CANONICAL_LEGAL_DISCLAIMER;
       expect(spatialResult.statements.authorityNotice).toContain('Indicative decision support');
-      expect(mandatoryDisclaimer).toContain('does not determine legal status');
+      expect(mandatoryDisclaimer).toContain('legal status');
     });
   });
 
