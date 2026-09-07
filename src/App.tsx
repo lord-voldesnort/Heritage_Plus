@@ -8,7 +8,7 @@ import { SpatialResultPage } from './features/spatial-result/SpatialResultPage';
 import { ChangeLedgerPage } from './features/change-ledger/ChangeLedgerPage';
 import { CaseDetailPage } from './features/spatial-result/CaseDetailPage';
 import { ReviewerConsolePage, ReviewerQueuePage } from './features/reviewer-workflow';
-import { ReviewerPacketPage } from './features/reviewer-packet/ReviewerPacketPage';
+import { ReviewerPacketPreview } from './features/reviewer-packet';
 import { TeamStatusPage } from './features/team-status/TeamStatusPage';
 import { PsFitPage } from './features/ps-fit/PsFitPage';
 import { JudgeQaPage } from './features/judge-qa/JudgeQaPage';
@@ -31,7 +31,8 @@ export const App: React.FC = () => {
             <Route path="/reviewer/queue" element={<ReviewerQueuePage />} />
             <Route path="/reviewer/console" element={<ReviewerConsolePage />} />
             <Route path="/reviewer/:caseId" element={<ReviewerConsolePage />} />
-            <Route path="/packet/:caseId" element={<ReviewerPacketPage />} />
+            <Route path="/packet/:caseId" element={<ReviewerPacketPreview />} />
+            <Route path="/reviewer/packet/:caseId" element={<ReviewerPacketPreview />} />
             <Route path="/team-status" element={<TeamStatusPage />} />
             <Route path="/ps-fit" element={<PsFitPage />} />
             <Route path="/judge-qa" element={<JudgeQaPage />} />
