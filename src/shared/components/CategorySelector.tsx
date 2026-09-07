@@ -1,3 +1,8 @@
+export interface CategoryOption {
+    id: string;
+    label: string;
+    description: string;
+}
 import React from 'react';
 import { clsx } from 'clsx';
 import {
