@@ -177,33 +177,7 @@ export const FieldCapturePage: React.FC = () => {
         spatialResult
       );
 
-      // 3. Durable Storage Fallback Sync for cross-screen persistence
-      const payload = {
-        id: newCase.caseId,
-        caseId: newCase.caseId,
-        siteId: newCase.siteId,
-        siteName: 'Fort of Shivner',
-        categoryId,
-        description: description.trim(),
-        coordinates,
-        accuracyMeters,
-        spatialResult,
-        photoMetadata: photo ? {
-          fileName: photo.file.name,
-          sizeKb: photo.sizeKb,
-          capturedDate: photo.lastModifiedDate,
-        } : null,
-        photoUrl: photo ? photo.previewUrl : null,
-        timestamp: newCase.observedTimestamp,
-        eventsTimeline: newCase.eventsTimeline,
-        currentStatus: newCase.currentStatus,
-      };
-
-      sessionStorage.setItem(`case_${newCase.caseId}`, JSON.stringify(payload));
-      sessionStorage.setItem(`case_${newCase.caseId.toLowerCase()}`, JSON.stringify(payload));
-      localStorage.setItem(`case_${newCase.caseId}`, JSON.stringify(payload));
-
-      // 4. Navigate directly to result view with stable Case ID
+      // 3. Navigate directly to result view with stable Case ID
       navigate(`/result/${newCase.caseId}`);
     } catch (err: any) {
       console.error('Failed to register ledger case:', err);

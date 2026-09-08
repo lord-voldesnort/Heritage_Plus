@@ -111,8 +111,12 @@ export interface CanonicalReviewerPacketData {
   caseId: string;
   generatedTimestamp: string;
   siteName: string;
+  vernacularName?: string;
+  district?: string;
+  state?: string;
   monumentNumber: string;
   category: ObservationType;
+  categoryLabel?: string;
   factualDescription: string;
   coordinates: {
     latitude: number;
@@ -122,18 +126,30 @@ export interface CanonicalReviewerPacketData {
   spatialVerdict: {
     classification: SpatialClassification;
     distanceToBoundaryMeters: number | null;
+    gpsAccuracyMeters: number;
     isUncertaintyOverlap: boolean;
     geometryVersion: string;
     explanation: string;
+    uncertaintyReason?: string;
+    statements?: {
+      userReported: string;
+      gisCalculated: string;
+      authorityNotice: string;
+    };
   };
   provenance: {
     sourceAgency: string;
     sourceDocumentOrUrl: string;
+    bhuvanVersionStatement?: string;
+    crs?: string;
+    verbatimLimitationText?: string;
+    retrievalDate?: string;
     gateStatus: string;
   };
   evidenceList: EvidenceRecord[];
   eventsTimeline: ReviewEvent[];
   disclaimer: string;
+  currentStatus: CaseStatus;
 }
 
 /**
@@ -141,15 +157,25 @@ export interface CanonicalReviewerPacketData {
  */
 export function buildCanonicalReviewerPacketData(
   observation: ObservationRecord,
-  siteName: string = 'Fort of Shivner',
+  siteName: string = 'Fort of Shivner (Shivneri Fort)',
   monumentNumber: string = 'MUMMH015'
 ): CanonicalReviewerPacketData {
+  const isOverlap =
+    observation.spatialResult?.isUncertaintyOverlap ??
+    (observation.computedClassification === 'LOCATION_UNCERTAIN');
+
+  const categoryMeta = OBSERVATION_CATEGORIES.find((c) => c.id === observation.category);
+
   return {
     caseId: observation.caseId,
     generatedTimestamp: new Date().toISOString(),
     siteName,
+    vernacularName: 'शिवनेरी किल्ला (MUMMH015)',
+    district: 'Pune',
+    state: 'Maharashtra',
     monumentNumber,
     category: observation.category,
+    categoryLabel: categoryMeta?.label || observation.category.replace(/_/g, ' '),
     factualDescription: observation.factualDescription,
     coordinates: {
       latitude: observation.latitude,
@@ -159,17 +185,26 @@ export function buildCanonicalReviewerPacketData(
     spatialVerdict: {
       classification: observation.spatialResult?.classification || observation.computedClassification,
       distanceToBoundaryMeters: observation.spatialResult?.distanceToBoundaryMeters ?? observation.distanceToBoundaryMeters,
-      isUncertaintyOverlap: observation.spatialResult?.isUncertaintyOverlap ?? false,
-      geometryVersion: observation.spatialResult?.geometryVersion || 'unknown',
+      gpsAccuracyMeters: observation.spatialResult?.gpsAccuracyMeters ?? observation.gpsAccuracyMeters,
+      isUncertaintyOverlap: isOverlap,
+      geometryVersion: observation.spatialResult?.geometryVersion || 'v1.0-bhuvan-protected-7068',
       explanation: observation.spatialResult?.explanation || observation.spatialReasoningExplanation,
+      uncertaintyReason: observation.spatialResult?.uncertaintyReason,
+      statements: observation.spatialResult?.statements,
     },
     provenance: {
-      sourceAgency: 'Bhuvan / NRSC (ISRO)',
+      sourceAgency: 'Bhuvan / NRSC (ISRO) in association with Archaeological Survey of India (ASI)',
       sourceDocumentOrUrl: 'https://bhuvan-app1.nrsc.gov.in/culture_monuments/',
       gateStatus: 'PASSED_WITH_LIMITATIONS',
+      bhuvanVersionStatement: 'Version 1.0 source data; not independently legally verified',
+      crs: 'EPSG:4326',
+      verbatimLimitationText:
+        'Bhuvan explicitly states that these boundaries were mapped in association with ASI, require ASI verification for correctness/completeness, are for visualization/indicative purposes only, and cannot be used for any legal purpose. Bhuvan also separately states this is "version 1.0 data" and disclaims responsibility for inadvertent errors.',
+      retrievalDate: '2026-09-07',
     },
     evidenceList: observation.evidenceList || [],
     eventsTimeline: observation.eventsTimeline || [],
     disclaimer: CANONICAL_LEGAL_DISCLAIMER,
+    currentStatus: observation.currentStatus || 'SUBMITTED_FOR_REVIEW',
   };
 }

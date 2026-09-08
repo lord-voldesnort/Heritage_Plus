@@ -175,19 +175,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
         return;
       }
 
-      // 2. Sync updated case to durable browser storage fallback
-      const cachedStr = sessionStorage.getItem(`case_${caseId}`) || localStorage.getItem(`case_${caseId}`);
-      if (cachedStr) {
-        try {
-          const cached = JSON.parse(cachedStr);
-          cached.currentStatus = updatedCase.currentStatus;
-          cached.eventsTimeline = updatedCase.eventsTimeline;
-          sessionStorage.setItem(`case_${caseId}`, JSON.stringify(cached));
-          localStorage.setItem(`case_${caseId}`, JSON.stringify(cached));
-        } catch {
-          // ignore JSON sync error
-        }
-      }
+
 
       const payload: ReviewerActionPayload = {
         caseId,

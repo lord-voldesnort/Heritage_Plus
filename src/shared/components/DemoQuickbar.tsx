@@ -51,19 +51,7 @@ export const DemoQuickbar: React.FC = () => {
       spatial
     );
 
-    // Store in sessionStorage for cross-screen persistence
-    sessionStorage.setItem(`case_${newCase.caseId}`, JSON.stringify({
-      id: newCase.caseId,
-      siteId: newCase.siteId,
-      siteName: SHIVNERI_SITE.name,
-      categoryId: newCase.category,
-      description: newCase.factualDescription,
-      coordinates: [newCase.longitude, newCase.latitude],
-      accuracyMeters: newCase.gpsAccuracyMeters,
-      spatialResult: spatial,
-      timestamp: newCase.observedTimestamp,
-      currentStatus: newCase.currentStatus,
-    }));
+
 
     // Navigate to Spatial Result page for immediate judge inspection
     navigate(`/result/${newCase.caseId}`);

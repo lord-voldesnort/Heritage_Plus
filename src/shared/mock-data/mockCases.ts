@@ -17,6 +17,19 @@ export const MOCK_CASES: ObservationRecord[] = [
     computedClassification: 'POTENTIAL_ZONE_CONCERN',
     distanceToBoundaryMeters: 0.0,
     spatialReasoningExplanation: 'Reported point appears within the active zone layer. GPS accuracy is ±4.5m. This is not a legal finding; authority verification is required.',
+    spatialResult: {
+      classification: 'POTENTIAL_ZONE_CONCERN',
+      distanceToBoundaryMeters: 0.0,
+      gpsAccuracyMeters: 4.5,
+      isUncertaintyOverlap: false,
+      geometryVersion: 'v1.0-bhuvan-protected-7068',
+      explanation: 'Reported point appears within the active zone layer. GPS accuracy is ±4.5m. This is not a legal finding; authority verification is required.',
+      statements: {
+        userReported: 'Stone foundation excavation and mortar mixing observed 15m inside north gateway.',
+        gisCalculated: 'Point falls within the surveyed boundary polygon (version: v1.0-bhuvan-protected-7068).',
+        authorityNotice: 'Indicative decision support only. Authority verification required.',
+      },
+    },
     currentStatus: 'SUBMITTED_FOR_REVIEW',
     evidenceList: [
       {
@@ -84,6 +97,20 @@ export const MOCK_CASES: ObservationRecord[] = [
     computedClassification: 'LOCATION_UNCERTAIN',
     distanceToBoundaryMeters: 6.2,
     spatialReasoningExplanation: 'Location uncertain – the GPS accuracy circle (±14.5m) overlaps the zone boundary (6.2m distance). Additional evidence required.',
+    spatialResult: {
+      classification: 'LOCATION_UNCERTAIN',
+      distanceToBoundaryMeters: 6.2,
+      gpsAccuracyMeters: 14.5,
+      isUncertaintyOverlap: true,
+      geometryVersion: 'v1.0-bhuvan-protected-7068',
+      explanation: 'Location uncertain – the GPS accuracy circle (±14.5m) overlaps the zone boundary (6.2m distance). Additional evidence required.',
+      uncertaintyReason: 'GPS accuracy circle intersects boundary line',
+      statements: {
+        userReported: 'Displaced masonry blocks noted near western bastion staircase.',
+        gisCalculated: 'Point is 6.2m from boundary line, within device error margin (±14.5m).',
+        authorityNotice: 'Indicative decision support only. Authority verification required.',
+      },
+    },
     currentStatus: 'ADDITIONAL_INFORMATION_NEEDED',
     evidenceList: [
       {
