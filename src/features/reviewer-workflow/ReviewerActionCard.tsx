@@ -141,7 +141,6 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
     effectiveStatus &&
       (effectiveStatus === 'CLOSED_REVIEWED' ||
         effectiveStatus === 'CLOSED_DUPLICATE' ||
-        effectiveStatus === 'CLOSED_UNRESOLVED' ||
         effectiveStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE' ||
         (CASE_STATUSES[effectiveStatus] as any)?.isTerminal)
   );

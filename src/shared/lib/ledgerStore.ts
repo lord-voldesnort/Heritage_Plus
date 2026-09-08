@@ -215,6 +215,10 @@ export class LedgerStore {
     return newCase;
   }
 
+  public loadFromStorage(): void {
+    this.cases = this.hydrateCases();
+  }
+
   public recordReviewAction(
     caseId: string,
     action: CaseStatus,
@@ -224,16 +228,30 @@ export class LedgerStore {
     const targetCase = this.getCaseById(caseId);
     if (!targetCase) return null;
 
-    // Terminal closed-case protection: cannot modify closed cases
-    const isTerminal =
+    // Terminal closed-case protection: authority actors can re-open/append, frontline triage is sealed
+    const isClosed =
       targetCase.currentStatus === 'CLOSED_REVIEWED' ||
       targetCase.currentStatus === 'CLOSED_DUPLICATE' ||
-      targetCase.currentStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE' ||
-      targetCase.currentStatus === 'CLOSED_UNRESOLVED' ||
-      (CASE_STATUSES[targetCase.currentStatus] as any)?.isTerminal;
+      targetCase.currentStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE';
 
-    if (isTerminal) {
+    const isAuthorityActor =
+      (reviewerRole || '').toLowerCase().includes('archaeologist') ||
+      (reviewerRole || '').toLowerCase().includes('authority') ||
+      (reviewerRole || '').toLowerCase().includes('admin');
+
+    if (isClosed && !isAuthorityActor) {
       console.warn(`Cannot record review action on closed case ${caseId} (${targetCase.currentStatus}).`);
+      return null;
+    }
+
+    // REFERRED governance: frontline triage is frozen while authority closure is allowed
+    const isClosureAction =
+      action === 'CLOSED_REVIEWED' ||
+      action === 'CLOSED_DUPLICATE' ||
+      action === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE';
+
+    if (targetCase.currentStatus === 'REFERRED' && !isClosureAction && !isAuthorityActor) {
+      console.warn(`Case ${caseId} is referred to authority; frontline triage is frozen.`);
       return null;
     }
 
@@ -284,16 +302,30 @@ export class LedgerStore {
     const targetCase = this.getCaseById(caseId);
     if (!targetCase) return null;
 
-    // Terminal closed-case protection: cannot modify closed cases
-    const isTerminal =
+    // Terminal closed-case protection: authority actors can re-open/append, frontline triage is sealed
+    const isClosed =
       targetCase.currentStatus === 'CLOSED_REVIEWED' ||
       targetCase.currentStatus === 'CLOSED_DUPLICATE' ||
-      targetCase.currentStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE' ||
-      targetCase.currentStatus === 'CLOSED_UNRESOLVED' ||
-      (CASE_STATUSES[targetCase.currentStatus] as any)?.isTerminal;
+      targetCase.currentStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE';
 
-    if (isTerminal) {
+    const isAuthorityActor =
+      (reviewerRole || '').toLowerCase().includes('archaeologist') ||
+      (reviewerRole || '').toLowerCase().includes('authority') ||
+      (reviewerRole || '').toLowerCase().includes('admin');
+
+    if (isClosed && !isAuthorityActor) {
       console.warn(`Cannot append decision to closed case ${caseId} (${targetCase.currentStatus}).`);
+      return null;
+    }
+
+    // REFERRED governance: frontline triage is frozen while authority closure is allowed
+    const isClosureAction =
+      resultingStatus === 'CLOSED_REVIEWED' ||
+      resultingStatus === 'CLOSED_DUPLICATE' ||
+      resultingStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE';
+
+    if (targetCase.currentStatus === 'REFERRED' && !isClosureAction && !isAuthorityActor) {
+      console.warn(`Case ${caseId} is referred to authority; frontline triage is frozen.`);
       return null;
     }
 
