@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Card } from '../../shared/components/Card';
 import { Badge } from '../../shared/components/Badge';
 import { MapLibreView } from '../../shared/components/MapLibreView';
 import { DemoScenarioSwitcher } from './DemoScenarioSwitcher';
 import { DEMO_SCENARIOS } from '../../shared/mock-data/mockScenarios';
 import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
-import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
+import { resolveMultiTierSpatialResult } from '../../shared/lib/spatialEngine';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
-import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/contracts/heritagePulseContract';
 import { DemoScenario, GeometryRecord } from '../../shared/types';
 import { 
   Compass, 
@@ -38,15 +38,14 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
     DEMO_SCENARIOS.find((s) => s.id === initialScenarioId) || DEMO_SCENARIOS[0]
   );
 
-  // Compute spatial result live from active scenario parameters
-  const spatialResult = calculateSpatialResult(
+  // Compute spatial result live from active scenario parameters using multi-tier spatial engine
+  const spatialResult = resolveMultiTierSpatialResult(
     {
       latitude: selectedScenario.latitude,
       longitude: selectedScenario.longitude,
       gpsAccuracyMeters: selectedScenario.gpsAccuracyMeters,
       factualDescription: factualDescription || selectedScenario.factualNotes,
-    },
-    geometryRecord
+    }
   );
 
   const classificationMeta = SPATIAL_CLASSIFICATIONS[spatialResult.classification];
@@ -73,13 +72,13 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
     }
     if (spatialResult.classification === 'POTENTIAL_ZONE_CONCERN') {
       return {
-        label: 'Circle Fully Within Protected Zone',
+        label: 'Circle Fully Within Protected/Prohibited Zone',
         color: 'text-amber-400 border-amber-800/80 bg-amber-950/40',
         badgeVariant: 'amber' as const,
       };
     }
     return {
-      label: 'Circle Fully Outside Regulated Zone',
+      label: 'Circle Outside Boundary Layers',
       color: 'text-emerald-400 border-emerald-800/80 bg-emerald-950/40',
       badgeVariant: 'emerald' as const,
     };
@@ -99,7 +98,6 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
         </Card>
       )}
 
-      {/* 2. Interactive Map Card with Boundary & Uncertainty Disk */}
       <Card variant="elevated" className="p-0 overflow-hidden space-y-0">
         {/* Header Bar */}
         <div className="p-4 bg-slate-900/80 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -112,7 +110,7 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
                 <span>Observation Map & Visual Uncertainty Disk</span>
               </h2>
               <p className="text-[11px] text-slate-400 font-mono">
-                {selectedScenario.latitude.toFixed(6)}°N, {selectedScenario.longitude.toFixed(6)}°E
+                {selectedScenario.latitude.toFixed(6)}┬░N, {selectedScenario.longitude.toFixed(6)}┬░E
               </p>
             </div>
           </div>
@@ -162,7 +160,7 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
                 <span>Live Spatial Reasoner Result</span>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant={classificationMeta.badgeVariant} className="text-xs py-1 px-2.5 font-bold">
+                <Badge variant={classificationMeta.badgeVariant as any} className="text-xs py-1 px-2.5 font-bold">
                   {classificationMeta.badgeLabel}
                 </Badge>
               </div>
@@ -188,7 +186,7 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
                   GPS Precision
                 </div>
                 <div className="text-base font-bold text-sky-300">
-                  ±{spatialResult.gpsAccuracyMeters.toFixed(1)}m
+                  ┬▒{spatialResult.gpsAccuracyMeters.toFixed(1)}m
                 </div>
               </div>
             </div>

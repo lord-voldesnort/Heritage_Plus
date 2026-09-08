@@ -1,1 +1,5 @@
-export { ReviewerPacketPreview, ReviewerPacketPreview as ReviewerPacketPage, default } from './ReviewerPacketPreview';
+import { ReviewerPacketPreview } from './ReviewerPacketPreview';
+
+export const ReviewerPacketPage = ReviewerPacketPreview;
+export { ReviewerPacketPreview };
+export default ReviewerPacketPreview;

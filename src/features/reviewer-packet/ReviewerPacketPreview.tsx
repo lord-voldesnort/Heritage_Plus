@@ -1,14 +1,11 @@
-import React, { useMemo } from 'react';
+﻿import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Printer,
   ArrowLeft,
   FileText
 } from 'lucide-react';
-import { ledgerStore } from '../../shared/lib/ledgerStore';
-import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
-import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
-import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
+import { getReviewerPacketData, CANONICAL_NON_LEGAL_NOTICE } from './packetData';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
 import { CASE_STATUSES } from '../../shared/constants/caseStatuses';
 import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
@@ -20,130 +17,16 @@ import {
   LedgerTimeline
 } from '../../shared/components';
 import { TimelineEventItem } from '../../shared/components/LedgerTimeline';
-import { CaseStatus, ObservationType } from '../../shared/types';
-
-interface SessionCasePayload {
-  id: string;
-  siteId: string;
-  siteName: string;
-  categoryId: string;
-  description: string;
-  coordinates: [number, number]; // [lng, lat]
-  accuracyMeters: number;
-  photoMetadata?: {
-    fileName: string;
-    sizeKb: number;
-    capturedDate: string;
-  } | null;
-  photoUrl?: string | null;
-  timestamp: string;
-  currentStatus?: CaseStatus;
-  eventsTimeline?: any[];
-}
-
-// Approved neutral labels
-const APPROVED_CATEGORY_LABELS: Record<string, string> = {
-  POSSIBLE_CONSTRUCTION: 'Possible construction',
-  POSSIBLE_ENCROACHMENT: 'Possible alteration',
-  PHYSICAL_DAMAGE: 'Physical damage',
-  DUMPING_OR_WASTE: 'Dumping or waste',
-  BLOCKED_ACCESS: 'Blocked access',
-  ALTERATION_OR_OBSTRUCTION: 'Visual obstruction',
-  OTHER_VISIBLE_CHANGE: 'Other visible change',
-};
 
 export const ReviewerPacketPreview: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
 
-  // 1. Data Retrieval: Read active case by ID from route params, falling back to local session storage or seeded data
+  // 1. Data Retrieval: Exclusively via shared packet data function
   const resolvedCase = useMemo(() => {
-    if (!caseId) return null;
-
-    // Check in-memory ledger store
-    const storeRecord = ledgerStore.getCaseById(caseId);
-    if (storeRecord) {
-      const isOverlap =
-        storeRecord.spatialResult.classification === 'LOCATION_UNCERTAIN' ||
-        (storeRecord.spatialResult.distanceToBoundaryMeters !== null &&
-          storeRecord.spatialResult.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
-
-      return {
-        id: storeRecord.caseId,
-        siteName: SHIVNERI_SITE.name,
-        category: storeRecord.category,
-        categoryLabel: APPROVED_CATEGORY_LABELS[storeRecord.category] || storeRecord.category.replace(/_/g, ' '),
-        description: storeRecord.factualDescription,
-        latitude: storeRecord.latitude,
-        longitude: storeRecord.longitude,
-        accuracyMeters: storeRecord.gpsAccuracyMeters,
-        distanceToBoundaryMeters: storeRecord.spatialResult.distanceToBoundaryMeters,
-        computedClassification: storeRecord.spatialResult.classification,
-        isUncertaintyOverlap: isOverlap,
-        explanation: storeRecord.spatialResult.explanation,
-        currentStatus: storeRecord.currentStatus,
-        timestamp: storeRecord.observedTimestamp,
-        photoUrl: storeRecord.evidenceList?.[0]?.fileUrl || null,
-        photoMetadata: storeRecord.evidenceList?.[0]
-          ? {
-              fileName: 'evidence-capture.jpg',
-              sizeKb: Math.round(storeRecord.evidenceList[0].fileSizeBytes / 1024),
-              capturedDate: storeRecord.evidenceList[0].uploadTimestamp.split('T')[0],
-            }
-          : null,
-        rawEvents: storeRecord.eventsTimeline,
-      };
-    }
-
-    // Check local session storage fallback
-    const rawSession =
-      sessionStorage.getItem(`case_${caseId}`) ||
-      sessionStorage.getItem(caseId);
-
-    if (rawSession) {
-      try {
-        const parsed: SessionCasePayload = JSON.parse(rawSession);
-        const [lng, lat] = parsed.coordinates || [73.8624, 19.1982];
-        const accuracy = parsed.accuracyMeters || 10;
-        const description = parsed.description || '';
-
-        const spatial = calculateSpatialResult(
-          {
-            latitude: lat,
-            longitude: lng,
-            gpsAccuracyMeters: accuracy,
-            factualDescription: description,
-          },
-          SHIVNERI_GEOMETRY
-        );
-
-        return {
-          id: parsed.id,
-          siteName: parsed.siteName || SHIVNERI_SITE.name,
-          category: (parsed.categoryId as ObservationType) || 'OTHER_VISIBLE_CHANGE',
-          categoryLabel:
-            APPROVED_CATEGORY_LABELS[parsed.categoryId] ||
-            (parsed.categoryId ? parsed.categoryId.replace(/_/g, ' ') : 'Observed Change'),
-          description,
-          latitude: lat,
-          longitude: lng,
-          accuracyMeters: accuracy,
-          distanceToBoundaryMeters: spatial.distanceToBoundaryMeters,
-          computedClassification: spatial.classification,
-          isUncertaintyOverlap: spatial.isUncertaintyOverlap,
-          explanation: spatial.explanation,
-          currentStatus: parsed.currentStatus || 'SUBMITTED_FOR_REVIEW',
-          timestamp: parsed.timestamp || new Date().toISOString(),
-          photoUrl: parsed.photoUrl || null,
-          photoMetadata: parsed.photoMetadata || null,
-          rawEvents: parsed.eventsTimeline || [],
-        };
-      } catch (err) {
-        console.error('Error parsing session packet preview:', err);
-      }
-    }
-
-    return null;
+    return caseId ? getReviewerPacketData(caseId) : null;
   }, [caseId]);
+
+
 
   // If missing, render the shared EmptyState component
   if (!resolvedCase) {
@@ -151,7 +34,7 @@ export const ReviewerPacketPreview: React.FC = () => {
       <div className="max-w-xl mx-auto py-12 px-4 print:hidden">
         <EmptyState
           title="Case record not found for review packet generation"
-          description={`No active case record matching ID "${caseId || ''}" could be retrieved from local session storage or the Change Ledger.`}
+          description={`No active case record matching ID "${caseId || ''}" could be retrieved from the Change Ledger.`}
           action={
             <div className="flex items-center gap-3">
               <Link to="/reviewer">
@@ -190,68 +73,83 @@ export const ReviewerPacketPreview: React.FC = () => {
   };
 
   // Section 4: Construct Append-Only Change Ledger Timeline
-  const timelineEvents: TimelineEventItem[] = [
-    {
-      id: `${resolvedCase.id}-pkt-1`,
-      eventType: 'OBSERVATION_CREATED',
-      actorRole: 'REPORTER',
-      timestamp: resolvedCase.timestamp,
-      title: 'Field Observation Created',
-      description: `Observation logged under category "${resolvedCase.categoryLabel}".`,
-      metadataBadge: 'Field Capture',
-    },
-    {
-      id: `${resolvedCase.id}-pkt-2`,
-      eventType: 'LOCATION_CAPTURED',
-      actorRole: 'SYSTEM',
-      timestamp: resolvedCase.timestamp,
-      title: 'GPS Location Telemetry Logged',
-      description: `Hardware GPS position (${resolvedCase.latitude.toFixed(5)}°N, ${resolvedCase.longitude.toFixed(5)}°E) with ±${resolvedCase.accuracyMeters.toFixed(1)}m uncertainty circle.`,
-      metadataBadge: `±${resolvedCase.accuracyMeters.toFixed(1)}m error`,
-    },
-    {
-      id: `${resolvedCase.id}-pkt-3`,
-      eventType: 'SOURCE_APPLIED',
-      actorRole: 'SYSTEM',
-      timestamp: resolvedCase.timestamp,
-      title: 'Authoritative Source Layer Applied',
-      description: `Shivneri Fort protected geometry layer (${PROVENANCE_METADATA.sourceAgency}, ${PROVENANCE_METADATA.bhuvanVersionStatement}) correlated.`,
-      metadataBadge: PROVENANCE_METADATA.crs,
-    },
-    {
-      id: `${resolvedCase.id}-pkt-4`,
-      eventType: 'SPATIAL_EVALUATED',
-      actorRole: 'SYSTEM',
-      timestamp: resolvedCase.timestamp,
-      title: 'Spatial Engine Finding Computed',
-      description: `Classification: ${classificationMeta.badgeLabel}. Distance: ${
-        resolvedCase.distanceToBoundaryMeters !== null
-          ? `${resolvedCase.distanceToBoundaryMeters.toFixed(1)} m`
-          : 'N/A'
-      }. Overlap flag: ${resolvedCase.isUncertaintyOverlap ? 'Detected' : 'Disjoint'}.`,
-      metadataBadge: resolvedCase.computedClassification,
-    },
-  ];
+  const timelineEvents: TimelineEventItem[] = (
+    resolvedCase.rawEvents && resolvedCase.rawEvents.length > 0
+      ? resolvedCase.rawEvents.map((evt, idx) => {
+          let mappedEventType: TimelineEventItem['eventType'] = 'STATUS_UPDATED';
+          if (evt.eventType === 'INFO_REQUESTED') mappedEventType = 'INFO_REQUESTED';
+          else if (evt.eventType === 'CASE_CLOSED') mappedEventType = 'CASE_CLOSED';
+          else if (evt.eventType === 'LOCATION_CAPTURED') mappedEventType = 'LOCATION_CAPTURED';
+          else if (evt.eventType === 'OBSERVATION_CREATED') mappedEventType = 'OBSERVATION_CREATED';
+          else if (evt.eventType === 'EVIDENCE_ATTACHED') mappedEventType = 'EVIDENCE_ADDED';
+          else if (evt.eventType === 'SPATIAL_CALCULATED') mappedEventType = 'SPATIAL_EVALUATED';
 
-  // Append raw review events from history if present
-  if (resolvedCase.rawEvents && resolvedCase.rawEvents.length > 0) {
-    resolvedCase.rawEvents.forEach((evt, idx) => {
-      timelineEvents.push({
-        id: evt.eventId || `raw-evt-${idx}`,
-        eventType: evt.eventType || 'STATUS_UPDATED',
-        actorRole: evt.actorRole === 'REVIEWER' ? 'REVIEWER' : 'SYSTEM',
-        timestamp: evt.timestamp || resolvedCase.timestamp,
-        title: evt.title || `Review Action: ${evt.resultingStatus || 'Updated'}`,
-        description: evt.reviewerNotes || evt.summary || 'Administrative review update logged.',
-        metadataBadge: evt.resultingStatus || 'REVIEW',
-      });
-    });
-  }
+          const actorRole: TimelineEventItem['actorRole'] =
+            (evt.actorRole || '').toUpperCase().includes('REVIEW') || (evt.actorRole || '').toUpperCase().includes('CURATOR')
+              ? 'REVIEWER'
+              : (evt.actorRole || '').toUpperCase().includes('ADMIN')
+              ? 'ADMIN'
+              : (evt.actorRole || '').toUpperCase().includes('REPORT') || (evt.actorRole || '').toUpperCase().includes('VISITOR')
+              ? 'REPORTER'
+              : 'SYSTEM';
+
+          return {
+            id: evt.eventId || `raw-evt-${idx}`,
+            eventType: mappedEventType,
+            actorRole,
+            timestamp: evt.timestamp || resolvedCase.timestamp,
+            title: evt.title || (
+              evt.eventType === 'OBSERVATION_CREATED'
+                ? 'Field Observation Created'
+                : evt.eventType === 'LOCATION_CAPTURED'
+                ? 'GPS Location Telemetry Logged'
+                : evt.eventType === 'SPATIAL_CALCULATED'
+                ? 'Spatial Engine Finding Computed'
+                : evt.eventType === 'REVIEW_ACTION_RECORDED'
+                ? 'Change Ledger Ingestion Recorded'
+                : `Review Action: ${evt.resultingStatus || 'Updated'}`
+            ),
+            description: evt.reviewerNotes || evt.summary || 'Administrative review update logged.',
+            metadataBadge: evt.resultingStatus || 'RECORDED',
+          };
+        })
+      : [
+          {
+            id: `${resolvedCase.id}-pkt-1`,
+            eventType: 'OBSERVATION_CREATED',
+            actorRole: 'REPORTER',
+            timestamp: resolvedCase.timestamp,
+            title: 'Field Observation Created',
+            description: `Observation logged under category "${resolvedCase.categoryLabel}".`,
+            metadataBadge: 'Field Capture',
+          },
+          {
+            id: `${resolvedCase.id}-pkt-2`,
+            eventType: 'LOCATION_CAPTURED',
+            actorRole: 'SYSTEM',
+            timestamp: resolvedCase.timestamp,
+            title: 'GPS Location Telemetry Logged',
+            description: `Hardware GPS position (${resolvedCase.latitude.toFixed(5)}┬░N, ${resolvedCase.longitude.toFixed(5)}┬░E) with ┬▒${resolvedCase.accuracyMeters.toFixed(1)}m uncertainty circle.`,
+            metadataBadge: `┬▒${resolvedCase.accuracyMeters.toFixed(1)}m error`,
+          },
+          {
+            id: `${resolvedCase.id}-pkt-3`,
+            eventType: 'SPATIAL_EVALUATED',
+            actorRole: 'SYSTEM',
+            timestamp: resolvedCase.timestamp,
+            title: 'Spatial Engine Finding Computed',
+            description: `Classification: ${classificationMeta.badgeLabel}. Distance: ${
+              resolvedCase.distanceToBoundaryMeters !== null
+                ? `${resolvedCase.distanceToBoundaryMeters.toFixed(1)} m`
+                : 'N/A'
+            }. Overlap flag: ${resolvedCase.isUncertaintyOverlap ? 'Detected' : 'Disjoint'}.`,
+            metadataBadge: resolvedCase.computedClassification,
+          },
+        ]
+  );
 
   // Section 5: Latest Reviewer Decision & Administrative Rationale
-  const latestReviewEvent = resolvedCase.rawEvents?.find(
-    (e) => e.reviewerNotes || e.actorRole === 'REVIEWER' || e.actorRole === 'Heritage Curator'
-  );
+  const latestReviewEvent = resolvedCase.latestReviewEvent;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 px-4 py-6 font-sans">
@@ -265,7 +163,7 @@ export const ReviewerPacketPreview: React.FC = () => {
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Reviewer Queue
           </Link>
-          <span className="text-slate-600">•</span>
+          <span className="text-slate-600">ΓÇó</span>
           <span className="font-mono text-xs text-amber-400 font-bold">
             {resolvedCase.id}
           </span>
@@ -305,7 +203,7 @@ export const ReviewerPacketPreview: React.FC = () => {
               OFFICIAL EVIDENCE PACKET
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-['Outfit'] mt-0.5">
-              HERITAGE PULSE — AUTHORITATIVE REVIEW PACKET
+              HERITAGE PULSE ΓÇö AUTHORITATIVE REVIEW PACKET
             </h1>
             <p className="text-xs text-slate-600 mt-1">
               Provenance-Aware Uncertainty-Driven Change Ledger Dossier
@@ -322,9 +220,14 @@ export const ReviewerPacketPreview: React.FC = () => {
           </div>
         </div>
 
-        {/* Printable Mandatory Legal Disclaimer */}
-        <div className="mb-6 p-3 rounded border border-slate-300 bg-slate-50 text-[11px] text-slate-700 leading-relaxed">
-          <strong>Mandatory Notice:</strong> {CANONICAL_LEGAL_DISCLAIMER}
+        {/* Printable Mandatory Legal Disclaimer & Non-Legal Determination Statement */}
+        <div className="mb-6 p-3.5 rounded border border-slate-300 bg-slate-50 text-[11px] text-slate-700 leading-relaxed space-y-2">
+          <div>
+            <strong>Mandatory Notice:</strong> {CANONICAL_LEGAL_DISCLAIMER}
+          </div>
+          <div className="text-[10px] text-slate-600 border-t border-slate-200 pt-2 font-sans">
+            <strong>Explicit Non-Legal Determination Statement:</strong> {CANONICAL_NON_LEGAL_NOTICE}
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -343,10 +246,10 @@ export const ReviewerPacketPreview: React.FC = () => {
                   Protected Heritage Site:
                 </span>
                 <div className="font-bold text-slate-900 text-sm">
-                  {SHIVNERI_SITE.name}
+                  {resolvedCase.site.name}
                 </div>
                 <div className="text-slate-600 text-[11px]">
-                  {SHIVNERI_SITE.vernacularName} ({SHIVNERI_SITE.district}, {SHIVNERI_SITE.state})
+                  {resolvedCase.site.vernacularName} ({resolvedCase.site.district}, {resolvedCase.site.state})
                 </div>
               </div>
 
@@ -355,10 +258,10 @@ export const ReviewerPacketPreview: React.FC = () => {
                   Authoritative Mapping Agency:
                 </span>
                 <div className="font-semibold text-slate-800">
-                  {PROVENANCE_METADATA.sourceAgency}
+                  {resolvedCase.provenance.sourceAgency}
                 </div>
                 <div className="text-slate-600 text-[11px] font-mono">
-                  ASI Monument Code: {PROVENANCE_METADATA.monumentNumber}
+                  ASI Monument Code: {resolvedCase.provenance.monumentNumber}
                 </div>
               </div>
 
@@ -367,7 +270,7 @@ export const ReviewerPacketPreview: React.FC = () => {
                   Layer Version & Capture Date:
                 </span>
                 <div className="font-mono font-medium text-slate-800">
-                  {PROVENANCE_METADATA.bhuvanVersionStatement} ({PROVENANCE_METADATA.retrievalDate})
+                  {resolvedCase.provenance.bhuvanVersionStatement} ({resolvedCase.provenance.retrievalDate})
                 </div>
               </div>
 
@@ -376,7 +279,7 @@ export const ReviewerPacketPreview: React.FC = () => {
                   Coordinate Reference System (CRS):
                 </span>
                 <div className="font-mono font-medium text-slate-800">
-                  {PROVENANCE_METADATA.crs}
+                  {resolvedCase.provenance.crs}
                 </div>
               </div>
 
@@ -385,11 +288,12 @@ export const ReviewerPacketPreview: React.FC = () => {
                   Verbatim Source Limitations Note:
                 </span>
                 <p className="text-[11px] text-slate-600 italic bg-white p-2.5 rounded border border-slate-200">
-                  &quot;{PROVENANCE_METADATA.verbatimLimitationText}&quot;
+                  &quot;{resolvedCase.provenance.verbatimLimitationText}&quot;
                 </p>
               </div>
             </div>
           </section>
+
 
           {/* SECTION 2: Factual Observation */}
           <section className="space-y-3">
@@ -425,7 +329,7 @@ export const ReviewerPacketPreview: React.FC = () => {
                     Hardware GPS Position:
                   </span>
                   <div className="font-mono text-slate-800">
-                    {resolvedCase.latitude.toFixed(5)}°N, {resolvedCase.longitude.toFixed(5)}°E
+                    {resolvedCase.latitude.toFixed(5)}┬░N, {resolvedCase.longitude.toFixed(5)}┬░E
                   </div>
                 </div>
               </div>
@@ -502,7 +406,7 @@ export const ReviewerPacketPreview: React.FC = () => {
                   <div className="bg-white p-2.5 rounded border border-slate-200">
                     <span className="text-[10px] text-slate-500 block">GPS Accuracy Radius:</span>
                     <div className="font-bold text-slate-900 text-sm">
-                      ±{resolvedCase.accuracyMeters.toFixed(1)} m
+                      ┬▒{resolvedCase.accuracyMeters.toFixed(1)} m
                     </div>
                   </div>
 
@@ -520,7 +424,7 @@ export const ReviewerPacketPreview: React.FC = () => {
 
                 {(resolvedCase.isUncertaintyOverlap || resolvedCase.accuracyMeters > 35) && (
                   <div className="p-3 rounded bg-amber-50 border border-amber-200 text-amber-900 text-xs font-sans">
-                    <strong>Refusal to Overclaim Notice:</strong> Location uncertain — additional evidence required. The system explicitly refuses to assert zone placement because the device horizontal GPS uncertainty radius intersects or exceeds the authoritative boundary perimeter.
+                    <strong>Refusal to Overclaim Notice:</strong> Location uncertain ΓÇö additional evidence required. The system explicitly refuses to assert zone placement because the device horizontal GPS uncertainty radius intersects or exceeds the authoritative boundary perimeter.
                   </div>
                 )}
               </div>
@@ -578,7 +482,7 @@ export const ReviewerPacketPreview: React.FC = () => {
           {/* Formal Sign-off Footer */}
           <div className="pt-6 border-t-2 border-slate-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[10px] text-slate-500 font-mono">
             <div>
-              HERITAGE PULSE · PROVENANCE-AWARE CHANGE LEDGER DOSSIER
+              HERITAGE PULSE ┬╖ PROVENANCE-AWARE CHANGE LEDGER DOSSIER
               <br />
               Generated for official institutional review & archival record.
             </div>

@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { Camera, X, ShieldAlert, Image as ImageIcon } from 'lucide-react';
 import { clsx } from 'clsx';
 
+import { NoticeBanner } from './NoticeBanner';
+
 export interface PhotoMetadata {
     file: File;
     previewUrl: string;
@@ -19,14 +21,29 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
     disabled = false,
 }) => {
     const [photo, setPhoto] = useState<PhotoMetadata | null>(null);
+    const [fileError, setFileError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files?.[0];
         if (!selectedFile) return;
 
-        if (!selectedFile.type.startsWith('image/')) {
-            alert('Please upload a valid image file (JPEG, PNG, or WebP).');
+        setFileError(null);
+
+        // Check unsupported image format
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+        if (!validTypes.includes(selectedFile.type)) {
+            setFileError('Unsupported image format. Please select a JPEG, PNG, or WebP photo.');
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
+        // Check maximum file size (10 MB)
+        const maxBytes = 10 * 1024 * 1024;
+        if (selectedFile.size > maxBytes) {
+            const sizeMb = (selectedFile.size / (1024 * 1024)).toFixed(1);
+            setFileError(`Image exceeds 10MB limit (${sizeMb}MB selected). Please choose a compressed photo or capture at standard resolution.`);
+            if (fileInputRef.current) fileInputRef.current.value = '';
             return;
         }
 
@@ -46,6 +63,7 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
             URL.revokeObjectURL(photo.previewUrl);
         }
         setPhoto(null);
+        setFileError(null);
         onPhotoSelected(null);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
@@ -79,6 +97,12 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
                 className="hidden"
                 id="field-photo-upload"
             />
+
+            {fileError && (
+                <NoticeBanner variant="insufficient">
+                    {fileError}
+                </NoticeBanner>
+            )}
 
             {!photo ? (
                 <button
