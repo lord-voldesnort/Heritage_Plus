@@ -139,17 +139,13 @@ export function calculateSpatialResult(
   const point = turf.point([longitude, latitude]);
   const isInside = turf.booleanPointInPolygon(point, geojsonGeom);
 
-  // Calculate distance in meters to nearest boundary line string
+  // Calculate distance in meters to nearest boundary line string (handles single Polygons, Polygons with holes, and MultiPolygons)
   const boundaryLines = turf.polygonToLine(geojsonGeom);
-  let distanceKm = 0;
-  if (boundaryLines.type === 'FeatureCollection') {
-    const distances = boundaryLines.features.map(lineFeature =>
-      turf.pointToLineDistance(point, lineFeature as any, { units: 'kilometers' })
-    );
-    distanceKm = Math.min(...distances);
-  } else {
-    distanceKm = turf.pointToLineDistance(point, boundaryLines as any, { units: 'kilometers' });
-  }
+  const flattenedLines = turf.flatten(boundaryLines as any);
+  const distances = flattenedLines.features.map(lineFeature =>
+    turf.pointToLineDistance(point, lineFeature as any, { units: 'kilometers' })
+  );
+  const distanceKm = distances.length > 0 ? Math.min(...distances) : 0;
   const distanceMeters = Math.round(distanceKm * 1000 * 10) / 10;
 
   // Rule 3: Accuracy Circle Overlap (Near Boundary Edge)
