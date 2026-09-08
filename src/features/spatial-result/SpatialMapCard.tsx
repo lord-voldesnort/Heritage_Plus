@@ -5,9 +5,9 @@ import { MapLibreView } from '../../shared/components/MapLibreView';
 import { DemoScenarioSwitcher } from './DemoScenarioSwitcher';
 import { DEMO_SCENARIOS } from '../../shared/mock-data/mockScenarios';
 import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
-import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
+import { resolveMultiTierSpatialResult } from '../../shared/lib/spatialEngine';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
-import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/contracts/heritagePulseContract';
 import { DemoScenario, GeometryRecord } from '../../shared/types';
 import { 
   Compass, 
@@ -38,15 +38,14 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
     DEMO_SCENARIOS.find((s) => s.id === initialScenarioId) || DEMO_SCENARIOS[0]
   );
 
-  // Compute spatial result live from active scenario parameters
-  const spatialResult = calculateSpatialResult(
+  // Compute spatial result live from active scenario parameters using multi-tier spatial engine
+  const spatialResult = resolveMultiTierSpatialResult(
     {
       latitude: selectedScenario.latitude,
       longitude: selectedScenario.longitude,
       gpsAccuracyMeters: selectedScenario.gpsAccuracyMeters,
       factualDescription: factualDescription || selectedScenario.factualNotes,
-    },
-    geometryRecord
+    }
   );
 
   const classificationMeta = SPATIAL_CLASSIFICATIONS[spatialResult.classification];
@@ -73,13 +72,13 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
     }
     if (spatialResult.classification === 'POTENTIAL_ZONE_CONCERN') {
       return {
-        label: 'Circle Fully Within Protected Zone',
+        label: 'Circle Fully Within Protected/Prohibited Zone',
         color: 'text-amber-400 border-amber-800/80 bg-amber-950/40',
         badgeVariant: 'amber' as const,
       };
     }
     return {
-      label: 'Circle Fully Outside Regulated Zone',
+      label: 'Circle Outside Boundary Layers',
       color: 'text-emerald-400 border-emerald-800/80 bg-emerald-950/40',
       badgeVariant: 'emerald' as const,
     };
@@ -108,7 +107,7 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
               <MapPin className="w-4 h-4 text-amber-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+              <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2 font-['Outfit']">
                 <span>Observation Map & Visual Uncertainty Disk</span>
               </h2>
               <p className="text-[11px] text-slate-400 font-mono">
@@ -162,7 +161,7 @@ export const SpatialMapCard: React.FC<SpatialMapCardProps> = ({
                 <span>Live Spatial Reasoner Result</span>
               </div>
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant={classificationMeta.badgeVariant} className="text-xs py-1 px-2.5 font-bold">
+                <Badge variant={classificationMeta.badgeVariant as any} className="text-xs py-1 px-2.5 font-bold">
                   {classificationMeta.badgeLabel}
                 </Badge>
               </div>

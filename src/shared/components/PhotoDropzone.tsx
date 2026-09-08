@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { clsx } from 'clsx';
+import { NoticeBanner } from './NoticeBanner';
 
 export interface PhotoMetadata {
   file: File;
@@ -18,17 +19,31 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
   disabled = false,
 }) => {
   const [photo, setPhoto] = useState<PhotoMetadata | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    if (!selectedFile.type.startsWith('image/')) {
-      alert('Please upload a valid image file (JPEG, PNG, WebP, TIFF).');
+    setFileError(null);
+
+    // Check unsupported image format
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/tiff'];
+    if (!selectedFile.type.startsWith('image/') && !validTypes.includes(selectedFile.type)) {
+      setFileError('Unsupported image format. Please select a JPEG, PNG, WebP, or TIFF photo.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
+    // Check maximum file size (10 MB)
+    const maxBytes = 10 * 1024 * 1024;
+    if (selectedFile.size > maxBytes) {
+      const sizeMb = (selectedFile.size / (1024 * 1024)).toFixed(1);
+      setFileError(`Image exceeds 10MB limit (${sizeMb}MB selected). Please choose a compressed photo or capture at standard resolution.`);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     const metadata: PhotoMetadata = {
       file: selectedFile,
       previewUrl: URL.createObjectURL(selectedFile),
@@ -45,6 +60,7 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
       URL.revokeObjectURL(photo.previewUrl);
     }
     setPhoto(null);
+    setFileError(null);
     onPhotoSelected(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -60,6 +76,12 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
         </label>
         <span className="text-xs text-text-muted">EXIF Geotag Verification</span>
       </div>
+
+      {fileError && (
+        <NoticeBanner variant="insufficient">
+          {fileError}
+        </NoticeBanner>
+      )}
 
       <input
         ref={fileInputRef}
@@ -94,7 +116,7 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
             Tap to capture or upload evidentiary photograph
           </span>
           <span className="text-xs text-text-secondary mt-1">
-            Accepts JPG, PNG, RAW, TIFF (up to 35MB per frame)
+            Accepts JPG, PNG, RAW, TIFF (up to 10MB per frame)
           </span>
         </div>
       ) : (

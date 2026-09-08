@@ -14,8 +14,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   PHYSICAL_DAMAGE: 'broken_image',
   DUMPING_OR_WASTE: 'rainy',
   BLOCKED_ACCESS: 'block',
-  STRUCTURE_ALTERATION: 'psychiatry',
-  VISUAL_OBSTRUCTION: 'visibility_off',
+  ALTERATION_OR_OBSTRUCTION: 'psychiatry',
   OTHER_VISIBLE_CHANGE: 'groups',
 };
 
@@ -45,7 +44,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
             (category.id === 'POSSIBLE_ENCROACHMENT' && selectedCategoryId === 'encroachment') ||
             (category.id === 'PHYSICAL_DAMAGE' && selectedCategoryId === 'structural-damage') ||
             (category.id === 'DUMPING_OR_WASTE' && selectedCategoryId === 'natural-degradation') ||
-            (category.id === 'STRUCTURE_ALTERATION' && selectedCategoryId === 'vegetation') ||
+            (category.id === 'ALTERATION_OR_OBSTRUCTION' && (selectedCategoryId === 'vegetation' || selectedCategoryId === 'structure-alteration')) ||
             (category.id === 'OTHER_VISIBLE_CHANGE' && selectedCategoryId === 'tourism-footprint');
 
           const iconName = CATEGORY_ICONS[category.id] || 'construction';

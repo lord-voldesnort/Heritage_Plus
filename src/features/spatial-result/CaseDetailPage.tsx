@@ -12,7 +12,6 @@ import {
   MapPin
 } from 'lucide-react';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
-import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
 import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
@@ -30,29 +29,11 @@ import {
 } from '../../shared/components';
 import { TimelineEventItem } from '../../shared/components/LedgerTimeline';
 import { SiteContextData } from '../../shared/components/SiteContextCard';
-import { ObservationType } from '../../shared/types';
-
-interface SessionCasePayload {
-  id: string;
-  siteId: string;
-  siteName: string;
-  categoryId: string;
-  description: string;
-  coordinates: [number, number]; // [lng, lat]
-  accuracyMeters: number;
-  photoMetadata?: {
-    fileName: string;
-    sizeKb: number;
-    capturedDate: string;
-  } | null;
-  photoUrl?: string | null;
-  timestamp: string;
-}
 
 export const CaseDetailPage: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
 
-  // 1. Data Retrieval: Check ledgerStore first, then session storage fallback
+  // 1. Data Retrieval: Exclusively from ledgerStore
   const resolvedCase = useMemo(() => {
     if (!caseId) return null;
 
@@ -86,50 +67,9 @@ export const CaseDetailPage: React.FC = () => {
               capturedDate: storeRecord.evidenceList[0].uploadTimestamp.split('T')[0],
             }
           : null,
+        eventsTimeline: storeRecord.eventsTimeline,
+        currentStatus: storeRecord.currentStatus,
       };
-    }
-
-    // Check session storage fallback
-    const rawSession =
-      sessionStorage.getItem(`case_${caseId}`) ||
-      sessionStorage.getItem(caseId);
-
-    if (rawSession) {
-      try {
-        const parsed: SessionCasePayload = JSON.parse(rawSession);
-        const [lng, lat] = parsed.coordinates;
-
-        // Perform deterministic spatial calculation against sourced boundary
-        const spatial = calculateSpatialResult(
-          {
-            latitude: lat,
-            longitude: lng,
-            gpsAccuracyMeters: parsed.accuracyMeters,
-            factualDescription: parsed.description,
-          },
-          SHIVNERI_GEOMETRY
-        );
-
-        return {
-          source: 'sessionStorage' as const,
-          id: parsed.id,
-          siteName: parsed.siteName || SHIVNERI_SITE.name,
-          category: parsed.categoryId as ObservationType,
-          description: parsed.description,
-          latitude: lat,
-          longitude: lng,
-          accuracyMeters: parsed.accuracyMeters,
-          distanceToBoundaryMeters: spatial.distanceToBoundaryMeters,
-          computedClassification: spatial.classification,
-          isUncertaintyOverlap: spatial.isUncertaintyOverlap,
-          explanation: spatial.explanation,
-          timestamp: parsed.timestamp,
-          photoUrl: parsed.photoUrl || null,
-          photoMetadata: parsed.photoMetadata || null,
-        };
-      } catch (err) {
-        console.error('Error parsing session storage case:', err);
-      }
     }
 
     return null;
@@ -141,7 +81,7 @@ export const CaseDetailPage: React.FC = () => {
       <div className="max-w-xl mx-auto py-12 px-4">
         <EmptyState
           title="Case record not found"
-          description={`No observation record matching ID "${caseId || ''}" could be retrieved from active session storage or the Change Ledger.`}
+          description={`No observation record matching ID "${caseId || ''}" could be retrieved from the Change Ledger.`}
           action={
             <div className="flex items-center gap-3">
               <Link to="/capture">
@@ -246,6 +186,40 @@ export const CaseDetailPage: React.FC = () => {
       metadataBadge: `${resolvedCase.photoMetadata?.sizeKb || 0} KB`,
     });
   }
+
+  // 5. Append Reviewer Decisions & Actions from immutable eventsTimeline
+  if (resolvedCase.eventsTimeline) {
+    resolvedCase.eventsTimeline.forEach((evt) => {
+      if (
+        evt.eventType === 'REVIEW_ACTION_RECORDED' ||
+        evt.eventType === 'INFO_REQUESTED' ||
+        evt.eventType === 'STATUS_UPDATED' ||
+        evt.eventType === 'CASE_CLOSED'
+      ) {
+        let mappedEventType: TimelineEventItem['eventType'] = 'STATUS_UPDATED';
+        if (evt.eventType === 'INFO_REQUESTED') mappedEventType = 'INFO_REQUESTED';
+        else if (evt.eventType === 'CASE_CLOSED') mappedEventType = 'CASE_CLOSED';
+
+        const actorRole: TimelineEventItem['actorRole'] =
+          evt.actorRole.toUpperCase().includes('REVIEW') || evt.actorRole.toUpperCase().includes('CURATOR')
+            ? 'REVIEWER'
+            : evt.actorRole.toUpperCase().includes('ADMIN')
+            ? 'ADMIN'
+            : 'SYSTEM';
+
+        timelineEvents.push({
+          id: evt.eventId,
+          eventType: mappedEventType,
+          actorRole,
+          timestamp: evt.timestamp,
+          title: evt.title || 'Reviewer Decision Recorded',
+          description: evt.summary || evt.reviewerNotes || 'Review action recorded.',
+          metadataBadge: evt.resultingStatus || evt.actionTaken || 'REVIEWED',
+        });
+      }
+    });
+  }
+
 
   // Explainability Flags
   const isUncertainOrInsufficient =

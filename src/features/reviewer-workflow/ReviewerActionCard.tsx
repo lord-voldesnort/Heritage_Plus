@@ -9,10 +9,16 @@ import {
   X,
   Loader2,
   ShieldCheck,
-  History
+  History,
+  Lock,
+  MapPin,
+  Layers,
+  Camera,
 } from 'lucide-react';
 import { CaseStatus } from '../../shared/types';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
+import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { containsBannedLanguage } from '../../shared/constants/bannedLanguage';
 import { Badge, Button, Card, NoticeBanner } from '../../shared/components';
 
@@ -20,7 +26,9 @@ export type ReviewerActionKey =
   | 'REQUEST_ADDITIONAL_EVIDENCE'
   | 'RECOMMEND_FIELD_VERIFICATION'
   | 'REFER_OFFICIAL_REVIEW'
-  | 'CLOSE_CASE';
+  | 'CLOSE_CASE'
+  | 'CLOSE_DUPLICATE'
+  | 'CLOSE_INSUFFICIENT_EVIDENCE';
 
 export interface PermittedActionOption {
   key: ReviewerActionKey;
@@ -62,11 +70,29 @@ export const PERMITTED_ACTIONS: PermittedActionOption[] = [
   },
   {
     key: 'CLOSE_CASE',
-    label: 'Close Case',
+    label: 'Close Case (Reviewed - No Action Needed)',
     targetStatus: 'CLOSED_REVIEWED',
     eventType: 'CASE_CLOSED',
-    description: 'Mark observation reviewed with no further action required. Immutably logged in the Change Ledger.',
+    description: 'Mark observation cataloged in Change Ledger with no further intervention required.',
     icon: CheckCircle2,
+    badgeVariant: 'emerald',
+  },
+  {
+    key: 'CLOSE_DUPLICATE',
+    label: 'Close Case (Duplicate / Unrelated)',
+    targetStatus: 'CLOSED_DUPLICATE',
+    eventType: 'CASE_CLOSED',
+    description: 'Mark observation closed as duplicate of an existing record or outside protected heritage scope.',
+    icon: FileCheck,
+    badgeVariant: 'slate',
+  },
+  {
+    key: 'CLOSE_INSUFFICIENT_EVIDENCE',
+    label: 'Close Case (Insufficient Location Evidence)',
+    targetStatus: 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE',
+    eventType: 'CASE_CLOSED',
+    description: 'GPS error disk is too wide (>35m or intersects boundary) to determine zone proximity reliably.',
+    icon: AlertTriangle,
     badgeVariant: 'slate',
   },
 ];
@@ -99,6 +125,17 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   isDrawer = false,
   className = '',
 }) => {
+  const caseRecord = ledgerStore.getCaseById(caseId);
+  const effectiveStatus = caseRecord?.currentStatus || currentStatus || 'SUBMITTED_FOR_REVIEW';
+
+  // Enforce closed-case protection: terminal statuses cannot be re-edited
+  const isCaseClosed = Boolean(
+    effectiveStatus &&
+      (effectiveStatus === 'CLOSED_REVIEWED' ||
+        effectiveStatus === 'CLOSED_DUPLICATE' ||
+        effectiveStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE')
+  );
+
   const [selectedActionKey, setSelectedActionKey] = useState<ReviewerActionKey>(
     'REQUEST_ADDITIONAL_EVIDENCE'
   );
@@ -107,17 +144,26 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const selectedAction = PERMITTED_ACTIONS.find(
-    (a) => a.key === selectedActionKey
-  )!;
+  const selectedAction =
+    PERMITTED_ACTIONS.find((a) => a.key === selectedActionKey) || PERMITTED_ACTIONS[0];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isCaseClosed) {
+      setErrorMessage('This case is closed. Historical records cannot be modified.');
+      return;
+    }
     setErrorMessage(null);
+    setSuccessMessage(null);
 
     const trimmedNotes = notes.trim();
     if (!trimmedNotes) {
       setErrorMessage('Action justification is required. Please provide administrative rationale for this decision.');
+      return;
+    }
+
+    if (trimmedNotes.length < 10) {
+      setErrorMessage('Rationale must be at least 10 characters long describing the physical reason.');
       return;
     }
 
@@ -135,8 +181,8 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
     try {
       const now = new Date().toISOString();
 
-      // 1. Append to in-memory ledger store
-      ledgerStore.appendReviewerDecision(
+      // Append to in-memory ledger store
+      const updatedCase = ledgerStore.appendReviewerDecision(
         caseId,
         selectedAction.label,
         selectedAction.targetStatus,
@@ -145,35 +191,10 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
         'REVIEWER'
       );
 
-      // 2. Append to session storage fallback if case exists there
-      const sessionKey = `case_${caseId}`;
-      const rawSession =
-        sessionStorage.getItem(sessionKey) || sessionStorage.getItem(caseId);
-
-      if (rawSession) {
-        try {
-          const parsed = JSON.parse(rawSession);
-          const newEvent = {
-            id: `evt-${Date.now()}`,
-            caseId,
-            timestamp: now,
-            eventType: selectedAction.eventType,
-            actorRole: 'REVIEWER',
-            title: selectedAction.label,
-            description: trimmedNotes,
-            summary: `${selectedAction.label}: ${trimmedNotes}`,
-            resultingStatus: selectedAction.targetStatus,
-          };
-
-          parsed.eventsTimeline = [
-            ...(parsed.eventsTimeline || []),
-            newEvent,
-          ];
-          parsed.currentStatus = selectedAction.targetStatus;
-          sessionStorage.setItem(sessionKey, JSON.stringify(parsed));
-        } catch (err) {
-          console.error('Failed to update session storage for reviewer action:', err);
-        }
+      if (!updatedCase) {
+        setErrorMessage(`Case ${caseId} not found in Change Ledger store.`);
+        setIsSubmitting(false);
+        return;
       }
 
       const payload: ReviewerActionPayload = {
@@ -199,7 +220,8 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
           onClose();
         }, 1200);
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Failed to record reviewer decision:', err);
       setErrorMessage('Failed to append action to Change Ledger. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -226,7 +248,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
               )}
             </div>
             <h3 className="text-base font-bold text-white font-['Outfit'] mt-0.5">
-              Reviewer Decision & Action Control
+              Reviewer Decision &amp; Action Control
             </h3>
           </div>
         </div>
@@ -236,7 +258,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close reviewer modal"
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-text-secondary hover:text-white hover:bg-surface-well transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-text-secondary hover:text-white hover:bg-surface-well transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -247,6 +269,75 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
       <NoticeBanner variant="advisory">
         Institutional triage only. Review decisions update case status and append an immutable event to the Change Ledger.
       </NoticeBanner>
+
+      {/* Case Details & Provenance Context */}
+      {caseRecord && (
+        <div className="p-3.5 bg-slate-950/70 border border-slate-800 rounded-xl space-y-3 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800/80">
+            <span className="font-mono text-amber-400 font-semibold">{caseRecord.caseId}</span>
+            <div className="flex items-center gap-2">
+              <Badge variant="slate" className="text-[10px]">
+                Status: {effectiveStatus}
+              </Badge>
+              <Badge
+                variant={caseRecord.spatialResult.classification === 'POTENTIAL_ZONE_CONCERN' ? 'amber' : 'blue'}
+                className="text-[10px]"
+              >
+                {caseRecord.spatialResult.classification}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300">
+            <div>
+              <span className="text-[10px] text-slate-500 block uppercase font-mono">Observation:</span>
+              <span className="font-medium text-slate-200">{caseRecord.category.replace(/_/g, ' ')}</span>
+              <p className="text-slate-400 text-[11px] line-clamp-2 mt-0.5">{caseRecord.factualDescription}</p>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-slate-500 block uppercase font-mono">Spatial Telemetry:</span>
+              <div className="flex items-center gap-1.5 text-slate-300 mt-0.5">
+                <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
+                <span>±{caseRecord.gpsAccuracyMeters.toFixed(1)}m GPS error</span>
+                <span>•</span>
+                <span>
+                  Dist:{' '}
+                  {caseRecord.spatialResult.distanceToBoundaryMeters !== null
+                    ? `${caseRecord.spatialResult.distanceToBoundaryMeters.toFixed(1)}m`
+                    : 'N/A'}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-1 font-mono">
+                <Layers className="w-3 h-3 text-indigo-400 shrink-0" />
+                <span className="truncate">
+                  {SHIVNERI_GEOMETRY.versionLabel} ({PROVENANCE_METADATA.sourceAgency})
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {caseRecord.evidenceList && caseRecord.evidenceList.length > 0 && (
+            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+              <span className="flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-emerald-400" />
+                Attached Evidence (SHA-256: {caseRecord.evidenceList[0].sha256Checksum?.slice(0, 16)}...)
+              </span>
+              <span>{Math.round(caseRecord.evidenceList[0].fileSizeBytes / 1024)} KB</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Closed Case Protection Warning */}
+      {isCaseClosed && (
+        <NoticeBanner variant="advisory">
+          <div className="flex items-center gap-2 font-semibold text-amber-300">
+            <Lock className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>Case is Sealed ({effectiveStatus}): Historical ledger records cannot be re-edited or re-submitted.</span>
+          </div>
+        </NoticeBanner>
+      )}
 
       {successMessage && (
         <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-300 text-xs flex items-center gap-2">
@@ -282,12 +373,14 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
                   key={action.key}
                   type="button"
                   onClick={() => setSelectedActionKey(action.key)}
-                  disabled={isSubmitting}
-                  className={`p-3 rounded-xl border text-left transition-all relative ${
-                      isSelected
-                        ? 'bg-surface-card border-amber-500 ring-1 ring-amber-500/40 text-text-primary shadow-md shadow-amber-950/40'
-                        : 'bg-surface-well/70 border-border-subtle hover:border-border-subtle text-text-secondary hover:bg-surface-card/40'
-                    }`}
+                  disabled={isSubmitting || isCaseClosed}
+                  className={`p-3 rounded-xl border text-left transition-all relative cursor-pointer ${
+                    isCaseClosed
+                      ? 'opacity-50 cursor-not-allowed bg-surface-well/40 border-border-subtle text-text-muted'
+                      : isSelected
+                      ? 'bg-surface-card border-amber-500 ring-1 ring-amber-500/40 text-text-primary shadow-md shadow-amber-950/40'
+                      : 'bg-surface-well/70 border-border-subtle hover:border-border-subtle text-text-secondary hover:bg-surface-card/40'
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2 font-semibold text-xs text-white">
@@ -313,7 +406,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
             htmlFor="reviewer-notes"
             className="text-xs font-semibold text-text-secondary uppercase tracking-wider font-mono flex items-center justify-between"
           >
-            <span>2. Action Justification & Institutional Rationale *</span>
+            <span>2. Action Justification &amp; Institutional Rationale *</span>
             <span className="text-[10px] text-amber-500 font-sans normal-case">Required</span>
           </label>
 
@@ -321,10 +414,14 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
             id="reviewer-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isCaseClosed}
             rows={3}
-            placeholder="Provide administrative rationale or context (e.g. boundary ambiguity requires secondary ground measurement)."
-            className="w-full bg-surface-well border border-border-subtle rounded-xl p-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-sans leading-relaxed"
+            placeholder={
+              isCaseClosed
+                ? 'Case is sealed. No further actions permitted.'
+                : 'Provide administrative rationale or context (e.g. boundary ambiguity requires secondary ground measurement).'
+            }
+            className="w-full bg-surface-well border border-border-subtle rounded-xl p-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-sans leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
           />
 
           <p className="text-[11px] text-text-secondary">
@@ -350,29 +447,31 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
               onClick={onClose}
               disabled={isSubmitting}
             >
-              Cancel
+              {isCaseClosed ? 'Close Drawer' : 'Cancel'}
             </Button>
           )}
 
-          <Button
-            type="submit"
-            variant="primary"
-            size="md"
-            disabled={isSubmitting || !notes.trim()}
-            className="gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Appending to Ledger...</span>
-              </>
-            ) : (
-              <>
-                <FileCheck className="w-4 h-4" />
-                <span>Append Decision to Change Ledger</span>
-              </>
-            )}
-          </Button>
+          {!isCaseClosed && (
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              disabled={isSubmitting || !notes.trim()}
+              className="gap-2 cursor-pointer"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Appending to Ledger...</span>
+                </>
+              ) : (
+                <>
+                  <FileCheck className="w-4 h-4" />
+                  <span>Append Decision to Change Ledger</span>
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </form>
     </Card>

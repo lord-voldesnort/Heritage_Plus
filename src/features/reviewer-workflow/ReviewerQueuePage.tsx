@@ -2,18 +2,17 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   UserCheck,
-  Filter,
   Search,
   RefreshCw,
   Eye,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  SlidersHorizontal,
+  FileText,
 } from 'lucide-react';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
-import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
-import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
-import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/contracts/heritagePulseContract';
 import { Badge, Button, Card, NoticeBanner, EmptyState } from '../../shared/components';
 import { ReviewerActionCard } from './ReviewerActionCard';
 import { CaseStatus, SpatialClassification, ObservationType } from '../../shared/types';
@@ -29,22 +28,21 @@ export interface QueueItem {
   computedClassification: SpatialClassification;
   currentStatus: CaseStatus;
   hasPhoto: boolean;
-  source: 'sessionStorage' | 'ledgerStore';
+  source: 'ledgerStore';
 }
 
 // Category display mapping using approved neutral non-accusatory terminology
 const APPROVED_CATEGORY_LABELS: Record<string, string> = {
-  POSSIBLE_CONSTRUCTION: 'Possible construction or extension',
-  POSSIBLE_ENCROACHMENT: 'Possible encroachment',
+  POSSIBLE_CONSTRUCTION: 'Possible construction',
+  POSSIBLE_ENCROACHMENT: 'Possible alteration',
   PHYSICAL_DAMAGE: 'Physical damage',
   DUMPING_OR_WASTE: 'Dumping or waste',
   BLOCKED_ACCESS: 'Blocked access',
-  STRUCTURE_ALTERATION: 'Structure alteration',
-  VISUAL_OBSTRUCTION: 'Visual obstruction',
+  ALTERATION_OR_OBSTRUCTION: 'Visual obstruction',
   OTHER_VISIBLE_CHANGE: 'Other visible change',
 };
 
-// Simplified status badge helper for queue table
+// Canonical status badge helper for queue table
 function getStatusBadgeConfig(status: CaseStatus): { label: string; variant: 'blue' | 'amber' | 'purple' | 'emerald' | 'slate' } {
   switch (status) {
     case 'SUBMITTED_FOR_REVIEW':
@@ -70,88 +68,30 @@ export const ReviewerQueuePage: React.FC = () => {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [actionSuccessToast, setActionSuccessToast] = useState<string | null>(null);
 
-  // Load and merge cases from sessionStorage & ledgerStore
-  const queueItems = useMemo(() => {
-    // 1. Load from ledgerStore
+  // Load cases directly from ledgerStore (canonical single source of truth - NO recalculation)
+  const queueItems: QueueItem[] = useMemo(() => {
     const storeCases = ledgerStore.getCases();
-    const itemsMap = new Map<string, QueueItem>();
-
-    storeCases.forEach((c) => {
-      itemsMap.set(c.caseId.toLowerCase(), {
+    return storeCases
+      .map((c) => ({
         caseId: c.caseId,
         timestamp: c.observedTimestamp || new Date().toISOString(),
         category: c.category,
         categoryLabel: APPROVED_CATEGORY_LABELS[c.category] || c.category.replace(/_/g, ' '),
         description: c.factualDescription,
-        coordinates: [c.longitude, c.latitude],
+        coordinates: [c.longitude, c.latitude] as [number, number],
         accuracyMeters: c.gpsAccuracyMeters,
-        computedClassification: c.spatialResult.classification,
+        computedClassification: c.spatialResult?.classification || c.computedClassification || 'LOCATION_UNCERTAIN',
         currentStatus: c.currentStatus,
-        hasPhoto: (c.evidenceList && c.evidenceList.length > 0) || false,
-        source: 'ledgerStore',
-      });
-    });
-
-    // 2. Scan sessionStorage for dynamic user submissions (keys: case_*)
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key && (key.startsWith('case_') || key.startsWith('case-'))) {
-        try {
-          const raw = sessionStorage.getItem(key);
-          if (!raw) continue;
-          const parsed = JSON.parse(raw);
-          if (!parsed.id) continue;
-
-          const [lng, lat] = parsed.coordinates || [73.8624, 19.1982];
-          const accuracy = parsed.accuracyMeters || 10;
-          const description = parsed.description || '';
-
-          // Deterministic spatial calculation
-          const spatial = calculateSpatialResult(
-            {
-              latitude: lat,
-              longitude: lng,
-              gpsAccuracyMeters: accuracy,
-              factualDescription: description,
-            },
-            SHIVNERI_GEOMETRY
-          );
-
-          const existingKey = parsed.id.toLowerCase();
-          const existingItem = itemsMap.get(existingKey);
-
-          itemsMap.set(existingKey, {
-            caseId: parsed.id,
-            timestamp: parsed.timestamp || new Date().toISOString(),
-            category: (parsed.categoryId as ObservationType) || 'OTHER_VISIBLE_CHANGE',
-            categoryLabel:
-              APPROVED_CATEGORY_LABELS[parsed.categoryId] ||
-              (parsed.categoryId ? parsed.categoryId.replace(/_/g, ' ') : 'Observed Change'),
-            description: description,
-            coordinates: [lng, lat],
-            accuracyMeters: accuracy,
-            computedClassification: spatial.classification,
-            currentStatus: (parsed.currentStatus as CaseStatus) || existingItem?.currentStatus || 'SUBMITTED_FOR_REVIEW',
-            hasPhoto: Boolean(parsed.photoUrl || parsed.photoMetadata),
-            source: 'sessionStorage',
-          });
-        } catch (err) {
-          console.error('Error parsing session queue item:', err);
-        }
-      }
-    }
-
-    // Convert map values to array and sort by timestamp descending (newest first)
-    const list = Array.from(itemsMap.values());
-    list.sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-    return list;
+        hasPhoto: Boolean(c.evidenceList && c.evidenceList.length > 0),
+        source: 'ledgerStore' as const,
+      }))
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [refreshTrigger]);
 
-  // Filter items by search query and status filter
+  // Filter items by search query, status filter, and category filter
   const filteredQueue = useMemo(() => {
     return queueItems.filter((item) => {
       const matchesSearch =
@@ -166,9 +106,13 @@ export const ReviewerQueuePage: React.FC = () => {
         statusConfig.label === statusFilter ||
         item.currentStatus === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      const matchesCategory =
+        categoryFilter === 'ALL' ||
+        item.category === categoryFilter;
+
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [queueItems, searchQuery, statusFilter]);
+  }, [queueItems, searchQuery, statusFilter, categoryFilter]);
 
   const activeSelectedItem = useMemo(() => {
     if (!selectedCaseId) return null;
@@ -180,7 +124,7 @@ export const ReviewerQueuePage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
         <div>
@@ -191,7 +135,7 @@ export const ReviewerQueuePage: React.FC = () => {
             </span>
           </div>
           <h1 className="text-xl sm:text-3xl font-bold text-white font-['Outfit']">
-            Reviewer Case Queue & Action Drawer
+            Reviewer Case Queue &amp; Action Drawer
           </h1>
           <p className="text-xs sm:text-sm text-text-secondary mt-1">
             Inspect spatial observations, verify GPS accuracy telemetry, and record append-only triage decisions.
@@ -200,36 +144,41 @@ export const ReviewerQueuePage: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={handleRefresh}
-            className="gap-1.5 min-h-[44px]"
+            className="gap-1.5 min-h-[44px] text-xs font-mono cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            Refresh Queue
+            <span>Refresh Queue</span>
           </Button>
+          <Link to="/capture">
+            <Button variant="primary" size="sm" className="gap-1.5 text-xs cursor-pointer">
+              + New Observation
+            </Button>
+          </Link>
           <Badge variant="slate" className="font-mono text-xs hidden sm:inline-flex">
             {queueItems.length} Total Records
           </Badge>
         </div>
       </div>
 
-      {/* Advisory Banner */}
+      {/* Advisory Legal Notice Banner */}
       <NoticeBanner variant="advisory">
         {CANONICAL_LEGAL_DISCLAIMER}
       </NoticeBanner>
 
-      {/* Action Toast Feedback */}
+      {/* Success Toast */}
       {actionSuccessToast && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/70 border border-emerald-800 text-emerald-300 text-xs flex items-center justify-between animate-fade-in">
-          <div className="flex items-center gap-2 bg-surface-well p-2 rounded-lg">
+        <div className="p-3.5 rounded-xl bg-emerald-950/70 border border-emerald-800 text-emerald-300 text-xs flex items-center justify-between gap-2 shadow-lg animate-fade-in">
+          <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{actionSuccessToast}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionSuccessToast(null)}
-            className="text-text-secondary hover:text-white text-xs font-bold px-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            className="text-text-secondary hover:text-white text-xs font-bold px-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
           >
             Dismiss
           </button>
@@ -250,7 +199,7 @@ export const ReviewerQueuePage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Filter className="w-3.5 h-3.5 text-text-secondary shrink-0" />
+          <SlidersHorizontal className="w-3.5 h-3.5 text-text-secondary shrink-0" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -283,7 +232,7 @@ export const ReviewerQueuePage: React.FC = () => {
             <tbody className="divide-y divide-border-subtle/80">
               {filteredQueue.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8">
+                  <td colSpan={5} className="p-8 text-center">
                     <EmptyState
                       title={
                         queueItems.length === 0
@@ -313,6 +262,7 @@ export const ReviewerQueuePage: React.FC = () => {
                             onClick={() => {
                               setSearchQuery('');
                               setStatusFilter('ALL');
+                              setCategoryFilter('ALL');
                             }}
                             className="min-h-[44px]"
                           >
@@ -382,23 +332,32 @@ export const ReviewerQueuePage: React.FC = () => {
                           <Button
                             size="sm"
                             variant="primary"
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent) => {
                               e.stopPropagation();
                               setSelectedCaseId(item.caseId);
                             }}
-                            className="gap-1.5 text-xs min-h-[44px]"
+                            className="gap-1.5 text-xs min-h-[44px] cursor-pointer"
                           >
                             <UserCheck className="w-3.5 h-3.5" />
-                            Inspect & Review
+                            <span>Inspect &amp; Review</span>
                           </Button>
                           <Link
-                            to={`/cases/${item.caseId}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-surface-well border border-border-subtle text-text-secondary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            to={`/case/${item.caseId}`}
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-surface-well border border-border-subtle text-text-secondary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
                             title={`View details for case ${item.caseId}`}
                             aria-label={`View details for case ${item.caseId}`}
                           >
                             <Eye className="w-4 h-4" />
+                          </Link>
+                          <Link
+                            to={`/packet/${item.caseId}`}
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-surface-well border border-border-subtle text-text-secondary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+                            title="View Reviewer Authority Packet"
+                            aria-label="View Reviewer Authority Packet"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
                           </Link>
                         </div>
                       </td>
@@ -500,20 +459,27 @@ export const ReviewerQueuePage: React.FC = () => {
 
                   <div className="pt-2 flex items-center justify-end gap-2 border-t border-border-subtle">
                     <Link
-                      to={`/cases/${item.caseId}`}
-                      className="px-3 min_h-[44px] rounded-lg border border-border-subtle text-text-primary hover:text-white text-xs font-medium flex items-center gap-1.5"
+                      to={`/case/${item.caseId}`}
+                      className="px-3 min-h-[44px] rounded-lg border border-border-subtle text-text-primary hover:text-white text-xs font-medium flex items-center gap-1.5 cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      Detail View
+                      Detail
+                    </Link>
+                    <Link
+                      to={`/packet/${item.caseId}`}
+                      className="px-3 min-h-[44px] rounded-lg border border-border-subtle text-text-primary hover:text-white text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Packet
                     </Link>
                     <Button
                       size="sm"
                       variant="primary"
                       onClick={() => setSelectedCaseId(item.caseId)}
-                      className="gap-1 text-xs min-h-[44px]"
+                      className="gap-1 text-xs min-h-[44px] cursor-pointer"
                     >
                       <UserCheck className="w-3.5 h-3.5" />
-                      Review & Decision
+                      Review
                     </Button>
                   </div>
                 </div>

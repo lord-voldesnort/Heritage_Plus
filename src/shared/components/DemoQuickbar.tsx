@@ -2,15 +2,35 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DEMO_SCENARIOS } from '../mock-data/mockScenarios';
 import { SHIVNERI_GEOMETRY, SHIVNERI_SITE } from '../mock-data/mockSite';
-import { calculateSpatialResult } from '../lib/spatialEngine';
+import { resolveMultiTierSpatialResult } from '../lib/spatialEngine';
 import { ledgerStore } from '../lib/ledgerStore';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { 
+  ChevronDown, 
+  ChevronUp, 
+  RotateCcw,
+} from 'lucide-react';
 
 export const DemoQuickbar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
+  const [resetToast, setResetToast] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const handleResetStore = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirmReset) {
+      setConfirmReset(true);
+      setTimeout(() => setConfirmReset(false), 4000);
+      return;
+    }
+    ledgerStore.resetDemoData();
+    setActiveScenarioId(null);
+    setConfirmReset(false);
+    setResetToast('Demo scenarios reset; user observations preserved');
+    setTimeout(() => setResetToast(null), 3000);
+  };
 
   // Load a scenario live and calculate deterministic spatial outputs
   const handleSelectScenario = (scenarioId: string) => {
@@ -19,18 +39,15 @@ export const DemoQuickbar: React.FC = () => {
 
     setActiveScenarioId(scenarioId);
 
-    // Calculate spatial result
-    const spatial = calculateSpatialResult(
-      {
-        latitude: scenario.latitude,
-        longitude: scenario.longitude,
-        gpsAccuracyMeters: scenario.gpsAccuracyMeters,
-        factualDescription: scenario.factualNotes,
-      },
-      SHIVNERI_GEOMETRY
-    );
+    // Calculate multi-tier spatial result
+    const spatial = resolveMultiTierSpatialResult({
+      latitude: scenario.latitude,
+      longitude: scenario.longitude,
+      gpsAccuracyMeters: scenario.gpsAccuracyMeters,
+      factualDescription: scenario.factualNotes,
+    });
 
-    // Create case in ledgerStore
+    // Create case in ledgerStore marked as a demo scenario
     const newCase = ledgerStore.createCase(
       {
         siteId: SHIVNERI_SITE.siteId,
@@ -42,7 +59,8 @@ export const DemoQuickbar: React.FC = () => {
         gpsAccuracyMeters: scenario.gpsAccuracyMeters,
         reporterType: 'VISITOR',
       },
-      spatial
+      spatial,
+      true // Mark as demo scenario
     );
 
     // Persist in sessionStorage for cross-screen flow
@@ -61,6 +79,7 @@ export const DemoQuickbar: React.FC = () => {
       })
     );
 
+    // Navigate to Spatial Result page for immediate judge inspection
     navigate(`/result/${newCase.caseId}`);
   };
 
@@ -162,7 +181,8 @@ export const DemoQuickbar: React.FC = () => {
           <button
             type="button"
             onClick={handleReset}
-            className="text-[11px] text-text-muted hover:text-text-primary px-2 py-1 transition font-medium"
+            aria-label={isExpanded ? 'Collapse Demo Switcher' : 'Expand Demo Switcher'}
+            className="text-[11px] text-text-muted hover:text-text-primary px-2 py-1 transition font-medium cursor-pointer"
           >
             Reset
           </button>
@@ -182,7 +202,7 @@ export const DemoQuickbar: React.FC = () => {
                     key={sc.id}
                     type="button"
                     onClick={() => handleSelectScenario(sc.id)}
-                    className={`p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between space-y-1.5 group ${
+                    className={`p-2.5 rounded-xl border text-left transition-all duration-200 flex flex-col justify-between space-y-1.5 group cursor-pointer ${
                       isActive
                         ? 'border-primary bg-primary/5 ring-1 ring-primary/30 text-text-primary shadow-xs'
                         : 'border-border-subtle bg-surface-card hover:bg-surface-well hover:border-border-strong text-text-secondary'
@@ -209,6 +229,32 @@ export const DemoQuickbar: React.FC = () => {
                 );
               })}
             </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 pt-1.5 border-t border-border-subtle text-[10px] font-mono text-text-secondary">
+              <div className="flex items-center gap-1.5 truncate">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span className="truncate">Geom: {SHIVNERI_GEOMETRY.versionLabel} · {SHIVNERI_GEOMETRY.governanceState} (Indicative · Uncertified)</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleResetStore}
+                className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors shrink-0 cursor-pointer ${
+                  confirmReset
+                    ? 'bg-rose-500/20 border-rose-500/50 text-rose-700 hover:bg-rose-500/30 animate-pulse'
+                    : 'text-primary hover:text-primary-container bg-primary/10 hover:bg-primary/20 border-primary/30'
+                }`}
+                title={confirmReset ? 'Click again to confirm resetting demo scenarios (preserves user observations)' : 'Reset demo scenarios to default baseline'}
+              >
+                <RotateCcw className="w-2.5 h-2.5" />
+                {confirmReset ? 'Confirm Demo Reset?' : 'Reset Demo'}
+              </button>
+            </div>
+
+            {resetToast && (
+              <div className="text-[10px] text-emerald-700 text-center font-mono py-0.5 bg-emerald-50 rounded border border-emerald-200 animate-pulse">
+                ✓ {resetToast}
+              </div>
+            )}
           </div>
         )}
       </div>
