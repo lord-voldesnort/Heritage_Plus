@@ -13,7 +13,7 @@ import {
   Lock,
   MapPin,
   Layers,
-  Camera
+  Camera,
 } from 'lucide-react';
 import { CaseStatus } from '../../shared/types';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
@@ -27,7 +27,8 @@ export type ReviewerActionKey =
   | 'RECOMMEND_FIELD_VERIFICATION'
   | 'REFER_OFFICIAL_REVIEW'
   | 'CLOSE_CASE'
-  | 'CLOSE_DUPLICATE';
+  | 'CLOSE_DUPLICATE'
+  | 'CLOSE_INSUFFICIENT_EVIDENCE';
 
 export interface PermittedActionOption {
   key: ReviewerActionKey;
@@ -69,20 +70,29 @@ export const PERMITTED_ACTIONS: PermittedActionOption[] = [
   },
   {
     key: 'CLOSE_CASE',
-    label: 'Close Case',
+    label: 'Close Case (Reviewed - No Action Needed)',
     targetStatus: 'CLOSED_REVIEWED',
     eventType: 'CASE_CLOSED',
-    description: 'Mark observation reviewed with no further action required. Immutably logged in the Change Ledger.',
+    description: 'Mark observation cataloged in Change Ledger with no further intervention required.',
     icon: CheckCircle2,
-    badgeVariant: 'slate',
+    badgeVariant: 'emerald',
   },
   {
     key: 'CLOSE_DUPLICATE',
     label: 'Close Case (Duplicate / Unrelated)',
     targetStatus: 'CLOSED_DUPLICATE',
     eventType: 'CASE_CLOSED',
-    description: 'Mark observation closed as duplicate of an existing record or outside scope. Immutably logged in the Change Ledger.',
+    description: 'Mark observation closed as duplicate of an existing record or outside protected heritage scope.',
     icon: FileCheck,
+    badgeVariant: 'slate',
+  },
+  {
+    key: 'CLOSE_INSUFFICIENT_EVIDENCE',
+    label: 'Close Case (Insufficient Location Evidence)',
+    targetStatus: 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE',
+    eventType: 'CASE_CLOSED',
+    description: 'GPS error disk is too wide (>35m or intersects boundary) to determine zone proximity reliably.',
+    icon: AlertTriangle,
     badgeVariant: 'slate',
   },
 ];
@@ -119,11 +129,12 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   const effectiveStatus = caseRecord?.currentStatus || currentStatus || 'SUBMITTED_FOR_REVIEW';
 
   // Enforce closed-case protection: terminal statuses cannot be re-edited
-  const isCaseClosed =
-    effectiveStatus === 'CLOSED_REVIEWED' ||
-    effectiveStatus === 'CLOSED_DUPLICATE' ||
-    effectiveStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE' ||
-    effectiveStatus === 'REFERRED';
+  const isCaseClosed = Boolean(
+    effectiveStatus &&
+      (effectiveStatus === 'CLOSED_REVIEWED' ||
+        effectiveStatus === 'CLOSED_DUPLICATE' ||
+        effectiveStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE')
+  );
 
   const [selectedActionKey, setSelectedActionKey] = useState<ReviewerActionKey>(
     'REQUEST_ADDITIONAL_EVIDENCE'
@@ -133,9 +144,8 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const selectedAction = PERMITTED_ACTIONS.find(
-    (a) => a.key === selectedActionKey
-  )!;
+  const selectedAction =
+    PERMITTED_ACTIONS.find((a) => a.key === selectedActionKey) || PERMITTED_ACTIONS[0];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,11 +154,16 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
       return;
     }
     setErrorMessage(null);
-
+    setSuccessMessage(null);
 
     const trimmedNotes = notes.trim();
     if (!trimmedNotes) {
       setErrorMessage('Action justification is required. Please provide administrative rationale for this decision.');
+      return;
+    }
+
+    if (trimmedNotes.length < 10) {
+      setErrorMessage('Rationale must be at least 10 characters long describing the physical reason.');
       return;
     }
 
@@ -166,8 +181,8 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
     try {
       const now = new Date().toISOString();
 
-      // 1. Append to in-memory ledger store
-      ledgerStore.appendReviewerDecision(
+      // Append to in-memory ledger store
+      const updatedCase = ledgerStore.appendReviewerDecision(
         caseId,
         selectedAction.label,
         selectedAction.targetStatus,
@@ -176,6 +191,11 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
         'REVIEWER'
       );
 
+      if (!updatedCase) {
+        setErrorMessage(`Case ${caseId} not found in Change Ledger store.`);
+        setIsSubmitting(false);
+        return;
+      }
 
       const payload: ReviewerActionPayload = {
         caseId,
@@ -200,7 +220,8 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
           onClose();
         }, 1200);
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Failed to record reviewer decision:', err);
       setErrorMessage('Failed to append action to Change Ledger. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -230,7 +251,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
               )}
             </div>
             <h3 className="text-base font-bold text-white font-['Outfit'] mt-0.5">
-              Reviewer Decision & Action Control
+              Reviewer Decision &amp; Action Control
             </h3>
           </div>
         </div>
@@ -239,7 +260,8 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            aria-label="Close reviewer drawer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -355,7 +377,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
                   type="button"
                   onClick={() => setSelectedActionKey(action.key)}
                   disabled={isSubmitting || isCaseClosed}
-                  className={`p-3 rounded-xl border text-left transition-all relative ${
+                  className={`p-3 rounded-xl border text-left transition-all relative cursor-pointer ${
                     isCaseClosed
                       ? 'opacity-50 cursor-not-allowed bg-slate-950/40 border-slate-850 text-slate-500'
                       : isSelected
@@ -387,7 +409,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
             htmlFor="reviewer-notes"
             className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono flex items-center justify-between"
           >
-            <span>2. Action Justification & Institutional Rationale *</span>
+            <span>2. Action Justification &amp; Institutional Rationale *</span>
             <span className="text-[10px] text-amber-500 font-sans normal-case">Required</span>
           </label>
 
@@ -400,7 +422,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
             placeholder={
               isCaseClosed
                 ? 'Case is sealed. No further actions permitted.'
-                : 'Provide administrative rationale or context (e.g. boundary ambiguity requires secondary ground measurement).'
+                : 'Provide administrative rationale or context (e.g., boundary ambiguity requires secondary ground measurement by ASI field unit).'
             }
             className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-sans leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed"
           />
@@ -438,7 +460,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
               variant="primary"
               size="md"
               disabled={isSubmitting || !notes.trim()}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
@@ -455,7 +477,6 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
           )}
         </div>
       </form>
-
     </Card>
   );
 

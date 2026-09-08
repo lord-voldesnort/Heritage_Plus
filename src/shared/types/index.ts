@@ -119,6 +119,9 @@ export interface ObservationRecord {
   observedTimestamp: string;
   privacyConsentGiven: boolean;
   spatialResult: SpatialResult;
+  computedClassification: SpatialClassification;
+  distanceToBoundaryMeters: number | null;
+  spatialReasoningExplanation: string;
   currentStatus: CaseStatus;
   evidenceList: EvidenceRecord[];
   eventsTimeline: ReviewEvent[];

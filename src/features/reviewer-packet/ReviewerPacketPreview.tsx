@@ -3,18 +3,19 @@ import { useParams, Link } from 'react-router-dom';
 import {
   Printer,
   ArrowLeft,
-  FileText
+  FileText,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { getReviewerPacketData, CANONICAL_NON_LEGAL_NOTICE } from './packetData';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
 import { CASE_STATUSES } from '../../shared/constants/caseStatuses';
-import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/contracts/heritagePulseContract';
 import {
   Badge,
   Button,
   NoticeBanner,
   EmptyState,
-  LedgerTimeline
+  LedgerTimeline,
 } from '../../shared/components';
 import { TimelineEventItem } from '../../shared/components/LedgerTimeline';
 
@@ -26,8 +27,6 @@ export const ReviewerPacketPreview: React.FC = () => {
     return caseId ? getReviewerPacketData(caseId) : null;
   }, [caseId]);
 
-
-
   // If missing, render the shared EmptyState component
   if (!resolvedCase) {
     return (
@@ -38,13 +37,13 @@ export const ReviewerPacketPreview: React.FC = () => {
           action={
             <div className="flex items-center gap-3">
               <Link to="/reviewer">
-                <Button variant="primary" size="sm" className="gap-1.5">
+                <Button variant="primary" size="sm" className="gap-1.5 cursor-pointer">
                   <ArrowLeft className="w-3.5 h-3.5" />
                   Return to Reviewer Queue
                 </Button>
               </Link>
               <Link to="/capture">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="cursor-pointer">
                   New Field Observation
                 </Button>
               </Link>
@@ -61,15 +60,18 @@ export const ReviewerPacketPreview: React.FC = () => {
 
   const classificationMeta =
     SPATIAL_CLASSIFICATIONS[resolvedCase.computedClassification] || {
+      id: resolvedCase.computedClassification,
       badgeLabel: resolvedCase.computedClassification,
       badgeVariant: 'slate',
       summaryDescription: 'Classification pending.',
     };
 
   const statusMeta = CASE_STATUSES[resolvedCase.currentStatus] || {
+    id: resolvedCase.currentStatus,
     label: resolvedCase.currentStatus,
     badgeVariant: 'slate',
     description: 'Current review status.',
+    isTerminal: false,
   };
 
   // Section 4: Construct Append-Only Change Ledger Timeline
@@ -97,8 +99,11 @@ export const ReviewerPacketPreview: React.FC = () => {
             id: evt.eventId || `raw-evt-${idx}`,
             eventType: mappedEventType,
             actorRole,
-            timestamp: evt.timestamp || resolvedCase.timestamp,
-            title: evt.title || (
+            timestamp: new Date(evt.timestamp).toLocaleString([], {
+              dateStyle: 'short',
+              timeStyle: 'short',
+            }),
+            title: evt.summary || (
               evt.eventType === 'OBSERVATION_CREATED'
                 ? 'Field Observation Created'
                 : evt.eventType === 'LOCATION_CAPTURED'
@@ -118,7 +123,10 @@ export const ReviewerPacketPreview: React.FC = () => {
             id: `${resolvedCase.id}-pkt-1`,
             eventType: 'OBSERVATION_CREATED',
             actorRole: 'REPORTER',
-            timestamp: resolvedCase.timestamp,
+            timestamp: new Date(resolvedCase.timestamp).toLocaleString([], {
+              dateStyle: 'short',
+              timeStyle: 'short',
+            }),
             title: 'Field Observation Created',
             description: `Observation logged under category "${resolvedCase.categoryLabel}".`,
             metadataBadge: 'Field Capture',
@@ -127,7 +135,10 @@ export const ReviewerPacketPreview: React.FC = () => {
             id: `${resolvedCase.id}-pkt-2`,
             eventType: 'LOCATION_CAPTURED',
             actorRole: 'SYSTEM',
-            timestamp: resolvedCase.timestamp,
+            timestamp: new Date(resolvedCase.timestamp).toLocaleString([], {
+              dateStyle: 'short',
+              timeStyle: 'short',
+            }),
             title: 'GPS Location Telemetry Logged',
             description: `Hardware GPS position (${resolvedCase.latitude.toFixed(5)}°N, ${resolvedCase.longitude.toFixed(5)}°E) with ±${resolvedCase.accuracyMeters.toFixed(1)}m uncertainty circle.`,
             metadataBadge: `±${resolvedCase.accuracyMeters.toFixed(1)}m error`,
@@ -136,7 +147,10 @@ export const ReviewerPacketPreview: React.FC = () => {
             id: `${resolvedCase.id}-pkt-3`,
             eventType: 'SPATIAL_EVALUATED',
             actorRole: 'SYSTEM',
-            timestamp: resolvedCase.timestamp,
+            timestamp: new Date(resolvedCase.timestamp).toLocaleString([], {
+              dateStyle: 'short',
+              timeStyle: 'short',
+            }),
             title: 'Spatial Engine Finding Computed',
             description: `Classification: ${classificationMeta.badgeLabel}. Distance: ${
               resolvedCase.distanceToBoundaryMeters !== null
@@ -153,7 +167,7 @@ export const ReviewerPacketPreview: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 px-4 py-6 font-sans">
-      {/* 3. Export Controls Bar (print:hidden) */}
+      {/* Export Controls Bar (print:hidden) */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800 print:hidden">
         <div className="flex items-center gap-2">
           <Link
@@ -165,13 +179,13 @@ export const ReviewerPacketPreview: React.FC = () => {
           </Link>
           <span className="text-slate-600">•</span>
           <span className="font-mono text-xs text-amber-400 font-bold">
-            {resolvedCase.id}
+            {resolvedCase.caseId}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Link to={`/cases/${resolvedCase.id}`}>
-            <Button variant="outline" size="sm" className="gap-1.5">
+          <Link to={`/case/${resolvedCase.caseId}`}>
+            <Button variant="outline" size="sm" className="gap-1.5 cursor-pointer">
               <FileText className="w-3.5 h-3.5" />
               Interactive View
             </Button>
@@ -181,7 +195,7 @@ export const ReviewerPacketPreview: React.FC = () => {
             onClick={handlePrint}
             variant="primary"
             size="sm"
-            className="gap-1.5 shadow-sm"
+            className="gap-1.5 shadow-sm cursor-pointer"
           >
             <Printer className="w-3.5 h-3.5" />
             Print / Save PDF
@@ -189,12 +203,12 @@ export const ReviewerPacketPreview: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. Legal Safety & Non-Accusatory Advisory Banner (print:hidden) */}
+      {/* Legal Safety & Non-Accusatory Advisory Banner (print:hidden) */}
       <NoticeBanner variant="advisory" className="print:hidden">
         {CANONICAL_LEGAL_DISCLAIMER}
       </NoticeBanner>
 
-      {/* 2. Standalone, Print-Ready Document Container */}
+      {/* Standalone, Print-Ready Document Container */}
       <div className="max-w-4xl mx-auto bg-white p-8 sm:p-10 border border-slate-200 rounded-xl shadow-xs text-slate-900 leading-relaxed print:border-none print:shadow-none print:p-0 print:m-0 print:bg-transparent print:text-black">
         {/* Printable Formal Document Header */}
         <div className="border-b-2 border-slate-900 pb-5 mb-6 flex items-start justify-between gap-4">
@@ -212,10 +226,10 @@ export const ReviewerPacketPreview: React.FC = () => {
 
           <div className="text-right font-mono shrink-0">
             <div className="text-sm font-bold text-slate-900 border border-slate-900 px-2.5 py-1 rounded bg-slate-50 print:bg-transparent">
-              {resolvedCase.id}
+              {resolvedCase.caseId}
             </div>
             <div className="text-[10px] text-slate-500 mt-1">
-              Generated: {new Date().toISOString().split('T')[0]}
+              Generated: {new Date(resolvedCase.timestamp).toISOString().split('T')[0]}
             </div>
           </div>
         </div>
@@ -246,10 +260,10 @@ export const ReviewerPacketPreview: React.FC = () => {
                   Protected Heritage Site:
                 </span>
                 <div className="font-bold text-slate-900 text-sm">
-                  {resolvedCase.site.name}
+                  {resolvedCase.siteName}
                 </div>
                 <div className="text-slate-600 text-[11px]">
-                  {resolvedCase.site.vernacularName} ({resolvedCase.site.district}, {resolvedCase.site.state})
+                  {resolvedCase.provenance.vernacularName} ({resolvedCase.provenance.district}, {resolvedCase.provenance.state})
                 </div>
               </div>
 
@@ -261,7 +275,7 @@ export const ReviewerPacketPreview: React.FC = () => {
                   {resolvedCase.provenance.sourceAgency}
                 </div>
                 <div className="text-slate-600 text-[11px] font-mono">
-                  ASI Monument Code: {resolvedCase.provenance.monumentNumber}
+                  ASI Monument Code: {resolvedCase.monumentNumber}
                 </div>
               </div>
 
@@ -270,7 +284,7 @@ export const ReviewerPacketPreview: React.FC = () => {
                   Layer Version & Capture Date:
                 </span>
                 <div className="font-mono font-medium text-slate-800">
-                  {resolvedCase.provenance.bhuvanVersionStatement} ({resolvedCase.provenance.retrievalDate})
+                  {resolvedCase.provenance.verbatimVersionDisclaimer} ({resolvedCase.provenance.retrievalDate})
                 </div>
               </div>
 
@@ -288,12 +302,11 @@ export const ReviewerPacketPreview: React.FC = () => {
                   Verbatim Source Limitations Note:
                 </span>
                 <p className="text-[11px] text-slate-600 italic bg-white p-2.5 rounded border border-slate-200">
-                  &quot;{resolvedCase.provenance.verbatimLimitationText}&quot;
+                  &quot;{resolvedCase.provenance.verbatimAsiDisclaimer}&quot;
                 </p>
               </div>
             </div>
           </section>
-
 
           {/* SECTION 2: Factual Observation */}
           <section className="space-y-3">
@@ -317,7 +330,7 @@ export const ReviewerPacketPreview: React.FC = () => {
 
                 <div>
                   <span className="text-slate-500 block text-[10px] uppercase font-mono">
-                    Captured Timestamp:
+                    Observation Timestamp:
                   </span>
                   <div className="font-mono text-slate-800">
                     {new Date(resolvedCase.timestamp).toLocaleString()}
@@ -326,10 +339,10 @@ export const ReviewerPacketPreview: React.FC = () => {
 
                 <div>
                   <span className="text-slate-500 block text-[10px] uppercase font-mono">
-                    Hardware GPS Position:
+                    Reported Coordinates & Error:
                   </span>
                   <div className="font-mono text-slate-800">
-                    {resolvedCase.latitude.toFixed(5)}°N, {resolvedCase.longitude.toFixed(5)}°E
+                    {resolvedCase.latitude.toFixed(5)}°N, {resolvedCase.longitude.toFixed(5)}°E (±{resolvedCase.accuracyMeters.toFixed(1)}m)
                   </div>
                 </div>
               </div>
@@ -343,31 +356,39 @@ export const ReviewerPacketPreview: React.FC = () => {
                 </p>
               </div>
 
-              {/* Photo Thumbnail with Metadata */}
-              {resolvedCase.photoUrl && (
+              {/* Photo Evidence with Metadata or Explicit Missing Notice */}
+              {resolvedCase.photoUrl || (resolvedCase.evidenceList && resolvedCase.evidenceList.length > 0) ? (
                 <div className="bg-slate-50/80 p-3.5 rounded-lg border border-slate-200 flex flex-col sm:flex-row items-start gap-4">
                   <img
-                    src={resolvedCase.photoUrl}
-                    alt="Field evidence"
-                    className="w-full sm:w-48 h-36 object-cover rounded border border-slate-300"
+                    src={resolvedCase.photoUrl || resolvedCase.evidenceList[0]?.fileUrl}
+                    alt="Field observation evidence"
+                    className="w-full sm:w-48 h-36 object-cover rounded border border-slate-300 bg-slate-100"
                   />
                   <div className="space-y-1.5 text-xs">
-                    <span className="text-slate-500 block text-[10px] uppercase font-mono">
+                    <span className="text-slate-500 block text-[10px] uppercase font-mono font-semibold">
                       Photographic Evidence Metadata:
                     </span>
                     <div className="font-mono text-slate-800">
                       File: <strong>{resolvedCase.photoMetadata?.fileName || 'capture.jpg'}</strong>
                     </div>
                     <div className="font-mono text-slate-800">
-                      Size: <strong>{resolvedCase.photoMetadata?.sizeKb || 0} KB</strong>
+                      Size: <strong>{resolvedCase.photoMetadata?.sizeKb || (resolvedCase.evidenceList[0] ? Math.round(resolvedCase.evidenceList[0].fileSizeBytes / 1024) : 0)} KB</strong>
                     </div>
                     <div className="font-mono text-slate-800">
-                      Captured Date: <strong>{resolvedCase.photoMetadata?.capturedDate || 'Verified'}</strong>
+                      SHA-256 Digest: <strong className="text-[11px] break-all text-slate-700">{resolvedCase.photoMetadata?.sha256Checksum || resolvedCase.evidenceList[0]?.sha256Checksum || 'N/A'}</strong>
+                    </div>
+                    <div className="font-mono text-slate-800">
+                      Captured Date: <strong>{resolvedCase.photoMetadata?.capturedDate || (resolvedCase.evidenceList[0]?.uploadTimestamp ? new Date(resolvedCase.evidenceList[0].uploadTimestamp).toLocaleDateString() : 'Verified')}</strong>
                     </div>
                     <div className="text-[11px] text-slate-500 italic mt-1">
                       SHA-256 evidence checksum validated upon upload.
                     </div>
                   </div>
+                </div>
+              ) : (
+                <div className="bg-slate-50/80 p-3.5 rounded-lg border border-slate-200 text-xs text-slate-600 flex items-center gap-2.5">
+                  <ImageIcon className="w-4 h-4 text-slate-400 shrink-0" />
+                  <span>No photographic evidence attached to this observation record.</span>
                 </div>
               )}
             </div>
@@ -418,9 +439,14 @@ export const ReviewerPacketPreview: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-700 leading-relaxed font-sans bg-white p-3 rounded border border-slate-200">
-                  {resolvedCase.explanation}
-                </p>
+                <div className="space-y-1">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono block">
+                    Spatial Reasoning Explanation:
+                  </span>
+                  <p className="text-xs text-slate-700 leading-relaxed font-sans bg-white p-3 rounded border border-slate-200">
+                    {resolvedCase.explanation}
+                  </p>
+                </div>
 
                 {(resolvedCase.isUncertaintyOverlap || resolvedCase.accuracyMeters > 35) && (
                   <div className="p-3 rounded bg-amber-50 border border-amber-200 text-amber-900 text-xs font-sans">
@@ -460,7 +486,7 @@ export const ReviewerPacketPreview: React.FC = () => {
                   Current Case Status:
                 </span>
                 <Badge variant={statusMeta.badgeVariant as any}>
-                  {resolvedCase.currentStatus}
+                  {statusMeta.label}
                 </Badge>
               </div>
 
@@ -487,7 +513,7 @@ export const ReviewerPacketPreview: React.FC = () => {
               Generated for official institutional review & archival record.
             </div>
             <div className="text-right">
-              Document Ref: HP-PACKET-{resolvedCase.id}
+              Document Ref: HP-PACKET-{resolvedCase.caseId}
               <br />
               Status: {resolvedCase.currentStatus}
             </div>

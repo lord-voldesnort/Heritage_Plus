@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DEMO_SCENARIOS } from '../mock-data/mockScenarios';
 import { SHIVNERI_GEOMETRY, SHIVNERI_SITE } from '../mock-data/mockSite';
-import { calculateSpatialResult } from '../lib/spatialEngine';
+import { resolveMultiTierSpatialResult } from '../lib/spatialEngine';
 import { ledgerStore } from '../lib/ledgerStore';
 import { 
   Sparkles, 
@@ -13,7 +13,7 @@ import {
   Compass, 
   AlertTriangle,
   Play,
-  RotateCcw
+  RotateCcw,
 } from 'lucide-react';
 
 export const DemoQuickbar: React.FC = () => {
@@ -45,16 +45,13 @@ export const DemoQuickbar: React.FC = () => {
 
     setActiveScenarioId(scenarioId);
 
-    // Calculate spatial result
-    const spatial = calculateSpatialResult(
-      {
-        latitude: scenario.latitude,
-        longitude: scenario.longitude,
-        gpsAccuracyMeters: scenario.gpsAccuracyMeters,
-        factualDescription: scenario.factualNotes,
-      },
-      SHIVNERI_GEOMETRY
-    );
+    // Calculate multi-tier spatial result
+    const spatial = resolveMultiTierSpatialResult({
+      latitude: scenario.latitude,
+      longitude: scenario.longitude,
+      gpsAccuracyMeters: scenario.gpsAccuracyMeters,
+      factualDescription: scenario.factualNotes,
+    });
 
     // Create case in ledgerStore marked as a demo scenario
     const newCase = ledgerStore.createCase(
@@ -75,7 +72,6 @@ export const DemoQuickbar: React.FC = () => {
     // Navigate to Spatial Result page for immediate judge inspection
     navigate(`/result/${newCase.caseId}`);
   };
-
 
   const getIcon = (expected: string) => {
     switch (expected) {
@@ -115,7 +111,7 @@ export const DemoQuickbar: React.FC = () => {
           <button 
             type="button"
             aria-label={isExpanded ? "Collapse Demo Switcher" : "Expand Demo Switcher"}
-            className="text-slate-400 hover:text-white p-1"
+            className="text-slate-400 hover:text-white p-1 cursor-pointer"
           >
             {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
           </button>
@@ -132,7 +128,7 @@ export const DemoQuickbar: React.FC = () => {
                     key={sc.id}
                     type="button"
                     onClick={() => handleSelectScenario(sc.id)}
-                    className={`p-2 rounded-xl border text-left transition-all duration-200 flex flex-col justify-between space-y-1 group ${
+                    className={`p-2 rounded-xl border text-left transition-all duration-200 flex flex-col justify-between space-y-1 group cursor-pointer ${
                       isActive
                         ? 'border-amber-500 bg-amber-950/50 ring-1 ring-amber-500/50 text-white'
                         : 'border-slate-800/80 bg-slate-900/80 hover:border-amber-500/50 hover:bg-slate-850 text-slate-300'
@@ -169,7 +165,7 @@ export const DemoQuickbar: React.FC = () => {
               <button
                 type="button"
                 onClick={handleResetStore}
-                className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors shrink-0 ${
+                className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors shrink-0 cursor-pointer ${
                   confirmReset
                     ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 hover:bg-rose-500/30 animate-pulse'
                     : 'text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30'

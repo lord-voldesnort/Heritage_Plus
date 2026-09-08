@@ -7,11 +7,13 @@ import {
   RefreshCw,
   Eye,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  SlidersHorizontal,
+  FileText,
 } from 'lucide-react';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
-import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
+import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/contracts/heritagePulseContract';
 import { Badge, Button, Card, NoticeBanner, EmptyState } from '../../shared/components';
 import { ReviewerActionCard } from './ReviewerActionCard';
 import { CaseStatus, SpatialClassification, ObservationType } from '../../shared/types';
@@ -27,6 +29,7 @@ export interface QueueItem {
   computedClassification: SpatialClassification;
   currentStatus: CaseStatus;
   hasPhoto: boolean;
+  source: 'ledgerStore';
 }
 
 // Category display mapping using approved neutral non-accusatory terminology
@@ -40,7 +43,7 @@ const APPROVED_CATEGORY_LABELS: Record<string, string> = {
   OTHER_VISIBLE_CHANGE: 'Other visible change',
 };
 
-// Simplified status badge helper for queue table
+// Canonical status badge helper for queue table
 function getStatusBadgeConfig(status: CaseStatus): { label: string; variant: 'blue' | 'amber' | 'purple' | 'emerald' | 'slate' } {
   switch (status) {
     case 'SUBMITTED_FOR_REVIEW':
@@ -69,25 +72,24 @@ export const ReviewerQueuePage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [actionSuccessToast, setActionSuccessToast] = useState<string | null>(null);
 
-  // Load cases exclusively from ledgerStore
-  const queueItems = useMemo(() => {
+  // Load cases directly from ledgerStore (canonical single source of truth - NO recalculation)
+  const queueItems: QueueItem[] = useMemo(() => {
     const storeCases = ledgerStore.getCases();
-    const items: QueueItem[] = storeCases.map((c) => ({
-      caseId: c.caseId,
-      timestamp: c.observedTimestamp || new Date().toISOString(),
-      category: c.category,
-      categoryLabel: APPROVED_CATEGORY_LABELS[c.category] || c.category.replace(/_/g, ' '),
-      description: c.factualDescription,
-      coordinates: [c.longitude, c.latitude],
-      accuracyMeters: c.gpsAccuracyMeters,
-      computedClassification: c.spatialResult.classification,
-      currentStatus: c.currentStatus,
-      hasPhoto: (c.evidenceList && c.evidenceList.length > 0) || false,
-    }));
-
-    return items.sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
+    return storeCases
+      .map((c) => ({
+        caseId: c.caseId,
+        timestamp: c.observedTimestamp || new Date().toISOString(),
+        category: c.category,
+        categoryLabel: APPROVED_CATEGORY_LABELS[c.category] || c.category.replace(/_/g, ' '),
+        description: c.factualDescription,
+        coordinates: [c.longitude, c.latitude] as [number, number],
+        accuracyMeters: c.gpsAccuracyMeters,
+        computedClassification: c.spatialResult?.classification || c.computedClassification || 'LOCATION_UNCERTAIN',
+        currentStatus: c.currentStatus,
+        hasPhoto: Boolean(c.evidenceList && c.evidenceList.length > 0),
+        source: 'ledgerStore' as const,
+      }))
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [refreshTrigger]);
 
   // Filter items by search query, status filter, and category filter
@@ -113,7 +115,6 @@ export const ReviewerQueuePage: React.FC = () => {
     });
   }, [queueItems, searchQuery, statusFilter, categoryFilter]);
 
-
   const activeSelectedItem = useMemo(() => {
     if (!selectedCaseId) return null;
     return queueItems.find((c) => c.caseId === selectedCaseId) || null;
@@ -124,7 +125,7 @@ export const ReviewerQueuePage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
@@ -135,7 +136,7 @@ export const ReviewerQueuePage: React.FC = () => {
             </span>
           </div>
           <h1 className="text-xl sm:text-3xl font-bold text-white font-['Outfit']">
-            Reviewer Case Queue & Action Drawer
+            Reviewer Case Queue &amp; Action Drawer
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Inspect spatial observations, verify GPS accuracy telemetry, and record append-only triage decisions.
@@ -144,28 +145,33 @@ export const ReviewerQueuePage: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={handleRefresh}
-            className="gap-1.5"
+            className="gap-1.5 text-xs font-mono cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            Refresh Queue
+            <span>Refresh Queue</span>
           </Button>
+          <Link to="/capture">
+            <Button variant="primary" size="sm" className="gap-1.5 text-xs cursor-pointer">
+              + New Observation
+            </Button>
+          </Link>
           <Badge variant="slate" className="font-mono text-xs hidden sm:inline-flex">
             {queueItems.length} Total Records
           </Badge>
         </div>
       </div>
 
-      {/* Advisory Banner */}
+      {/* Advisory Legal Notice Banner */}
       <NoticeBanner variant="advisory">
         {CANONICAL_LEGAL_DISCLAIMER}
       </NoticeBanner>
 
-      {/* Action Toast Feedback */}
+      {/* Success Toast */}
       {actionSuccessToast && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/70 border border-emerald-800 text-emerald-300 text-xs flex items-center justify-between animate-fade-in">
+        <div className="p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-700 text-emerald-200 text-xs flex items-center justify-between gap-2 shadow-lg animate-fade-in">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{actionSuccessToast}</span>
@@ -173,80 +179,80 @@ export const ReviewerQueuePage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActionSuccessToast(null)}
-            className="text-slate-400 hover:text-white text-xs font-bold px-2"
+            className="text-emerald-400 hover:text-white text-xs underline cursor-pointer"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      {/* Search & Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by Case ID, category, or description..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 font-sans"
-          />
+      {/* Filter & Search Bar */}
+      <Card variant="bordered" className="p-4 bg-slate-900/60 border-slate-800 space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search by Case ID, category, or factual notes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+            />
+          </div>
+
+          {/* Status Filter Tabs */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500 mr-1 hidden sm:inline-block" />
+            {['ALL', 'SUBMITTED', 'ADDITIONAL_INFO_NEEDED', 'FIELD_VERIFICATION_RECOMMENDED', 'CLOSED'].map((filterKey) => {
+              const isSelected = statusFilter === filterKey;
+              return (
+                <button
+                  key={filterKey}
+                  type="button"
+                  onClick={() => setStatusFilter(filterKey)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-amber-600/30 text-amber-300 border border-amber-500/60 font-semibold'
+                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800 hover:bg-slate-850'
+                  }`}
+                >
+                  {filterKey.replace(/_/g, ' ')}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-          >
-            <option value="ALL">All Review Statuses</option>
-            <option value="SUBMITTED">SUBMITTED</option>
-            <option value="ADDITIONAL_INFO_NEEDED">ADDITIONAL_INFO_NEEDED</option>
-            <option value="FIELD_VERIFICATION_RECOMMENDED">FIELD_VERIFICATION_RECOMMENDED</option>
-            <option value="REFERRED">REFERRED</option>
-            <option value="CLOSED">CLOSED</option>
-          </select>
-
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-          >
-            <option value="ALL">All Categories</option>
-            <option value="POSSIBLE_CONSTRUCTION">Possible construction</option>
-            <option value="POSSIBLE_ENCROACHMENT">Possible alteration</option>
-            <option value="PHYSICAL_DAMAGE">Physical damage</option>
-            <option value="DUMPING_OR_WASTE">Dumping or waste</option>
-            <option value="BLOCKED_ACCESS">Blocked access</option>
-            <option value="ALTERATION_OR_OBSTRUCTION">Visual obstruction</option>
-            <option value="OTHER_VISIBLE_CHANGE">Other visible change</option>
-          </select>
+        {/* Count Pill */}
+        <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 pt-2 border-t border-slate-800/80">
+          <span>
+            Showing <strong>{filteredQueue.length}</strong> of <strong>{queueItems.length}</strong> cases in Change Ledger
+          </span>
+          <span>Append-Only Ledger Active</span>
         </div>
-      </div>
+      </Card>
 
-
-      {/* Responsive Case Queue: Desktop Table & Mobile Cards */}
-      <Card variant="bordered" className="overflow-hidden bg-slate-900/40 p-0 border-slate-800">
-        {/* Desktop View Table (sm and above) */}
+      {/* Main Table / List View */}
+      <Card variant="elevated" className="p-0 overflow-hidden bg-slate-900/80 border-slate-800">
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-slate-950/80 text-slate-400 font-mono border-b border-slate-800">
-                <th className="p-3.5">Case ID & Timestamp</th>
-                <th className="p-3.5">Observation Category</th>
-                <th className="p-3.5">Spatial Classification</th>
-                <th className="p-3.5">Review Status</th>
-                <th className="p-3.5 text-right">Inspect Action</th>
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-950/90 text-slate-400 font-mono border-b border-slate-800 uppercase tracking-wider text-[10px]">
+              <tr>
+                <th className="p-3.5">Case ID &amp; Time</th>
+                <th className="p-3.5">Observation &amp; Notes</th>
+                <th className="p-3.5">Spatial Assessment</th>
+                <th className="p-3.5">Current Status</th>
+                <th className="p-3.5 text-right">Review Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-slate-800/60">
               {filteredQueue.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8">
+                  <td colSpan={5} className="p-8 text-center">
                     <EmptyState
-                      title="No cases match search or filter criteria"
-                      description="Try adjusting your search terms or selecting 'All Review Statuses' to view all institutional triage records."
+                      title="No matching cases found"
+                      description="No Change Ledger observations match the applied filter criteria."
                       action={
                         <Button
                           variant="secondary"
@@ -259,7 +265,6 @@ export const ReviewerQueuePage: React.FC = () => {
                         >
                           Clear Filters
                         </Button>
-
                       }
                     />
                   </td>
@@ -323,22 +328,30 @@ export const ReviewerQueuePage: React.FC = () => {
                           <Button
                             size="sm"
                             variant="primary"
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent) => {
                               e.stopPropagation();
                               setSelectedCaseId(item.caseId);
                             }}
-                            className="gap-1 text-xs"
+                            className="gap-1 text-xs cursor-pointer"
                           >
                             <UserCheck className="w-3.5 h-3.5" />
-                            Inspect & Review
+                            <span>Inspect &amp; Review</span>
                           </Button>
                           <Link
-                            to={`/cases/${item.caseId}`}
-                            onClick={(e) => e.stopPropagation()}
+                            to={`/case/${item.caseId}`}
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
                             className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                             title="View Full Detail Page"
                           >
                             <Eye className="w-3.5 h-3.5" />
+                          </Link>
+                          <Link
+                            to={`/packet/${item.caseId}`}
+                            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                            className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                            title="View Reviewer Authority Packet"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
                           </Link>
                         </div>
                       </td>
@@ -350,7 +363,7 @@ export const ReviewerQueuePage: React.FC = () => {
           </table>
         </div>
 
-        {/* Mobile View Cards (below md, min 390px support) */}
+        {/* Mobile View Cards (below md) */}
         <div className="md:hidden divide-y divide-slate-800/80">
           {filteredQueue.length === 0 ? (
             <div className="p-6 text-center text-slate-500 text-xs">
@@ -404,20 +417,27 @@ export const ReviewerQueuePage: React.FC = () => {
 
                   <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-900">
                     <Link
-                      to={`/cases/${item.caseId}`}
-                      className="px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1"
+                      to={`/case/${item.caseId}`}
+                      className="px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1 cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      Detail View
+                      Detail
+                    </Link>
+                    <Link
+                      to={`/packet/${item.caseId}`}
+                      className="px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1 cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Packet
                     </Link>
                     <Button
                       size="sm"
                       variant="primary"
                       onClick={() => setSelectedCaseId(item.caseId)}
-                      className="gap-1 text-xs"
+                      className="gap-1 text-xs cursor-pointer"
                     >
                       <UserCheck className="w-3.5 h-3.5" />
-                      Review & Decision
+                      Review
                     </Button>
                   </div>
                 </div>

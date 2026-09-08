@@ -5,5 +5,5 @@ export type {
   ReviewerActionKey,
   PermittedActionOption,
   ReviewerActionPayload,
-  ReviewerActionCardProps
+  ReviewerActionCardProps,
 } from './ReviewerActionCard';
