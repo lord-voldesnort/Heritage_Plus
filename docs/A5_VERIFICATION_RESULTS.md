@@ -17,10 +17,17 @@ All four scenarios were evaluated through the authoritative spatial resolver (`r
 
 | Scenario | Coordinates | GPS Accuracy | Resolver Classification | Layer Attributed | Perimeter Distance | Stored Result | Result UI | Case UI | Reviewer UI | Packet Data | Data Consistent? |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| **Scenario 1: Inside Protected** | 19.1980°N, 73.8580°E | ±4.5m | `POTENTIAL_ZONE_CONCERN` | `v1.0-bhuvan-protected-7068` | 128.8m | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | **YES (PASS)** |
-| **Scenario 2: Outside Regulated** | 19.2085°N, 73.8750°E | ±5.0m | `NO_SPATIAL_CONCERN_INDICATED` | `v1.0-bhuvan-regulated-2394` | 984.7m | `NO_SPATIAL_CONCERN_INDICATED` | `NO_SPATIAL_CONCERN_INDICATED` | `NO_SPATIAL_CONCERN_INDICATED` | `NO_SPATIAL_CONCERN_INDICATED` | `NO_SPATIAL_CONCERN_INDICATED` | **YES (PASS)** |
-| **Scenario 3: Edge Uncertainty** | 19.1931225°N, 73.8528893°E | ±30.0m | `POTENTIAL_ZONE_CONCERN` (Prohibited tier + Protected uncertainty note) | `v1.0-bhuvan-prohibited-9785` | 70.0m (to Prohibited) / 26.0m (to Protected) | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | **YES (PASS)** |
-| **Scenario 4: Degraded GPS** | 19.1980°N, 73.8580°E | ±46.0m | `EVIDENCE_INSUFFICIENT` | N/A (sensor gate >35m) | null | `EVIDENCE_INSUFFICIENT` | `EVIDENCE_INSUFFICIENT` | `EVIDENCE_INSUFFICIENT` | `EVIDENCE_INSUFFICIENT` | `EVIDENCE_INSUFFICIENT` | **YES (PASS)** |
+| **Scenario 1: Inside Protected** | 19.1980°N, 73.8580°E | ±4.5m | `POTENTIAL_ZONE_CONCERN` | `v1.0-bhuvan-protected-7068` (Protected Area) | 128.8m | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | **YES (PASS)** |
+| **Scenario 2: Outside Regulated** | 19.2085°N, 73.8750°E | ±5.0m | `NO_SPATIAL_CONCERN_INDICATED` | `v1.0-bhuvan-regulated-2394` (300m Regulated Boundary) | 984.7m | `NO_SPATIAL_CONCERN_INDICATED` | `NO_SPATIAL_CONCERN_INDICATED` | `NO_SPATIAL_CONCERN_INDICATED` | `NO_SPATIAL_CONCERN_INDICATED` | `NO_SPATIAL_CONCERN_INDICATED` | **YES (PASS)** |
+| **Scenario 3: Near Boundary / Multi-Tier Uncertainty** | 19.1931225°N, 73.8528893°E | ±30.0m | `POTENTIAL_ZONE_CONCERN` (Prohibited Tier with explicit Protected uncertainty note) | `v1.0-bhuvan-prohibited-9785` (100m Prohibited Zone) | 71.6m (to Prohibited boundary) / 26.0m (to Protected boundary) | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | `POTENTIAL_ZONE_CONCERN` | **YES (PASS)** |
+| **Scenario 4: Degraded GPS** | 19.1980°N, 73.8580°E | ±46.0m | `EVIDENCE_INSUFFICIENT` | N/A (Sensor error gate >35m) | null | `EVIDENCE_INSUFFICIENT` | `EVIDENCE_INSUFFICIENT` | `EVIDENCE_INSUFFICIENT` | `EVIDENCE_INSUFFICIENT` | `EVIDENCE_INSUFFICIENT` | **YES (PASS)** |
+
+### Detailed Analysis of Scenario 3 (Multi-Tier vs Single-Layer Behavior)
+- **Single-Layer Evaluation against Protected Area**: Distance from coordinate to Protected boundary is $26.0\text{ m} \le 30.0\text{ m}$ (GPS error margin). Evaluated in isolation, `calculateSpatialResult` returns `LOCATION_UNCERTAIN` (`isUncertaintyOverlap: true`).
+- **Multi-Tier Evaluation across all 3 Tiers**: The coordinate is located comfortably inside the 100m Prohibited Buffer layer ($71.6\text{ m}$ from Prohibited perimeter $> 30.0\text{ m}$ GPS accuracy).
+- **Resolver Output**: `resolveMultiTierSpatialResult()` attributes the primary classification to the confident Prohibited tier (`POTENTIAL_ZONE_CONCERN`, $71.6\text{ m}$ perimeter distance) while annotating the higher-tier Protected Area boundary uncertainty in the explanation:
+  > *"Potential zone-related concern – point is within the 100m Prohibited Zone layer (v1.0-bhuvan-prohibited-9785). GPS accuracy is ±30.0m. Note: The relationship to the more restrictive Protected Area layer (v1.0-bhuvan-protected-7068) could not be reliably determined due to GPS accuracy."*
+- **Data Consistency**: The engine-derived classification, distance ($71.6\text{ m}$), and explanation are saved into the `CaseRecord` and consumed identically by Result, Case Detail, Reviewer Queue, and Packet views.
 
 ---
 
@@ -30,7 +37,7 @@ All four scenarios were evaluated through the authoritative spatial resolver (`r
 - **Step 2 — Field Capture (`/capture`)**: Validates input observation, categories, coordinates, and photo evidence. — **PASS**
 - **Step 3 — Spatial Resolution**: `resolveMultiTierSpatialResult()` evaluates the 3 MultiPolygon tiers exactly once. Zero centroid shortcuts. — **PASS**
 - **Step 4 — Case Creation**: Assigns non-colliding stable Case ID (`HP-YYYYMMDD-SEQ`) and appends initial `CASE_CREATED` event to `eventsTimeline`. — **PASS**
-- **Step 5 — Persistence**: `LedgerStore` + `ClientStorageAdapter` writes case to `localStorage`. Case survives page reload and browser restarts. — **PASS**
+- **Step 5 — Persistence**: `LedgerStore` + `ClientStorageAdapter` writes case to `localStorage`. Case metadata, evidence metadata, SHA-256 checksums, and ledger history survive page reload and browser restarts. — **PASS**
 - **Step 6 — Spatial Result (`/result/:id`)**: Renders stored `spatialResult`, distance, and 3-part statements. Zero recalculation. — **PASS**
 - **Step 7 — Change Ledger (`/case/:id`)**: Renders append-only chronological history. — **PASS**
 - **Step 8 — Reviewer Queue (`/reviewer`)**: Filters and displays active cases by status pills. — **PASS**
@@ -39,7 +46,17 @@ All four scenarios were evaluated through the authoritative spatial resolver (`r
 
 ---
 
-## 4. Failure-State Matrix
+## 4. Evidence Persistence & Lifetime
+
+- **Case Metadata Persistence**: Case IDs, observation fields, coordinates, spatial results, and status persist across browser sessions in `localStorage`.
+- **Evidence Metadata Persistence**: Evidence IDs (`EVD-YYYYMMDD-SEQ`), filenames, MIME types, file sizes, upload timestamps, and SHA-256 cryptographic hashes persist in `localStorage`.
+- **Binary Image Persistence**: Binary image files are held in local browser memory via object URLs (`blob:...`).
+- **Browser Refresh**: Survives refresh within the active browser session.
+- **Browser Restart**: Case records, evidence metadata, and SHA-256 checksums survive restart. Binary image previews use local object URLs and are not guaranteed to survive a full browser process restart; the image preview may require re-selection.
+
+---
+
+## 5. Failure-State Matrix
 
 | Failure Condition | Expected Behavior | Observed Result | Status |
 |---|---|---|---|
@@ -54,11 +71,11 @@ All four scenarios were evaluated through the authoritative spatial resolver (`r
 
 ---
 
-## 5. Verification Commands Baseline
+## 6. Verification Commands Baseline
 
 | Command | Check | Result |
 |---|---|---|
-| `npm test` | Unit, spatial, packet, persistence, and hardening tests | **PASS** (56/56 passing) |
+| `npm test` | Unit, spatial, packet, persistence, and hardening tests | **PASS** (57/57 passing) |
 | `npx tsc --noEmit` | TypeScript typecheck across entire codebase | **PASS** (0 errors) |
 | `npm run build` | Production Vite bundle generation | **PASS** (Clean build in ~10s) |
 | `npm run gate:check` | Bhuvan geometry Go/No-Go gate | **PASS** (`PASSED_WITH_LIMITATIONS`) |
@@ -67,8 +84,8 @@ All four scenarios were evaluated through the authoritative spatial resolver (`r
 
 ---
 
-## 6. Documented Limitations
+## 7. Documented Limitations
 
-1. **Client-Durable Prototype**: Persisted in browser `localStorage`. Multi-tenant cloud synchronization is an extension for production.
-2. **Binary Image Storage**: Image previews are held in local object URLs with persistent SHA-256 hashes and metadata in the ledger.
-3. **Bhuvan Source Data**: Sourced from official Bhuvan/NRSC Version 1.0 datasets mapped in association with ASI; requires formal on-ground statutory ASI verification.
+1. **Client-Durable Prototype**: Case records, evidence metadata, and ledger events persist in browser `localStorage`. Multi-tenant cloud synchronization is an extension for production.
+2. **Binary Evidence Lifetime**: Evidence metadata, MIME types, file sizes, and SHA-256 hashes persist indefinitely in client storage; local object URLs used for binary image rendering are scoped to the browser process lifetime.
+3. **Bhuvan Source Data**: Sourced from official Bhuvan/NRSC Version 1.0 datasets mapped in association with ASI; requires formal on-ground statutory ASI verification for legal proceedings.

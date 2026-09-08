@@ -117,3 +117,5 @@ Use the floating **Demo Quickbar** at the bottom of the screen to quickly demons
    *Official ISRO/Bhuvan cultural monuments spatial layers (`asi:protected_areas`, `asi:prohibited_boundary`, `asi:regulated_boundary`) retrieved via WMS GetFeatureInfo for Fort of Shivner (`MUMMH015`).*
 3. **How does it handle poor GPS in hill forts?**  
    *If device GPS accuracy error exceeds ±35m, the system automatically gates calculation and returns `EVIDENCE_INSUFFICIENT`, prompting repositioning in open sky.*
+4. **How is photo evidence persisted in the prototype?**  
+   *Evidence metadata (IDs, MIME types, file sizes, upload timestamps) and cryptographic SHA-256 hashes are permanently persisted in the Change Ledger. Binary image previews utilize local browser object URLs for rapid prototype evaluation.*

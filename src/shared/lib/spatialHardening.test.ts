@@ -398,4 +398,36 @@ describe('A4 — Spatial Engine Hardening & Verification', () => {
     });
     expect(res4.classification).toBe('EVIDENCE_INSUFFICIENT');
   });
+
+  // 8. Scenario 3 Focused Regression Test (Single-Layer vs Multi-Tier Consistency)
+  it('Requirement A4.8: verifies Scenario 3 single-layer Protected uncertainty vs multi-tier Prohibited resolution consistency', () => {
+    const s3 = DEMO_SCENARIOS[2];
+    const input = {
+      latitude: s3.latitude,
+      longitude: s3.longitude,
+      gpsAccuracyMeters: s3.gpsAccuracyMeters,
+      factualDescription: s3.factualNotes,
+    };
+
+    // 1. Single-layer against Protected Area: distance 26.0m <= 30.0m GPS error -> LOCATION_UNCERTAIN
+    const singleProtected = calculateSpatialResult(input, SHIVNERI_PROTECTED_GEOMETRY);
+    expect(singleProtected.classification).toBe('LOCATION_UNCERTAIN');
+    expect(singleProtected.distanceToBoundaryMeters).toBe(26.0);
+    expect(singleProtected.isUncertaintyOverlap).toBe(true);
+
+    // 2. Single-layer against Prohibited Boundary: distance 71.6m > 30.0m GPS error -> POTENTIAL_ZONE_CONCERN
+    const singleProhibited = calculateSpatialResult(input, SHIVNERI_PROHIBITED_GEOMETRY);
+    expect(singleProhibited.classification).toBe('POTENTIAL_ZONE_CONCERN');
+    expect(singleProhibited.distanceToBoundaryMeters).toBe(71.6);
+    expect(singleProhibited.isUncertaintyOverlap).toBe(false);
+
+    // 3. Multi-tier resolution: Prohibited concern + Protected uncertainty note
+    const multiTier = resolveMultiTierSpatialResult(input);
+    expect(multiTier.classification).toBe('POTENTIAL_ZONE_CONCERN');
+    expect(multiTier.distanceToBoundaryMeters).toBe(71.6);
+    expect(multiTier.geometryVersion).toBe(SHIVNERI_PROHIBITED_GEOMETRY.versionLabel);
+    expect(multiTier.explanation).toContain('100m Prohibited Zone layer');
+    expect(multiTier.explanation).toContain('Note: The relationship to the more restrictive Protected Area layer');
+    expect(multiTier.statements.gisCalculated).toContain('100m Prohibited Boundary');
+  });
 });
