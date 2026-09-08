@@ -10,8 +10,6 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
-import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
-import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
 import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
 import { Badge, Button, Card, NoticeBanner, EmptyState } from '../../shared/components';
@@ -29,7 +27,6 @@ export interface QueueItem {
   computedClassification: SpatialClassification;
   currentStatus: CaseStatus;
   hasPhoto: boolean;
-  source: 'sessionStorage' | 'ledgerStore';
 }
 
 // Category display mapping using approved neutral non-accusatory terminology
@@ -69,88 +66,31 @@ export const ReviewerQueuePage: React.FC = () => {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [actionSuccessToast, setActionSuccessToast] = useState<string | null>(null);
 
-  // Load and merge cases from sessionStorage & ledgerStore
+  // Load cases exclusively from ledgerStore
   const queueItems = useMemo(() => {
-    // 1. Load from ledgerStore
     const storeCases = ledgerStore.getCases();
-    const itemsMap = new Map<string, QueueItem>();
+    const items: QueueItem[] = storeCases.map((c) => ({
+      caseId: c.caseId,
+      timestamp: c.observedTimestamp || new Date().toISOString(),
+      category: c.category,
+      categoryLabel: APPROVED_CATEGORY_LABELS[c.category] || c.category.replace(/_/g, ' '),
+      description: c.factualDescription,
+      coordinates: [c.longitude, c.latitude],
+      accuracyMeters: c.gpsAccuracyMeters,
+      computedClassification: c.spatialResult.classification,
+      currentStatus: c.currentStatus,
+      hasPhoto: (c.evidenceList && c.evidenceList.length > 0) || false,
+    }));
 
-    storeCases.forEach((c) => {
-      itemsMap.set(c.caseId.toLowerCase(), {
-        caseId: c.caseId,
-        timestamp: c.observedTimestamp || new Date().toISOString(),
-        category: c.category,
-        categoryLabel: APPROVED_CATEGORY_LABELS[c.category] || c.category.replace(/_/g, ' '),
-        description: c.factualDescription,
-        coordinates: [c.longitude, c.latitude],
-        accuracyMeters: c.gpsAccuracyMeters,
-        computedClassification: c.spatialResult.classification,
-        currentStatus: c.currentStatus,
-        hasPhoto: (c.evidenceList && c.evidenceList.length > 0) || false,
-        source: 'ledgerStore',
-      });
-    });
-
-    // 2. Scan sessionStorage for dynamic user submissions (keys: case_*)
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key && (key.startsWith('case_') || key.startsWith('case-'))) {
-        try {
-          const raw = sessionStorage.getItem(key);
-          if (!raw) continue;
-          const parsed = JSON.parse(raw);
-          if (!parsed.id) continue;
-
-          const [lng, lat] = parsed.coordinates || [73.8624, 19.1982];
-          const accuracy = parsed.accuracyMeters || 10;
-          const description = parsed.description || '';
-
-          // Deterministic spatial calculation
-          const spatial = calculateSpatialResult(
-            {
-              latitude: lat,
-              longitude: lng,
-              gpsAccuracyMeters: accuracy,
-              factualDescription: description,
-            },
-            SHIVNERI_GEOMETRY
-          );
-
-          const existingKey = parsed.id.toLowerCase();
-          const existingItem = itemsMap.get(existingKey);
-
-          itemsMap.set(existingKey, {
-            caseId: parsed.id,
-            timestamp: parsed.timestamp || new Date().toISOString(),
-            category: (parsed.categoryId as ObservationType) || 'OTHER_VISIBLE_CHANGE',
-            categoryLabel:
-              APPROVED_CATEGORY_LABELS[parsed.categoryId] ||
-              (parsed.categoryId ? parsed.categoryId.replace(/_/g, ' ') : 'Observed Change'),
-            description: description,
-            coordinates: [lng, lat],
-            accuracyMeters: accuracy,
-            computedClassification: spatial.classification,
-            currentStatus: (parsed.currentStatus as CaseStatus) || existingItem?.currentStatus || 'SUBMITTED_FOR_REVIEW',
-            hasPhoto: Boolean(parsed.photoUrl || parsed.photoMetadata),
-            source: 'sessionStorage',
-          });
-        } catch (err) {
-          console.error('Error parsing session queue item:', err);
-        }
-      }
-    }
-
-    // Convert map values to array and sort by timestamp descending (newest first)
-    const list = Array.from(itemsMap.values());
-    list.sort(
+    return items.sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
-    return list;
   }, [refreshTrigger]);
 
-  // Filter items by search query and status filter
+  // Filter items by search query, status filter, and category filter
   const filteredQueue = useMemo(() => {
     return queueItems.filter((item) => {
       const matchesSearch =
@@ -165,9 +105,14 @@ export const ReviewerQueuePage: React.FC = () => {
         statusConfig.label === statusFilter ||
         item.currentStatus === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      const matchesCategory =
+        categoryFilter === 'ALL' ||
+        item.category === categoryFilter;
+
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [queueItems, searchQuery, statusFilter]);
+  }, [queueItems, searchQuery, statusFilter, categoryFilter]);
+
 
   const activeSelectedItem = useMemo(() => {
     if (!selectedCaseId) return null;
@@ -248,7 +193,7 @@ export const ReviewerQueuePage: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <select
             value={statusFilter}
@@ -262,8 +207,24 @@ export const ReviewerQueuePage: React.FC = () => {
             <option value="REFERRED">REFERRED</option>
             <option value="CLOSED">CLOSED</option>
           </select>
+
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+          >
+            <option value="ALL">All Categories</option>
+            <option value="POSSIBLE_CONSTRUCTION">Possible construction</option>
+            <option value="POSSIBLE_ENCROACHMENT">Possible alteration</option>
+            <option value="PHYSICAL_DAMAGE">Physical damage</option>
+            <option value="DUMPING_OR_WASTE">Dumping or waste</option>
+            <option value="BLOCKED_ACCESS">Blocked access</option>
+            <option value="ALTERATION_OR_OBSTRUCTION">Visual obstruction</option>
+            <option value="OTHER_VISIBLE_CHANGE">Other visible change</option>
+          </select>
         </div>
       </div>
+
 
       {/* Responsive Case Queue: Desktop Table & Mobile Cards */}
       <Card variant="bordered" className="overflow-hidden bg-slate-900/40 p-0 border-slate-800">
@@ -293,10 +254,12 @@ export const ReviewerQueuePage: React.FC = () => {
                           onClick={() => {
                             setSearchQuery('');
                             setStatusFilter('ALL');
+                            setCategoryFilter('ALL');
                           }}
                         >
                           Clear Filters
                         </Button>
+
                       }
                     />
                   </td>

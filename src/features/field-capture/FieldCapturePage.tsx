@@ -10,6 +10,10 @@ import { GpsAccuracyHud } from './GpsAccuracyHud';
 import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
 
 import { getGuidelineById, APPROVED_PRIVACY_WARNING } from '../site-context/observationGuidelines';
+import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { calculateSpatialResult } from '../../shared/lib/spatialEngine';
+import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
+import { ObservationType } from '../../shared/types';
 
 interface PhotoEvidencePayload {
   file: File;
@@ -39,6 +43,8 @@ export const FieldCapturePage: React.FC = () => {
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const handleGetLocation = () => {
     setGpsLoading(true);
@@ -78,43 +84,64 @@ export const FieldCapturePage: React.FC = () => {
   const isFormValid = Boolean(
     categoryId !== null &&
     description.trim().length > 0 &&
-    hasValidGps
+    hasValidGps &&
+    accuracyMeters !== null &&
+    accuracyMeters <= 35.0
   );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid || !coordinates || accuracyMeters === null || !categoryId) return;
+    setHasAttemptedSubmit(true);
+    setSubmissionError(null);
+
+    if (!isFormValid || !coordinates || accuracyMeters === null || !categoryId) {
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
-      const generatedCaseId = `case-${Date.now()}`;
+      const spatialResult = calculateSpatialResult(
+        {
+          latitude: coordinates[1],
+          longitude: coordinates[0],
+          gpsAccuracyMeters: accuracyMeters,
+          factualDescription: description.trim(),
+        },
+        SHIVNERI_GEOMETRY
+      );
 
-      const payload = {
-        id: generatedCaseId,
-        siteId: 'shivneri-fort',
-        siteName: 'Shivneri Fort',
-        categoryId,
-        description: description.trim(),
-        coordinates,
-        accuracyMeters,
-        photoMetadata: photo ? {
-          fileName: photo.file.name,
-          sizeKb: photo.sizeKb,
-          capturedDate: photo.lastModifiedDate,
-        } : null,
-        photoUrl: photo ? photo.previewUrl : null,
-        timestamp: new Date().toISOString(),
-      };
+      const createdCase = ledgerStore.createCase(
+        {
+          siteId: SHIVNERI_SITE.siteId,
+          geometryId: SHIVNERI_GEOMETRY.geometryId,
+          category: categoryId as ObservationType,
+          factualDescription: description.trim(),
+          latitude: coordinates[1],
+          longitude: coordinates[0],
+          gpsAccuracyMeters: accuracyMeters,
+          reporterType: 'VISITOR',
+          photoUrl: photo ? photo.previewUrl : undefined,
+          evidenceMetadata: photo
+            ? {
+                fileMimeType: photo.file.type || 'image/jpeg',
+                fileSizeBytes: photo.file.size || 1024000,
+                sha256Checksum: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+              }
+            : undefined,
+        },
+        spatialResult
+      );
 
-      sessionStorage.setItem(`case_${generatedCaseId}`, JSON.stringify(payload));
-      navigate(`/cases/${generatedCaseId}`);
+      navigate(`/result/${createdCase.caseId}`);
     } catch (err) {
       console.error('Failed to register ledger case:', err);
+      setSubmissionError('Unable to record observation to Change Ledger. Persistence failed. Please verify device storage and retry submission.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
@@ -135,13 +162,27 @@ export const FieldCapturePage: React.FC = () => {
         {CANONICAL_LEGAL_DISCLAIMER}
       </NoticeBanner>
 
+      {/* Geometry Gate Status Banner */}
+      {(SHIVNERI_GEOMETRY.layerConfidenceScore < 0.70 || SHIVNERI_GEOMETRY.governanceState === 'RETIRED') && (
+        <NoticeBanner variant="advisory">
+          Notice: Source boundary layer confidence ({(SHIVNERI_GEOMETRY.layerConfidenceScore * 100).toFixed(0)}%) is below required 70% threshold. Observations will be registered under SOURCE_UNAVAILABLE classification pending curator review.
+        </NoticeBanner>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Category Selector */}
-        <CategorySelector
-          selectedCategoryId={categoryId}
-          onSelectCategory={(id) => setCategoryId(id)}
-          disabled={isSubmitting}
-        />
+        <div className="space-y-2">
+          <CategorySelector
+            selectedCategoryId={categoryId}
+            onSelectCategory={(id) => setCategoryId(id)}
+            disabled={isSubmitting}
+          />
+          {hasAttemptedSubmit && !categoryId && (
+            <NoticeBanner variant="insufficient">
+              Observation category is required. Please select an approved category to classify the observed physical change.
+            </NoticeBanner>
+          )}
+        </div>
 
         {/* Factual Description */}
         <div className="space-y-1.5">
@@ -157,6 +198,11 @@ export const FieldCapturePage: React.FC = () => {
             placeholder={currentPromptPlaceholder}
             className="w-full text-sm p-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500/50 placeholder:text-slate-400"
           />
+          {hasAttemptedSubmit && description.trim().length === 0 && (
+            <NoticeBanner variant="insufficient">
+              Factual description is required. Please describe what was physically observed without accusatory phrasing.
+            </NoticeBanner>
+          )}
         </div>
 
         {/* Category Guidance & Photo Examples */}
@@ -177,10 +223,17 @@ export const FieldCapturePage: React.FC = () => {
         )}
 
         {/* Photo Upload Dropzone */}
-        <PhotoDropzone
-          onPhotoSelected={(meta) => setPhoto(meta as PhotoEvidencePayload | null)}
-          disabled={isSubmitting}
-        />
+        <div className="space-y-2">
+          <PhotoDropzone
+            onPhotoSelected={(meta) => setPhoto(meta as PhotoEvidencePayload | null)}
+            disabled={isSubmitting}
+          />
+          {!photo && (
+            <p className="text-xs text-slate-500">
+              Note: Attaching photographic evidence provides factual visual context for reviewer triage.
+            </p>
+          )}
+        </div>
 
         {/* GPS Capture HUD */}
         <div className="space-y-2">
@@ -225,6 +278,18 @@ export const FieldCapturePage: React.FC = () => {
             </div>
           )}
 
+          {hasAttemptedSubmit && !hasValidGps && !gpsError && (
+            <NoticeBanner variant="insufficient">
+              Hardware GPS coordinates are required. Tap "Capture Current Coordinates" to record location telemetry.
+            </NoticeBanner>
+          )}
+
+          {accuracyMeters !== null && accuracyMeters > 35 && (
+            <NoticeBanner variant="insufficient">
+              Degraded GPS accuracy (±{accuracyMeters}m) exceeds the 35.0m threshold. Move under open sky with clear satellite line-of-sight and tap refresh before submitting.
+            </NoticeBanner>
+          )}
+
           {gpsError && (
             <NoticeBanner variant="insufficient">
               {gpsError}
@@ -232,10 +297,17 @@ export const FieldCapturePage: React.FC = () => {
           )}
         </div>
 
+        {/* Submission Failure State */}
+        {submissionError && (
+          <NoticeBanner variant="insufficient">
+            {submissionError}
+          </NoticeBanner>
+        )}
+
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={!isFormValid || isSubmitting}
+          disabled={isSubmitting}
           className="w-full py-3.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-xs"
         >
           {isSubmitting ? (
@@ -251,6 +323,7 @@ export const FieldCapturePage: React.FC = () => {
           )}
         </button>
       </form>
+
     </div>
   );
 };
