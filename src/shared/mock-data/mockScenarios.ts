@@ -42,14 +42,14 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   {
     id: 'scenario-3-near-boundary',
     name: 'Scenario 3: Near Boundary (Edge Uncertainty - Real Reference Point)',
-    description: 'Uses official reference coordinate (19.1931225, 73.8528893), ~26m from protected boundary with ±30m GPS accuracy (error disk intersects line).',
+    description: 'Uses official reference coordinate (19.1931225, 73.8528893), ~26m from protected boundary with ±30m GPS accuracy. Multi-tier resolver identifies Prohibited tier concern with explicit higher-tier Protected boundary uncertainty caveat.',
     category: 'PHYSICAL_DAMAGE',
     factualNotes: 'Displaced masonry blocks noted near perimeter boundary stone.',
     latitude: 19.1931225,
     longitude: 73.8528893,
     gpsAccuracyMeters: 30.0,
-    expectedClassification: 'LOCATION_UNCERTAIN',
-    demonstrates: 'Refuses to overclaim when device accuracy circle intersects the boundary.',
+    expectedClassification: 'POTENTIAL_ZONE_CONCERN',
+    demonstrates: 'Multi-tier resolution: identifies confident Prohibited zone concern while preserving Protected tier edge uncertainty.',
   },
   {
     id: 'scenario-4-poor-gps',
