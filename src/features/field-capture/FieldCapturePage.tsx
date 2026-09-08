@@ -188,7 +188,7 @@ export const FieldCapturePage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Site Header Context */}
       <div className="flex items-center justify-between pb-2 border-b border-slate-800">
         <Link to="/site" className="text-xs text-slate-400 hover:text-amber-400 flex items-center gap-1.5 transition-colors">

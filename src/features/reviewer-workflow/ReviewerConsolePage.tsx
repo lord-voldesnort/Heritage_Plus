@@ -21,18 +21,18 @@ export const ReviewerConsolePage: React.FC = () => {
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border-subtle">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="purple">Institutional Triage</Badge>
-            <span className="text-xs font-mono text-text-secondary">Curator Assessment Portal</span>
+            <span className="text-xs font-mono text-slate-400">Curator Assessment Portal</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white font-['Outfit']">
             Reviewer Console
           </h1>
-          <p className="text-xs sm:text-sm text-text-secondary mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Examine spatial observations, verify GPS uncertainty, and append review decisions.
           </p>
         </div>
@@ -43,7 +43,7 @@ export const ReviewerConsolePage: React.FC = () => {
       </div>
 
       {actionSuccessMessage && (
-        <div className="p-3.5 rounded-xl bg-surface-well border border-emerald-800 text-emerald-300 text-xs flex items-center gap-2">
+        <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-300 text-xs flex items-center gap-2">
           <Check className="w-4 h-4" />
           <span>{actionSuccessMessage}</span>
         </div>
@@ -69,8 +69,8 @@ export const ReviewerConsolePage: React.FC = () => {
                   onClick={() => setSelectedCase(c)}
                   className={`w-full text-left p-3.5 rounded-2xl border transition-all ${
                     isSelected
-                      ? 'bg-surface-card border-primary shadow-md shadow-amber-950/30'
-                      : 'bg-surface-well border-border-subtle hover:bg-surface-card/80 hover:border-primary'
+                      ? 'bg-slate-800 border-amber-500/60 shadow-md'
+                      : 'bg-slate-900 border-slate-700 hover:bg-slate-800 hover:border-amber-500/40'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1.5">
@@ -80,11 +80,11 @@ export const ReviewerConsolePage: React.FC = () => {
                     </Badge>
                   </div>
 
-                  <div className="text-xs font-semibold text-text-primary line-clamp-1 mb-1">
+                  <div className="text-xs font-semibold text-slate-100 line-clamp-1 mb-1">
                     {c.category.replace(/_/g, ' ')}
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-text-secondary font-mono">
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
                     <span className="text-text-secondary">GPS: ±{c.gpsAccuracyMeters.toFixed(1)}m</span>
                     <span className="text-amber-400/90 text-[10px]">
                       {c.spatialResult.classification === 'POTENTIAL_ZONE_CONCERN' && 'Zone Concern'}
@@ -100,10 +100,10 @@ export const ReviewerConsolePage: React.FC = () => {
         </div>
 
         {/* Right Column: Active Case Assessment */}
-        <div className="lg:col-span-7 bg-surface-card p-4 rounded-xl">
+        <div className="lg:col-span-7 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
           {selectedCase ? (
-            <Card variant="elevated" className="space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
+            <Card variant="dark" className="space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-700">
                 <div>
                   <div className="text-xs font-mono text-amber-400 font-bold">{selectedCase.caseId}</div>
                   <h3 className="text-base font-bold text-white mt-0.5">
@@ -131,23 +131,23 @@ export const ReviewerConsolePage: React.FC = () => {
               </div>
 
               {/* Factual Description */}
-              <div className="space-y-1 bg-surface-card p-3 rounded-xl border border-border-subtle text-xs">
-                <span className="text-text-secondary font-mono text-[10px]">OBSERVER ACCOUNT:</span>
-                <p className="text-text-primary">{selectedCase.factualDescription}</p>
+              <div className="space-y-1 bg-slate-800/60 p-3 rounded-xl border border-slate-700 text-xs">
+                <span className="text-slate-400 font-mono text-[10px]">OBSERVER ACCOUNT:</span>
+                <p className="text-slate-100">{selectedCase.factualDescription}</p>
               </div>
 
               {/* Spatial Verdict Box */}
-              <div className="bg-surface-well/80 p-3.5 rounded-xl border border-border-subtle space-y-2 text-xs">
+              <div className="bg-slate-800/40 p-3.5 rounded-xl border border-slate-700 space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-text-secondary uppercase">Computed Spatial Logic</span>
+                  <span className="text-[10px] font-mono text-slate-400 uppercase">Computed Spatial Logic</span>
                   <Badge variant={SPATIAL_CLASSIFICATIONS[selectedCase.spatialResult.classification].badgeVariant}>
                     {selectedCase.spatialResult.classification}
                   </Badge>
                 </div>
-                <p className="text-text-primary text-xs">
+                <p className="text-slate-100 text-xs">
                   {selectedCase.spatialResult.explanation}
                 </p>
-                <div className="flex items-center gap-4 text-[11px] font-mono text-text-secondary pt-1 border-t border-border-subtle">
+                <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400 pt-1 border-t border-slate-700">
                   <span>Coordinates: {selectedCase.latitude.toFixed(4)}°N, {selectedCase.longitude.toFixed(4)}°E</span>
                   <span>Accuracy: ±{selectedCase.gpsAccuracyMeters.toFixed(1)}m</span>
                 </div>
@@ -166,19 +166,19 @@ export const ReviewerConsolePage: React.FC = () => {
               )}
 
               {/* Event Timeline Preview */}
-              <div className="space-y-2 pt-2 border-t border-border-subtle">
+              <div className="space-y-2 pt-2 border-t border-slate-700">
                 <span className="text-[10px] font-mono text-slate-400 uppercase">Change Ledger Audit Trail:</span>
                 <div className="space-y-1.5 max-h-40 overflow-y-auto">
                   {selectedCase.eventsTimeline.map(evt => (
-                    <div key={evt.eventId} className="text-xs bg-surface-card p-2 rounded-lg border border-border-subtle flex items-start justify-between gap-2">
+                    <div key={evt.eventId} className="text-xs bg-slate-800 p-2 rounded-lg border border-slate-700 flex items-start justify-between gap-2">
                       <div>
-                        <span className="font-semibold text-text-primary">{evt.actorRole}: </span>
-                        <span className="text-text-secondary">{evt.summary}</span>
+                        <span className="font-semibold text-slate-100">{evt.actorRole}: </span>
+                        <span className="text-slate-400">{evt.summary}</span>
                         {evt.reviewerNotes && (
                           <div className="text-amber-300/80 text-[11px] mt-0.5">&quot;{evt.reviewerNotes}&quot;</div>
                         )}
                       </div>
-                      <span className="text-[10px] font-mono text-text-secondary whitespace-nowrap">
+                      <span className="text-[10px] font-mono text-slate-400 whitespace-nowrap">
                         {new Date(evt.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -187,7 +187,7 @@ export const ReviewerConsolePage: React.FC = () => {
               </div>
             </Card>
           ) : (
-            <div className="py-12 text-center text-text-secondary text-xs">
+            <div className="py-12 text-center text-slate-400 text-xs">
               Select a case from the triage queue to begin assessment.
             </div>
           )}

@@ -17,7 +17,7 @@ export const ChangeLedgerPage: React.FC = () => {
     : allCases.filter(c => c.currentStatus === statusFilter);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
         <div>

@@ -126,18 +126,18 @@ export const ReviewerQueuePage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="purple">Institutional Triage</Badge>
-            <span className="text-xs font-mono text-text-secondary">
+            <span className="text-xs font-mono text-slate-400">
               Curator Assessment Queue
             </span>
           </div>
           <h1 className="text-xl sm:text-3xl font-bold text-white font-['Outfit']">
             Reviewer Case Queue &amp; Action Drawer
           </h1>
-          <p className="text-xs sm:text-sm text-text-secondary mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Inspect spatial observations, verify GPS accuracy telemetry, and record append-only triage decisions.
           </p>
         </div>
