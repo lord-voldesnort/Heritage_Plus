@@ -126,18 +126,18 @@ export const ReviewerQueuePage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="purple">Institutional Triage</Badge>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-xs font-mono text-text-secondary">
               Curator Assessment Queue
             </span>
           </div>
-          <h1 className="text-xl sm:text-3xl font-bold text-white font-['Outfit']">
+          <h1 className="text-xl sm:text-3xl font-bold text-primary font-sans tracking-tight">
             Reviewer Case Queue &amp; Action Drawer
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-text-secondary mt-1">
             Inspect spatial observations, verify GPS accuracy telemetry, and record append-only triage decisions.
           </p>
         </div>
@@ -170,15 +170,15 @@ export const ReviewerQueuePage: React.FC = () => {
 
       {/* Success Toast */}
       {actionSuccessToast && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/70 border border-emerald-800 text-emerald-300 text-xs flex items-center justify-between gap-2 shadow-lg animate-fade-in">
+        <div className="p-3.5 rounded-xl bg-zone-survey-bg border border-zone-survey-border text-zone-survey text-xs flex items-center justify-between gap-2 shadow-xs animate-fade-in">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-zone-survey shrink-0" />
             <span>{actionSuccessToast}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionSuccessToast(null)}
-            className="text-text-secondary hover:text-white text-xs font-bold px-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+            className="text-text-secondary hover:text-text-primary text-xs font-bold px-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
           >
             Dismiss
           </button>
@@ -289,7 +289,7 @@ export const ReviewerQueuePage: React.FC = () => {
                       onClick={() => setSelectedCaseId(item.caseId)}
                     >
                       <td className="p-3.5 font-mono text-text-primary">
-                        <div className="font-bold text-amber-400 flex items-center gap-1.5">
+                        <div className="font-bold text-primary flex items-center gap-1.5">
                           <span>{item.caseId}</span>
                           {item.hasPhoto && (
                             <div className="text-[10px] text-text-secondary font-normal px-1 bg-surface-well rounded border border-border-subtle">
@@ -344,7 +344,7 @@ export const ReviewerQueuePage: React.FC = () => {
                           <Link
                             to={`/case/${item.caseId}`}
                             onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-surface-well border border-border-subtle text-text-secondary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-surface-well border border-border-subtle text-text-secondary hover:text-primary hover:border-primary/30 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
                             title={`View details for case ${item.caseId}`}
                             aria-label={`View details for case ${item.caseId}`}
                           >
@@ -353,7 +353,7 @@ export const ReviewerQueuePage: React.FC = () => {
                           <Link
                             to={`/packet/${item.caseId}`}
                             onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-surface-well border border-border-subtle text-text-secondary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-surface-well border border-border-subtle text-text-secondary hover:text-primary hover:border-primary/30 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer"
                             title="View Reviewer Authority Packet"
                             aria-label="View Reviewer Authority Packet"
                           >
@@ -426,7 +426,7 @@ export const ReviewerQueuePage: React.FC = () => {
                   className="p-4 space-y-3 hover:bg-surface-card/80 transition-colors"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs font-bold text-amber-400">
+                    <span className="font-mono text-xs font-bold text-primary">
                       {item.caseId}
                     </span>
                     <Badge variant={statusBadge.variant} className="text-[10px]">
@@ -467,7 +467,7 @@ export const ReviewerQueuePage: React.FC = () => {
                     </Link>
                     <Link
                       to={`/packet/${item.caseId}`}
-                      className="px-3 min-h-[44px] rounded-lg border border-border-subtle text-text-primary hover:text-white text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                      className="px-3 min-h-[44px] rounded-lg border border-border-subtle text-text-secondary hover:text-primary hover:border-primary/30 text-xs font-medium flex items-center gap-1.5 cursor-pointer transition-colors"
                     >
                       <FileText className="w-3.5 h-3.5" />
                       Packet

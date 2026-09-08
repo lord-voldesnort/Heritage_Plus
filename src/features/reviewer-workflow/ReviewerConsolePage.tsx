@@ -7,9 +7,9 @@ import { Card } from '../../shared/components/Card';
 import { Button } from '../../shared/components/Button';
 import { Badge } from '../../shared/components/Badge';
 import { ObservationRecord } from '../../shared/types';
-import { 
-  UserCheck, 
-  FileText, 
+import {
+  UserCheck,
+  FileText,
   Check
 } from 'lucide-react';
 import { ReviewerActionCard } from './ReviewerActionCard';
@@ -21,18 +21,18 @@ export const ReviewerConsolePage: React.FC = () => {
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="purple">Institutional Triage</Badge>
-            <span className="text-xs font-mono text-slate-400">Curator Assessment Portal</span>
+            <span className="text-xs font-mono text-text-secondary">Curator Assessment Portal</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white font-['Outfit']">
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary font-sans tracking-tight">
             Reviewer Console
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-text-secondary mt-1">
             Examine spatial observations, verify GPS uncertainty, and append review decisions.
           </p>
         </div>
@@ -43,7 +43,7 @@ export const ReviewerConsolePage: React.FC = () => {
       </div>
 
       {actionSuccessMessage && (
-        <div className="p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-300 text-xs flex items-center gap-2">
+        <div className="p-3.5 rounded-xl bg-zone-survey-bg border border-zone-survey-border text-zone-survey text-xs flex items-center gap-2">
           <Check className="w-4 h-4" />
           <span>{actionSuccessMessage}</span>
         </div>
@@ -53,7 +53,7 @@ export const ReviewerConsolePage: React.FC = () => {
       <div className="grid lg:grid-cols-12 gap-6">
         {/* Left Column: Cases Queue */}
         <div className="lg:col-span-5 space-y-3">
-          <h2 className="text-xs font-semibold text-text-secondary uppercase tracking-wider font-mono">
+          <h2 className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono">
             Triage Case Queue ({cases.length})
           </h2>
 
@@ -69,24 +69,24 @@ export const ReviewerConsolePage: React.FC = () => {
                   onClick={() => setSelectedCase(c)}
                   className={`w-full text-left p-3.5 rounded-2xl border transition-all ${
                     isSelected
-                      ? 'bg-slate-800 border-amber-500/60 shadow-md'
-                      : 'bg-slate-900 border-slate-700 hover:bg-slate-800 hover:border-amber-500/40'
+                      ? 'bg-primary-surface border-primary shadow-xs ring-1 ring-primary/30'
+                      : 'bg-surface-card border-border-subtle hover:bg-surface-well hover:border-primary/30'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="font-mono text-xs font-bold text-amber-400">{c.caseId}</span>
+                    <span className="font-mono text-xs font-bold text-primary">{c.caseId}</span>
                     <Badge variant={statusMeta.badgeVariant} className="text-[10px]">
                       {statusMeta.label.split('(')[0]}
                     </Badge>
                   </div>
 
-                  <div className="text-xs font-semibold text-slate-100 line-clamp-1 mb-1">
+                  <div className="text-xs font-semibold text-text-primary line-clamp-1 mb-1">
                     {c.category.replace(/_/g, ' ')}
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                    <span className="text-text-secondary">GPS: ±{c.gpsAccuracyMeters.toFixed(1)}m</span>
-                    <span className="text-amber-400/90 text-[10px]">
+                  <div className="flex items-center justify-between text-[11px] text-text-muted font-mono">
+                    <span>GPS: ±{c.gpsAccuracyMeters.toFixed(1)}m</span>
+                    <span className="text-primary text-[10px] font-semibold">
                       {c.spatialResult.classification === 'POTENTIAL_ZONE_CONCERN' && 'Zone Concern'}
                       {c.spatialResult.classification === 'LOCATION_UNCERTAIN' && 'Uncertain'}
                       {c.spatialResult.classification === 'NO_SPATIAL_CONCERN_INDICATED' && 'Outside'}
@@ -100,13 +100,13 @@ export const ReviewerConsolePage: React.FC = () => {
         </div>
 
         {/* Right Column: Active Case Assessment */}
-        <div className="lg:col-span-7 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+        <div className="lg:col-span-7">
           {selectedCase ? (
-            <Card variant="dark" className="space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-700">
+            <Card variant="elevated" className="space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
                 <div>
-                  <div className="text-xs font-mono text-amber-400 font-bold">{selectedCase.caseId}</div>
-                  <h3 className="text-base font-bold text-white mt-0.5">
+                  <div className="text-xs font-mono text-primary font-bold">{selectedCase.caseId}</div>
+                  <h3 className="text-base font-bold text-text-primary mt-0.5">
                     {selectedCase.category.replace(/_/g, ' ')}
                   </h3>
                 </div>
@@ -131,23 +131,23 @@ export const ReviewerConsolePage: React.FC = () => {
               </div>
 
               {/* Factual Description */}
-              <div className="space-y-1 bg-slate-800/60 p-3 rounded-xl border border-slate-700 text-xs">
-                <span className="text-slate-400 font-mono text-[10px]">OBSERVER ACCOUNT:</span>
-                <p className="text-slate-100">{selectedCase.factualDescription}</p>
+              <div className="space-y-1 bg-surface-well p-3 rounded-xl border border-border-subtle text-xs">
+                <span className="text-text-muted font-mono text-[10px] uppercase">Observer Account:</span>
+                <p className="text-text-primary leading-relaxed">{selectedCase.factualDescription}</p>
               </div>
 
               {/* Spatial Verdict Box */}
-              <div className="bg-slate-800/40 p-3.5 rounded-xl border border-slate-700 space-y-2 text-xs">
+              <div className="bg-primary-surface/60 p-3.5 rounded-xl border border-primary-border space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-slate-400 uppercase">Computed Spatial Logic</span>
+                  <span className="text-[10px] font-mono text-secondary uppercase font-semibold">Computed Spatial Logic</span>
                   <Badge variant={SPATIAL_CLASSIFICATIONS[selectedCase.spatialResult.classification].badgeVariant}>
                     {selectedCase.spatialResult.classification}
                   </Badge>
                 </div>
-                <p className="text-slate-100 text-xs">
+                <p className="text-text-primary text-xs leading-relaxed">
                   {selectedCase.spatialResult.explanation}
                 </p>
-                <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400 pt-1 border-t border-slate-700">
+                <div className="flex items-center gap-4 text-[11px] font-mono text-text-muted pt-1 border-t border-primary-border">
                   <span>Coordinates: {selectedCase.latitude.toFixed(4)}°N, {selectedCase.longitude.toFixed(4)}°E</span>
                   <span>Accuracy: ±{selectedCase.gpsAccuracyMeters.toFixed(1)}m</span>
                 </div>
@@ -156,7 +156,7 @@ export const ReviewerConsolePage: React.FC = () => {
               {/* Evidence Photo */}
               {selectedCase.evidenceList.length > 0 && (
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono text-text-secondary uppercase">Attached Photo Evidence:</span>
+                  <span className="text-[10px] font-mono text-text-muted uppercase">Attached Photo Evidence:</span>
                   <img
                     src={selectedCase.evidenceList[0].fileUrl}
                     alt="Evidence"
@@ -166,19 +166,19 @@ export const ReviewerConsolePage: React.FC = () => {
               )}
 
               {/* Event Timeline Preview */}
-              <div className="space-y-2 pt-2 border-t border-slate-700">
-                <span className="text-[10px] font-mono text-slate-400 uppercase">Change Ledger Audit Trail:</span>
+              <div className="space-y-2 pt-2 border-t border-border-subtle">
+                <span className="text-[10px] font-mono text-secondary uppercase font-semibold">Change Ledger Audit Trail:</span>
                 <div className="space-y-1.5 max-h-40 overflow-y-auto">
                   {selectedCase.eventsTimeline.map(evt => (
-                    <div key={evt.eventId} className="text-xs bg-slate-800 p-2 rounded-lg border border-slate-700 flex items-start justify-between gap-2">
+                    <div key={evt.eventId} className="text-xs bg-surface-well p-2 rounded-lg border border-border-subtle flex items-start justify-between gap-2">
                       <div>
-                        <span className="font-semibold text-slate-100">{evt.actorRole}: </span>
-                        <span className="text-slate-400">{evt.summary}</span>
+                        <span className="font-semibold text-text-primary">{evt.actorRole}: </span>
+                        <span className="text-text-secondary">{evt.summary}</span>
                         {evt.reviewerNotes && (
-                          <div className="text-amber-300/80 text-[11px] mt-0.5">&quot;{evt.reviewerNotes}&quot;</div>
+                          <div className="text-primary text-[11px] mt-0.5 italic">"{evt.reviewerNotes}"</div>
                         )}
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400 whitespace-nowrap">
+                      <span className="text-[10px] font-mono text-text-muted whitespace-nowrap">
                         {new Date(evt.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -187,7 +187,7 @@ export const ReviewerConsolePage: React.FC = () => {
               </div>
             </Card>
           ) : (
-            <div className="py-12 text-center text-slate-400 text-xs">
+            <div className="py-12 text-center text-text-secondary text-xs bg-surface-card rounded-2xl border border-border-subtle">
               Select a case from the triage queue to begin assessment.
             </div>
           )}

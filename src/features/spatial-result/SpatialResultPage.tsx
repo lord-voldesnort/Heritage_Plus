@@ -5,10 +5,10 @@ import { SpatialMapCard } from './SpatialMapCard';
 import { Card } from '../../shared/components/Card';
 import { Button } from '../../shared/components/Button';
 import { Badge } from '../../shared/components/Badge';
-import { 
-  History, 
-  FileText, 
-  ArrowRight, 
+import {
+  History,
+  FileText,
+  ArrowRight,
   Sparkles
 } from 'lucide-react';
 
@@ -31,13 +31,15 @@ export const SpatialResultPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border-subtle">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-2">
             {caseRecord ? (
               <>
-                <span className="text-xs font-mono text-amber-400 font-semibold">{caseRecord.caseId}</span>
-                <Badge variant="blue">{caseRecord.currentStatus}</Badge>
+                <span className="text-xs font-mono text-primary font-bold">{caseRecord.caseId}</span>
+                <Badge variant={caseRecord.currentStatus === 'SUBMITTED_FOR_REVIEW' ? 'blue' : 'default'}>
+                  {caseRecord.currentStatus}
+                </Badge>
               </>
             ) : (
               <>
@@ -45,14 +47,14 @@ export const SpatialResultPage: React.FC = () => {
                   <Sparkles className="w-3 h-3" />
                   Official Evaluator Benchmark Harness
                 </Badge>
-                <span className="text-xs font-mono text-slate-400">Task 8 Delivery</span>
+                <span className="text-xs font-mono text-text-muted">Task 8 Delivery</span>
               </>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white font-['Outfit'] tracking-tight">
-            Interactive Map & Demo Scenarios Switcher
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary font-sans tracking-tight">
+            Interactive Map &amp; Demo Scenarios Switcher
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-text-secondary mt-1">
             Test all 4 official spatial test conditions against official Shivneri Fort geometry with real-time GPS accuracy circle rendering.
           </p>
         </div>
@@ -91,10 +93,10 @@ export const SpatialResultPage: React.FC = () => {
 
       {/* Case Context Alert if evaluating active case */}
       {caseRecord && (
-        <Card variant="bordered" className="bg-slate-900/40 p-4 flex items-center justify-between gap-3 text-xs">
+        <Card variant="default" className="p-4 flex items-center justify-between gap-3 text-xs">
           <div className="space-y-0.5">
-            <span className="text-slate-400 font-mono text-[10px]">Active Case Record:</span>
-            <div className="font-semibold text-slate-200">{caseRecord.factualDescription}</div>
+            <span className="text-text-muted font-mono text-[10px]">Active Case Record:</span>
+            <div className="font-semibold text-text-primary">{caseRecord.factualDescription}</div>
           </div>
           <Badge variant="slate" className="font-mono text-[10px]">
             ±{caseRecord.gpsAccuracyMeters}m GPS Error
@@ -110,7 +112,7 @@ export const SpatialResultPage: React.FC = () => {
       />
 
       {/* Bottom Navigation */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-800/80">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-border-subtle">
         <Link to="/site" className="w-full sm:w-auto">
           <Button variant="secondary" size="md" fullWidth>
             View Site Context

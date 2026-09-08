@@ -27,16 +27,16 @@ export const JudgeQaPage: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Badge variant="emerald">Jury Q&A Defense</Badge>
-            <span className="text-xs font-mono text-slate-400">SIH 2026</span>
+            <Badge variant="emerald">Jury Q&amp;A Defense</Badge>
+            <span className="text-xs font-mono text-text-secondary">SIH 2026</span>
           </div>
-          <h1 className="text-2xl font-bold text-white font-['Outfit']">
-            Judge Q&A Defense Brief
+          <h1 className="text-2xl font-bold text-primary font-sans tracking-tight">
+            Judge Q&amp;A Defense Brief
           </h1>
         </div>
 
@@ -49,15 +49,15 @@ export const JudgeQaPage: React.FC = () => {
         {qaList.map((item, index) => (
           <Card key={index} variant="elevated" className="space-y-3">
             <div className="flex items-start gap-3">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-xs font-mono font-bold text-amber-400">
+              <span className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-primary-saffron to-primary flex items-center justify-center text-xs font-mono font-bold text-white shadow-sm">
                 Q{index + 1}
               </span>
-              <h2 className="text-sm sm:text-base font-bold text-white leading-snug">
+              <h2 className="text-sm sm:text-base font-bold text-primary leading-snug pt-0.5">
                 {item.q}
               </h2>
             </div>
-            <div className="pl-9 text-xs sm:text-sm text-slate-300 leading-relaxed bg-slate-950/60 p-3.5 rounded-xl border border-slate-900">
-              <strong className="text-amber-400 block mb-1 font-mono text-xs">Honest Answer:</strong>
+            <div className="pl-10 text-xs sm:text-sm text-text-primary leading-relaxed bg-surface-well p-3.5 rounded-xl border border-border-subtle">
+              <strong className="text-secondary block mb-1 font-mono text-xs uppercase tracking-wide">Honest Answer:</strong>
               {item.a}
             </div>
           </Card>

@@ -190,22 +190,22 @@ export const FieldCapturePage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Site Header Context */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-        <Link to="/site" className="text-xs text-slate-400 hover:text-amber-400 flex items-center gap-1.5 transition-colors">
+      <div className="flex items-center justify-between pb-4 border-b border-border-subtle">
+        <Link to="/site" className="text-xs text-text-secondary hover:text-primary flex items-center gap-1.5 transition-colors font-medium">
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Site Context
         </Link>
-        <Badge variant="slate">Shivneri Fort Field Studio</Badge>
+        <Badge variant="blue">Shivneri Fort Field Studio</Badge>
       </div>
 
       <div>
-        <span className="text-xs font-semibold text-amber-500 uppercase tracking-wider font-mono">
+        <span className="text-xs font-semibold text-primary uppercase tracking-wider font-mono">
           Field Evidence Capture
         </span>
-        <h1 className="text-xl sm:text-2xl font-bold text-slate-100 mt-1 font-['Outfit']">
+        <h1 className="text-xl sm:text-2xl font-bold text-primary mt-1 font-sans">
           {SHIVNERI_SITE.name}
         </h1>
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-text-secondary mt-1">
           Record a factual, time-stamped observation near {SHIVNERI_SITE.name} (MUMMH015).
         </p>
       </div>
@@ -216,9 +216,9 @@ export const FieldCapturePage: React.FC = () => {
       </NoticeBanner>
 
       {/* Scenario Loader Pill for Jury/Evaluator Testing */}
-      <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <div className="text-xs text-slate-300 flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+      <div className="bg-surface-card p-3 rounded-xl border border-border-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="text-xs text-text-secondary flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
           <span>Testing a benchmark scenario?</span>
         </div>
         <div className="flex flex-wrap gap-1">
@@ -227,7 +227,7 @@ export const FieldCapturePage: React.FC = () => {
               key={sc.id}
               type="button"
               onClick={() => handleSelectDemoScenario(sc.id)}
-              className="px-2 py-1 rounded text-[11px] font-mono bg-slate-800 hover:bg-amber-600/30 text-slate-300 hover:text-amber-300 border border-slate-700 transition-all cursor-pointer"
+              className="px-2 py-1 rounded text-[11px] font-mono bg-surface-well hover:bg-primary/10 text-text-secondary hover:text-primary border border-border-subtle hover:border-primary/30 transition-all cursor-pointer"
             >
               {sc.name.split(':')[0]}
             </button>
@@ -239,11 +239,11 @@ export const FieldCapturePage: React.FC = () => {
         {/* Step 1: GPS Sensor HUD & Hardware Acquisition */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
-              1. Location &amp; Uncertainty Telemetry <span className="text-amber-500">*</span>
+            <label className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono">
+              1. Location &amp; Uncertainty Telemetry <span className="text-primary">*</span>
             </label>
             {isGpsAcquired && (
-              <span className="text-xs text-emerald-400 font-medium flex items-center gap-1">
+              <span className="text-xs text-zone-survey font-medium flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Sensor Active
               </span>
             )}
@@ -263,16 +263,16 @@ export const FieldCapturePage: React.FC = () => {
                 type="button"
                 onClick={handleGetLocation}
                 disabled={gpsLoading || isSubmitting}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-850 text-slate-200 font-medium text-xs transition-colors shadow-sm cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-border-strong bg-surface-card hover:bg-surface-well text-text-secondary hover:text-primary font-medium text-xs transition-colors shadow-xs cursor-pointer"
               >
                 {gpsLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
                     <span>Determining device position...</span>
                   </>
                 ) : (
                   <>
-                    <Navigation className="w-4 h-4 text-amber-500" />
+                    <Navigation className="w-4 h-4 text-primary" />
                     <span>Acquire Live Device GPS Coordinates</span>
                   </>
                 )}
@@ -281,12 +281,12 @@ export const FieldCapturePage: React.FC = () => {
 
             {/* Degraded GPS Precision Warning */}
             {accuracyMeters > 35 && (
-              <div className="p-3 rounded-xl bg-amber-950/50 border border-amber-800 text-amber-300 text-xs space-y-1">
+              <div className="p-3 rounded-xl bg-zone-regulated-bg border border-zone-regulated-border text-zone-regulated text-xs space-y-1">
                 <div className="flex items-center gap-1.5 font-semibold">
-                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <AlertTriangle className="w-4 h-4" />
                   <span>Degraded GPS Accuracy Error (±{accuracyMeters}m &gt; 35m threshold)</span>
                 </div>
-                <p className="text-slate-300 text-[11px]">
+                <p className="text-text-secondary text-[11px]">
                   <strong>Next Action:</strong> Move to an open-sky location with unobstructed satellite view. The spatial engine will safely record this case under <em>Location Evidence Insufficient</em> if submitted.
                 </p>
               </div>
@@ -302,8 +302,8 @@ export const FieldCapturePage: React.FC = () => {
 
         {/* Step 2: Category Selector */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
-            2. Visible Change Category <span className="text-amber-500">*</span>
+          <label className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono">
+            2. Visible Change Category <span className="text-primary">*</span>
           </label>
           <CategorySelector
             selectedCategoryId={categoryId}
@@ -314,17 +314,17 @@ export const FieldCapturePage: React.FC = () => {
 
         {/* Category Guidance & Photo Examples Box */}
         {activeGuideline && (
-          <div className="p-3.5 bg-amber-950/30 border border-amber-800/50 rounded-xl space-y-2 text-xs text-amber-200">
+          <div className="p-3.5 bg-primary-surface border border-primary-border rounded-xl space-y-2 text-xs text-text-secondary">
             <div>
-              <strong className="font-semibold block font-mono text-[11px] uppercase tracking-wide text-amber-400">
+              <strong className="font-semibold block font-mono text-[11px] uppercase tracking-wide text-primary">
                 Category Guidance &amp; Evidence Guidelines:
               </strong>
-              <div className="text-slate-300 mt-0.5">
+              <div className="text-text-secondary mt-0.5">
                 <strong>Examples to photograph:</strong> {activeGuideline.photoExamples.join(' · ')}.
               </div>
             </div>
-            <div className="text-amber-300 font-semibold flex items-center gap-1.5 pt-1.5 border-t border-amber-900/60 text-[11px]">
-              <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+            <div className="text-primary font-semibold flex items-center gap-1.5 pt-1.5 border-t border-primary-border text-[11px]">
+              <ShieldAlert className="w-3.5 h-3.5 shrink-0 text-primary" />
               <span>Privacy Warning: {APPROVED_PRIVACY_WARNING}</span>
             </div>
           </div>
@@ -332,7 +332,7 @@ export const FieldCapturePage: React.FC = () => {
 
         {/* Step 3: Photo Upload Dropzone */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
+          <label className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono">
             3. Photographic Evidence
           </label>
           <PhotoDropzone
@@ -344,10 +344,10 @@ export const FieldCapturePage: React.FC = () => {
         {/* Step 4: Factual Description */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="description" className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono">
-              4. Factual Observation Notes <span className="text-amber-500">*</span>
+            <label htmlFor="description" className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono">
+              4. Factual Observation Notes <span className="text-primary">*</span>
             </label>
-            <span className="text-[10px] text-slate-500">Neutral physical description</span>
+            <span className="text-[10px] text-text-muted">Neutral physical description</span>
           </div>
 
           <textarea
@@ -357,13 +357,13 @@ export const FieldCapturePage: React.FC = () => {
             disabled={isSubmitting}
             rows={3}
             placeholder={currentPromptPlaceholder}
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-sans"
+            className="w-full bg-surface-card border border-border-subtle rounded-xl p-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all font-sans"
           />
         </div>
 
         {/* Validation Error Banner */}
         {submitError && (
-          <div className="p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-300 text-xs flex items-start gap-2">
+          <div className="p-3.5 rounded-xl bg-zone-core-bg border border-zone-core-border text-zone-core text-xs flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>{submitError}</span>
           </div>
@@ -373,7 +373,7 @@ export const FieldCapturePage: React.FC = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:bg-slate-800 disabled:text-slate-500 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+          className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-primary-saffron via-primary to-primary-container disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
         >
           {isSubmitting ? (
             <>

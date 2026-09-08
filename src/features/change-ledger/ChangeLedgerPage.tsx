@@ -19,16 +19,16 @@ export const ChangeLedgerPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="amber">The Hero Feature</Badge>
-            <span className="text-xs font-mono text-slate-400">{allCases.length} Cases Logged</span>
+            <span className="text-xs font-mono text-text-muted">{allCases.length} Cases Logged</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white font-['Outfit']">
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary font-sans tracking-tight">
             Heritage Change Ledger
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-text-secondary mt-1">
             An append-only, traceable record of visible changes, spatial reasoning, and reviewer actions.
           </p>
         </div>
@@ -48,8 +48,8 @@ export const ChangeLedgerPage: React.FC = () => {
           onClick={() => setStatusFilter('ALL')}
           className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
             statusFilter === 'ALL'
-              ? 'bg-amber-600 text-slate-950 font-semibold'
-              : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+              ? 'bg-gradient-to-r from-primary-saffron to-primary text-white font-semibold shadow-sm'
+              : 'bg-surface-card text-text-secondary hover:text-primary hover:bg-primary/5 border border-border-subtle'
           }`}
         >
           All Cases ({allCases.length})
@@ -65,8 +65,8 @@ export const ChangeLedgerPage: React.FC = () => {
               onClick={() => setStatusFilter(status.id)}
               className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
                 statusFilter === status.id
-                  ? 'bg-amber-600 text-slate-950 font-semibold'
-                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800'
+                  ? 'bg-gradient-to-r from-primary-saffron to-primary text-white font-semibold shadow-sm'
+                  : 'bg-surface-card text-text-secondary hover:text-primary hover:bg-primary/5 border border-border-subtle'
               }`}
             >
               {status.label.split('(')[0]} ({count})
@@ -88,29 +88,29 @@ export const ChangeLedgerPage: React.FC = () => {
               className="block group"
             >
               <Card
-                variant="default"
-                className="hover:border-amber-500/50 hover:bg-slate-900/95 transition-all p-4 sm:p-5"
+                variant="elevated"
+                className="hover:border-primary/40 hover:shadow-sm transition-all p-4 sm:p-5"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-amber-400">{c.caseId}</span>
+                      <span className="font-mono text-xs font-bold text-primary">{c.caseId}</span>
                       <Badge variant={statusMeta.badgeVariant}>{statusMeta.label}</Badge>
-                      <span className="text-[11px] text-slate-500 font-mono">
+                      <span className="text-[11px] text-text-muted font-mono">
                         {new Date(c.observedTimestamp).toLocaleDateString()}
                       </span>
                     </div>
 
-                    <h2 className="text-sm sm:text-base font-semibold text-slate-100 group-hover:text-amber-300 transition-colors">
+                    <h2 className="text-sm sm:text-base font-bold text-text-primary group-hover:text-primary transition-colors">
                       {c.category.replace(/_/g, ' ')}
                     </h2>
 
-                    <p className="text-xs text-slate-400 line-clamp-1">
+                    <p className="text-xs text-text-secondary line-clamp-1">
                       {c.factualDescription}
                     </p>
                   </div>
 
-                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
+                  <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-border-subtle">
                     <Badge variant={classificationMeta.badgeVariant}>
                       {c.spatialResult.classification === 'POTENTIAL_ZONE_CONCERN' && 'Zone Concern'}
                       {c.spatialResult.classification === 'LOCATION_UNCERTAIN' && 'Location Uncertain'}
@@ -118,9 +118,9 @@ export const ChangeLedgerPage: React.FC = () => {
                       {c.spatialResult.classification === 'EVIDENCE_INSUFFICIENT' && 'Poor GPS'}
                     </Badge>
 
-                    <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1">
+                    <div className="text-[11px] text-text-muted font-mono flex items-center gap-1">
                       <span>{c.eventsTimeline.length} events logged</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 transition-transform group-hover:translate-x-0.5" />
+                      <ArrowRight className="w-3.5 h-3.5 text-text-muted group-hover:text-primary transition-all group-hover:translate-x-0.5" />
                     </div>
                   </div>
                 </div>

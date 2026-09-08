@@ -26,20 +26,20 @@ const ReviewerRoleGate: React.FC<{ children: React.ReactNode }> = ({ children })
   if (!hasRole) {
     return (
       <div className="max-w-md mx-auto py-16 px-4 text-center space-y-6">
-        <div className="p-8 bg-slate-900 border border-slate-800 rounded-2xl space-y-5 shadow-lg">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center mx-auto">
+        <div className="p-8 bg-surface-card border border-border-subtle rounded-2xl space-y-5 shadow-lg">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center mx-auto">
             <ShieldCheck className="w-7 h-7" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white tracking-tight">
+            <h2 className="text-xl font-bold text-primary tracking-tight">
               Reviewer Queue Access Gate
             </h2>
-            <p className="text-xs text-slate-400 mt-1.5">
+            <p className="text-xs text-text-secondary mt-1.5">
               Restricted to institutional reviewers and heritage curators.
             </p>
           </div>
 
-          <div className="p-3.5 bg-amber-950/40 border border-amber-800/60 rounded-xl text-xs text-amber-300 text-left leading-relaxed">
+          <div className="p-3.5 bg-zone-regulated-bg border border-zone-regulated-border rounded-xl text-xs text-zone-regulated text-left leading-relaxed">
             <strong className="block font-semibold mb-0.5">Simulated Prototype Role Gate:</strong>
             Authentication is simulated for demonstration purposes. Select your role to enter the curator triage console.
           </div>
@@ -62,14 +62,13 @@ const ReviewerRoleGate: React.FC<{ children: React.ReactNode }> = ({ children })
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-500/30 selection:text-amber-200">
+      {/* Global light canvas — bg-canvas-bg is #f8fafc (off-white) */}
+      <div className="min-h-screen flex flex-col bg-canvas-bg text-text-primary selection:bg-primary-fixed selection:text-primary">
         <Navbar />
         <main className="flex-1 w-full print:p-0 print:m-0 print:max-w-none">
           <Routes>
             <Route path="/" element={<Navigate to="/site" replace />} />
-            {/* Site Context page uses its own light background */}
-            <Route path="/site" element={<div className="bg-canvas-bg min-h-screen"><SiteContextPage /></div>} />
-            {/* All other pages sit on the dark slate-950 canvas */}
+            <Route path="/site" element={<SiteContextPage />} />
             <Route path="/capture" element={<div className="max-w-2xl mx-auto px-4 sm:px-6 py-8"><FieldCapturePage /></div>} />
             <Route path="/result" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><SpatialResultPage /></div>} />
             <Route path="/result/:caseId" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><SpatialResultPage /></div>} />
@@ -84,8 +83,8 @@ export const App: React.FC = () => {
             <Route path="/packet/:caseId" element={<ReviewerPacketPreview />} />
             <Route path="/reviewer/packet/:caseId" element={<ReviewerPacketPreview />} />
             <Route path="/team-status" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><TeamStatusPage /></div>} />
-            <Route path="/ps-fit" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><PsFitPage /></div>} />
-            <Route path="/judge-qa" element={<div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><JudgeQaPage /></div>} />
+            <Route path="/ps-fit" element={<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><PsFitPage /></div>} />
+            <Route path="/judge-qa" element={<div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><JudgeQaPage /></div>} />
             <Route path="*" element={<Navigate to="/site" replace />} />
           </Routes>
         </main>
