@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
@@ -15,20 +15,20 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]';
+  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-md transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-sandstone-500/40 focus:ring-offset-2 focus:ring-offset-ink-950 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const sizeStyles = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2.5 text-sm min-h-[44px]',
-    lg: 'px-6 py-3.5 text-base min-h-[48px]',
+    sm: 'px-2.5 py-1.5 text-xs gap-1.5',
+    md: 'px-3.5 py-2 text-sm min-h-[40px] gap-2',
+    lg: 'px-5 py-2.5 text-sm sm:text-base min-h-[44px] gap-2.5',
   };
 
   const variantStyles = {
-    primary: 'bg-amber-600 hover:bg-amber-500 text-slate-950 font-semibold shadow-md shadow-amber-900/30',
-    secondary: 'bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700',
-    outline: 'bg-transparent border border-amber-600/60 text-amber-400 hover:bg-amber-950/30',
-    danger: 'bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-950/40',
-    ghost: 'bg-transparent text-slate-300 hover:bg-slate-800/60',
+    primary: 'bg-sandstone-500 hover:bg-sandstone-400 text-ink-950 font-semibold border border-sandstone-400/80 shadow-archival-sm',
+    secondary: 'bg-ink-800 hover:bg-ink-700 text-ink-100 border border-ink-600/80 shadow-archival-sm',
+    outline: 'bg-transparent border border-sandstone-600/70 text-sandstone-300 hover:bg-sandstone-950/40',
+    danger: 'bg-terracotta-700 hover:bg-terracotta-600 text-terracotta-50 border border-terracotta-600/80 shadow-archival-sm',
+    ghost: 'bg-transparent text-ink-300 hover:bg-ink-800/60 hover:text-ink-100',
   };
 
   return (
@@ -41,3 +41,5 @@ export const Button: React.FC<ButtonProps> = ({
     </button>
   );
 };
+
+export default Button;

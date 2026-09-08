@@ -4,79 +4,92 @@ import { AlertCircle, AlertTriangle, Info, CheckCircle2, ShieldAlert } from 'luc
 
 export type BannerVariant = 'advisory' | 'uncertainty' | 'insufficient' | 'neutral' | 'success';
 
-interface NoticeBannerProps {
-    variant?: BannerVariant;
-    title?: string;
-    children: React.ReactNode;
-    className?: string;
+export interface NoticeBannerProps {
+  variant?: BannerVariant;
+  title?: string;
+  children: React.ReactNode;
+  className?: string;
 }
 
 const VARIANT_CONFIG: Record<
-    BannerVariant,
-    {
-        containerClass: string;
-        iconClass: string;
-        icon: React.ReactNode;
-        defaultTitle: string;
-    }
+  BannerVariant,
+  {
+    containerClass: string;
+    iconClass: string;
+    icon: React.ReactNode;
+    defaultTitle: string;
+  }
 > = {
-    advisory: {
-        containerClass: 'bg-indigo-50/80 border-indigo-200 text-indigo-950',
-        iconClass: 'text-indigo-600',
-        icon: <Info className="w-5 h-5" />,
-        defaultTitle: 'Indicative Decision Support',
-    },
-    uncertainty: {
-        containerClass: 'bg-amber-50/90 border-amber-300 text-amber-950',
-        iconClass: 'text-amber-600',
-        icon: <AlertTriangle className="w-5 h-5" />,
-        defaultTitle: 'Location Uncertain',
-    },
-    insufficient: {
-        containerClass: 'bg-slate-100 border-slate-300 text-slate-900',
-        iconClass: 'text-slate-600',
-        icon: <AlertCircle className="w-5 h-5" />,
-        defaultTitle: 'Location Evidence Insufficient',
-    },
-    neutral: {
-        containerClass: 'bg-slate-50 border-slate-200 text-slate-800',
-        iconClass: 'text-slate-500',
-        icon: <ShieldAlert className="w-5 h-5" />,
-        defaultTitle: 'Notice',
-    },
-    success: {
-        containerClass: 'bg-emerald-50 border-emerald-200 text-emerald-950',
-        iconClass: 'text-emerald-600',
-        icon: <CheckCircle2 className="w-5 h-5" />,
-        defaultTitle: 'Record Logged',
-    },
+  // Institutional Indicative Decision Support (Sandstone / Warm Archival)
+  advisory: {
+    containerClass: 'bg-sandstone-950/70 border-sandstone-800/90 text-sandstone-100 shadow-archival-sm',
+    iconClass: 'text-sandstone-400',
+    icon: <Info className="w-4 h-4 mt-0.5 shrink-0" />,
+    defaultTitle: 'Indicative Decision Support',
+  },
+  // Mineral Ochre (Location Uncertain / Buffer Overlap)
+  uncertainty: {
+    containerClass: 'bg-ochre-950/80 border-ochre-800/90 text-ochre-100 shadow-archival-sm',
+    iconClass: 'text-ochre-400',
+    icon: <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />,
+    defaultTitle: 'Location Uncertain',
+  },
+  // Archival Ash (Insufficient Location Evidence / Threshold Exceeded)
+  insufficient: {
+    containerClass: 'bg-ash-950/80 border-ash-800 text-ash-200 shadow-archival-sm',
+    iconClass: 'text-ash-400',
+    icon: <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />,
+    defaultTitle: 'Location Evidence Insufficient',
+  },
+  // Quiet Structural Record (Neutral Dossier Note)
+  neutral: {
+    containerClass: 'bg-ink-900/80 border-ink-800 text-ink-200 shadow-archival-sm',
+    iconClass: 'text-ink-400',
+    icon: <ShieldAlert className="w-4 h-4 mt-0.5 shrink-0" />,
+    defaultTitle: 'Archival Notice',
+  },
+  // Mineral Verdigris (Record Logged / Verified Clearance)
+  success: {
+    containerClass: 'bg-verdigris-950/80 border-verdigris-800/90 text-verdigris-100 shadow-archival-sm',
+    iconClass: 'text-verdigris-400',
+    icon: <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />,
+    defaultTitle: 'Record Logged',
+  },
 };
 
 export const NoticeBanner: React.FC<NoticeBannerProps> = ({
-    variant = 'advisory',
-    title,
-    children,
-    className,
+  variant = 'advisory',
+  title,
+  children,
+  className,
 }) => {
-    const config = VARIANT_CONFIG[variant];
-    const displayTitle = title ?? config.defaultTitle;
+  const config = VARIANT_CONFIG[variant] || VARIANT_CONFIG.advisory;
+  const displayTitle = title ?? config.defaultTitle;
 
-    return (
-        <div
-            role="alert"
-            className={clsx(
-                'flex items-start gap-3 p-3.5 rounded-lg border text-xs sm:text-sm leading-relaxed shadow-sm transition-all',
-                config.containerClass,
-                className
-            )}
-        >
-            <div className={clsx('shrink-0 mt-0.5', config.iconClass)}>{config.icon}</div>
-            <div className="flex-1 min-w-0">
-                {displayTitle && <div className="font-semibold mb-0.5 tracking-tight">{displayTitle}</div>}
-                <div className="opacity-90">{children}</div>
-            </div>
+  return (
+    <div
+      role="alert"
+      className={clsx(
+        'flex items-start gap-3 p-3.5 sm:p-4 rounded-md border text-xs sm:text-sm leading-relaxed transition-colors',
+        config.containerClass,
+        className
+      )}
+    >
+      <div className={clsx('shrink-0', config.iconClass)} aria-hidden="true">
+        {config.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        {displayTitle && (
+          <div className="font-display font-semibold mb-1 tracking-tight text-ink-50">
+            {displayTitle}
+          </div>
+        )}
+        <div className="opacity-90 font-sans text-legal-notice leading-relaxed">
+          {children}
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default NoticeBanner;

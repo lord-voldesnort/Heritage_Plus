@@ -4,16 +4,15 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans antialiased;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    @apply bg-ink-950 text-ink-100 font-sans antialiased selection:bg-sandstone-500/30 selection:text-sandstone-100;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
+    @apply font-display tracking-tight text-ink-50;
   }
 
   code, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    @apply font-mono;
   }
 }
 
@@ -24,4 +23,82 @@
 
 .maplibregl-ctrl-attrib {
   display: none !important;
+}
+
+/* Institutional Dossier & Reviewer Packet Print Stylesheet */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm 18mm 15mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #111111 !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Universal hide for non-printable navigation, demo bars, and interactive toggles */
+  .print\:hidden,
+  header,
+  footer,
+  aside,
+  button,
+  nav {
+    display: none !important;
+  }
+
+  /* Printable Dossier Container */
+  .printable-dossier,
+  [data-printable-dossier="true"],
+  .print-container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #111111 !important;
+  }
+
+  /* Prevent awkward page splits across evidence cards and tables */
+  .break-inside-avoid,
+  article,
+  table,
+  .dossier-card,
+  .border {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Crisp hair-line borders for physical paper output */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .border,
+  [class*="border-"] {
+    border-color: #333333 !important;
+  }
+
+  /* Legal disclaimer box in print */
+  .legal-print-notice {
+    border: 1.5pt solid #222222 !important;
+    padding: 8pt 10pt !important;
+    margin: 10pt 0 !important;
+    font-size: 8.5pt !important;
+    background: #f8f8f8 !important;
+    color: #111111 !important;
+  }
+
+  /* High contrast status badges in print */
+  .print-status-badge {
+    border: 1pt solid #000000 !important;
+    color: #000000 !important;
+    background: transparent !important;
+    font-weight: 700 !important;
+    font-family: 'JetBrains Mono', monospace !important;
+  }
 }

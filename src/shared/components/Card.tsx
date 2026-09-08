@@ -1,22 +1,25 @@
 import React from 'react';
 
-interface CardProps {
+export interface CardProps {
   children: React.ReactNode;
   className?: string;
-  variant?: 'default' | 'elevated' | 'glass' | 'bordered';
+  variant?: 'default' | 'elevated' | 'glass' | 'bordered' | 'dossier';
 }
 
 export const Card: React.FC<CardProps> = ({ children, className = '', variant = 'default' }) => {
-  const variantStyles = {
-    default: 'bg-slate-900/90 border border-slate-800 text-slate-100',
-    elevated: 'bg-slate-900 border border-slate-700/80 shadow-xl shadow-slate-950/60',
-    glass: 'bg-slate-900/60 backdrop-blur-md border border-slate-800/80',
-    bordered: 'bg-transparent border border-slate-800',
+  const variantStyles: Record<string, string> = {
+    default: 'bg-ink-900/90 border border-ink-800 text-ink-100 shadow-archival-sm',
+    elevated: 'bg-ink-900 border border-ink-700/80 text-ink-100 shadow-archival',
+    glass: 'bg-ink-900/70 backdrop-blur-sm border border-ink-800/90 text-ink-100',
+    bordered: 'bg-transparent border border-ink-800 text-ink-200',
+    dossier: 'bg-ink-950/60 border border-sandstone-900/60 text-ink-100 shadow-archival-sm',
   };
 
   return (
-    <div className={`rounded-2xl p-4 sm:p-5 transition-all ${variantStyles[variant]} ${className}`}>
+    <div className={`rounded-lg p-4 sm:p-5 transition-colors ${variantStyles[variant] || variantStyles.default} ${className}`}>
       {children}
     </div>
   );
 };
+
+export default Card;
