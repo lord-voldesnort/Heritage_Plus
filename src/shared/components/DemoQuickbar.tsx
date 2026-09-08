@@ -73,6 +73,7 @@ export const DemoQuickbar: React.FC = () => {
     navigate(`/result/${newCase.caseId}`);
   };
 
+
   const getIcon = (expected: string) => {
     switch (expected) {
       case 'POTENTIAL_ZONE_CONCERN':

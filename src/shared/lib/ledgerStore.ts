@@ -36,23 +36,17 @@ export class LedgerStore {
   private hydrateCases(): ObservationRecord[] {
     const loaded = this.adapter.loadCases();
     if (loaded && Array.isArray(loaded) && loaded.length > 0) {
-      // Merge seeded MOCK_CASES with loaded cases to guarantee benchmark cases exist
-      const loadedMap = new Map(loaded.map((c) => [c.caseId.toLowerCase(), c]));
-      for (const mockCase of MOCK_CASES) {
-        if (!loadedMap.has(mockCase.caseId.toLowerCase())) {
-          loaded.push(mockCase);
-        }
-      }
       return loaded;
     }
-    // Seed initial cases into persistent storage
-    const initial = [...MOCK_CASES];
-    this.adapter.saveCases(initial);
-    return initial;
+    // Deep copy baseline mock data
+    const baseline = JSON.parse(JSON.stringify(MOCK_CASES));
+    this.adapter.saveCases(baseline);
+    return baseline;
   }
 
   public getCases(filters?: CaseFilters): ObservationRecord[] {
     let result = [...this.cases];
+
     if (!filters) return result;
 
     if (filters.category) {
@@ -62,12 +56,10 @@ export class LedgerStore {
       result = result.filter((c) => c.currentStatus === filters.status);
     }
     if (filters.classification) {
-      result = result.filter(
-        (c) => (c.spatialResult?.classification || c.computedClassification) === filters.classification
-      );
+      result = result.filter((c) => c.spatialResult.classification === filters.classification);
     }
-    if (filters.searchQuery) {
-      const q = filters.searchQuery.toLowerCase();
+    if (filters.searchQuery && filters.searchQuery.trim()) {
+      const q = filters.searchQuery.toLowerCase().trim();
       result = result.filter(
         (c) =>
           c.caseId.toLowerCase().includes(q) ||
@@ -75,16 +67,12 @@ export class LedgerStore {
           c.category.toLowerCase().includes(q)
       );
     }
+
     return result;
   }
 
-  public listCases(filters?: CaseFilters): ObservationRecord[] {
-    return this.getCases(filters);
-  }
-
   public getCaseById(caseId: string): ObservationRecord | undefined {
-    if (!caseId) return undefined;
-    return this.cases.find((c) => c.caseId.toLowerCase() === caseId.trim().toLowerCase());
+    return this.cases.find((c) => c.caseId.toLowerCase() === caseId.toLowerCase());
   }
 
   public getCase(caseId: string): ObservationRecord | undefined {
@@ -236,6 +224,19 @@ export class LedgerStore {
     const targetCase = this.getCaseById(caseId);
     if (!targetCase) return null;
 
+    // Terminal closed-case protection: cannot modify closed cases
+    const isTerminal =
+      targetCase.currentStatus === 'CLOSED_REVIEWED' ||
+      targetCase.currentStatus === 'CLOSED_DUPLICATE' ||
+      targetCase.currentStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE' ||
+      targetCase.currentStatus === 'CLOSED_UNRESOLVED' ||
+      (CASE_STATUSES[targetCase.currentStatus] as any)?.isTerminal;
+
+    if (isTerminal) {
+      console.warn(`Cannot record review action on closed case ${caseId} (${targetCase.currentStatus}).`);
+      return null;
+    }
+
     // Validate permitted action
     if (!CASE_STATUSES[action]) {
       console.error(`Invalid case status action: ${action}`);
@@ -280,17 +281,19 @@ export class LedgerStore {
     eventType: 'INFO_REQUESTED' | 'STATUS_UPDATED' | 'CASE_CLOSED' = 'STATUS_UPDATED',
     reviewerRole: string = 'REVIEWER'
   ): ObservationRecord | null {
-    const targetCase = this.cases.find(c => c.caseId.toLowerCase() === caseId.toLowerCase());
+    const targetCase = this.getCaseById(caseId);
     if (!targetCase) return null;
 
     // Terminal closed-case protection: cannot modify closed cases
     const isTerminal =
       targetCase.currentStatus === 'CLOSED_REVIEWED' ||
       targetCase.currentStatus === 'CLOSED_DUPLICATE' ||
-      targetCase.currentStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE';
+      targetCase.currentStatus === 'CLOSED_INSUFFICIENT_LOCATION_EVIDENCE' ||
+      targetCase.currentStatus === 'CLOSED_UNRESOLVED' ||
+      (CASE_STATUSES[targetCase.currentStatus] as any)?.isTerminal;
 
     if (isTerminal) {
-      console.warn(`Cannot append reviewer decision to closed case ${caseId} (${targetCase.currentStatus}).`);
+      console.warn(`Cannot append decision to closed case ${caseId} (${targetCase.currentStatus}).`);
       return null;
     }
 
@@ -301,7 +304,7 @@ export class LedgerStore {
       eventId,
       caseId: targetCase.caseId,
       timestamp: now,
-      eventType,
+      eventType: eventType as any,
       actorRole: reviewerRole,
       title: actionTitle,
       summary: `${actionTitle}: ${notes}`,
@@ -310,7 +313,7 @@ export class LedgerStore {
       resultingStatus,
     };
 
-    return this.appendLedgerEvent(targetCase.caseId, newEvent);
+    return this.appendLedgerEvent(caseId, newEvent);
   }
 
   public appendLedgerEvent(caseId: string, event: ReviewEvent): ObservationRecord | null {
@@ -392,12 +395,14 @@ export class LedgerStore {
   }
 
   public resetDemoData(): void {
-    // Preserve user-created field observations
+    // Preserve user-created field observations (not demo scenarios and not initial MOCK_CASES)
     const userCases = this.cases.filter(
       (c) =>
         !this.demoCaseIds.has(c.caseId) &&
         !MOCK_CASES.some((m) => m.caseId.toLowerCase() === c.caseId.toLowerCase())
     );
+
+    // Re-seed baseline MOCK_CASES while preserving any user-created observations
     const nextCases = [...userCases, ...MOCK_CASES];
     this.demoCaseIds.clear();
     this.adapter.saveCases(nextCases);

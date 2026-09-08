@@ -11,9 +11,14 @@ import {
   ShieldCheck,
   History,
   Lock,
+  MapPin,
+  Layers,
+  Camera,
 } from 'lucide-react';
 import { CaseStatus } from '../../shared/types';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
+import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { containsBannedLanguage } from '../../shared/constants/bannedLanguage';
 import { CASE_STATUSES } from '../../shared/constants/caseStatuses';
 import { Badge, Button, Card, NoticeBanner } from '../../shared/components';
@@ -129,8 +134,8 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const targetCase = ledgerStore.getCaseById(caseId);
-  const effectiveStatus = currentStatus || targetCase?.currentStatus;
+  const caseRecord = ledgerStore.getCaseById(caseId);
+  const effectiveStatus = currentStatus || caseRecord?.currentStatus;
 
   const isCaseClosed = Boolean(
     effectiveStatus &&
@@ -147,13 +152,12 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(null);
-    setSuccessMessage(null);
-
     if (isCaseClosed) {
-      setErrorMessage('Case is sealed. Additional actions cannot be appended to closed records.');
+      setErrorMessage('Case is sealed. Historical ledger records cannot be re-edited or re-submitted.');
       return;
     }
+    setErrorMessage(null);
+    setSuccessMessage(null);
 
     const trimmedNotes = notes.trim();
     if (!trimmedNotes) {
@@ -264,6 +268,65 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
       <NoticeBanner variant="advisory">
         Institutional triage only. Review decisions update case status and append an immutable event to the Change Ledger.
       </NoticeBanner>
+
+      {/* Case Details & Provenance Context */}
+      {caseRecord && (
+        <div className="p-3.5 bg-slate-950/70 border border-slate-800 rounded-xl space-y-3 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800/80">
+            <span className="font-mono text-amber-400 font-semibold">{caseRecord.caseId}</span>
+            <div className="flex items-center gap-2">
+              <Badge variant="slate" className="text-[10px]">
+                Status: {effectiveStatus}
+              </Badge>
+              <Badge
+                variant={caseRecord.spatialResult.classification === 'POTENTIAL_ZONE_CONCERN' ? 'amber' : 'blue'}
+                className="text-[10px]"
+              >
+                {caseRecord.spatialResult.classification}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300">
+            <div>
+              <span className="text-[10px] text-slate-500 block uppercase font-mono">Observation:</span>
+              <span className="font-medium text-slate-200">{caseRecord.category.replace(/_/g, ' ')}</span>
+              <p className="text-slate-400 text-[11px] line-clamp-2 mt-0.5">{caseRecord.factualDescription}</p>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-slate-500 block uppercase font-mono">Spatial Telemetry:</span>
+              <div className="flex items-center gap-1.5 text-slate-300 mt-0.5">
+                <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
+                <span>±{caseRecord.gpsAccuracyMeters.toFixed(1)}m GPS error</span>
+                <span>•</span>
+                <span>
+                  Dist:{' '}
+                  {caseRecord.spatialResult.distanceToBoundaryMeters !== null
+                    ? `${caseRecord.spatialResult.distanceToBoundaryMeters.toFixed(1)}m`
+                    : 'N/A'}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] text-slate-400 mt-1 font-mono">
+                <Layers className="w-3 h-3 text-indigo-400 shrink-0" />
+                <span className="truncate">
+                  {SHIVNERI_GEOMETRY.versionLabel} ({PROVENANCE_METADATA.sourceAgency})
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {caseRecord.evidenceList && caseRecord.evidenceList.length > 0 && (
+            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+              <span className="flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-emerald-400" />
+                Attached Evidence (SHA-256: {caseRecord.evidenceList[0].sha256Checksum?.slice(0, 16)}...)
+              </span>
+              <span>{Math.round(caseRecord.evidenceList[0].fileSizeBytes / 1024)} KB</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Closed Case Protection Warning */}
       {isCaseClosed && (

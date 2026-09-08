@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Printer,
@@ -129,8 +129,8 @@ export const ReviewerPacketPreview: React.FC = () => {
             actorRole: 'SYSTEM',
             timestamp: resolvedCase.timestamp,
             title: 'GPS Location Telemetry Logged',
-            description: `Hardware GPS position (${resolvedCase.latitude.toFixed(5)}┬░N, ${resolvedCase.longitude.toFixed(5)}┬░E) with ┬▒${resolvedCase.accuracyMeters.toFixed(1)}m uncertainty circle.`,
-            metadataBadge: `┬▒${resolvedCase.accuracyMeters.toFixed(1)}m error`,
+            description: `Hardware GPS position (${resolvedCase.latitude.toFixed(5)}°N, ${resolvedCase.longitude.toFixed(5)}°E) with ±${resolvedCase.accuracyMeters.toFixed(1)}m uncertainty circle.`,
+            metadataBadge: `±${resolvedCase.accuracyMeters.toFixed(1)}m error`,
           },
           {
             id: `${resolvedCase.id}-pkt-3`,

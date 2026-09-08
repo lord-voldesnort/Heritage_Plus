@@ -70,6 +70,7 @@ export const PhotoDropzone: React.FC<PhotoDropzoneProps> = ({
         }
     };
 
+
     return (
         <div className="space-y-2.5">
             <div className="flex justify-between items-baseline">
