@@ -8,8 +8,11 @@
     padding: 0;
   }
   body {
-    @apply bg-canvas-bg text-text-primary font-sans antialiased;
+    background-color: #f8fafc;
+    color: #0f172a;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -19,6 +22,28 @@
 
   code, pre, .font-mono, .font-code-telemetry, .font-code-dossier {
     font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer utilities {
+  .bg-canvas-bg {
+    background-color: #f8fafc;
+  }
+  .text-text-primary {
+    color: #0f172a;
+  }
+  .text-text-secondary {
+    color: #475569;
+  }
+  .text-text-muted {
+    color: #94a3b8;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
