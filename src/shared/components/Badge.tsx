@@ -8,18 +8,18 @@ interface BadgeProps {
 
 export const Badge: React.FC<BadgeProps> = ({ children, variant = 'default', className = '' }) => {
   const variantStyles = {
-    default: 'bg-slate-800 text-slate-300 border-slate-700',
-    amber: 'bg-amber-950/70 text-amber-300 border-amber-800/80',
-    emerald: 'bg-emerald-950/70 text-emerald-300 border-emerald-800/80',
-    rose: 'bg-rose-950/70 text-rose-300 border-rose-800/80',
-    blue: 'bg-blue-950/70 text-blue-300 border-blue-800/80',
-    purple: 'bg-purple-950/70 text-purple-300 border-purple-800/80',
-    slate: 'bg-slate-900 text-slate-400 border-slate-800',
+    default: 'bg-surface-well text-text-secondary border-border-subtle',
+    amber: 'bg-zone-regulated-bg text-zone-regulated border-zone-regulated-border',
+    emerald: 'bg-zone-survey-bg text-zone-survey border-zone-survey-border',
+    rose: 'bg-zone-core-bg text-zone-core border-zone-core-border',
+    blue: 'bg-secondary-surface text-secondary border-secondary-border',
+    purple: 'bg-purple-50 text-purple-800 border-purple-200',
+    slate: 'bg-surface-well text-text-muted border-border-subtle',
   };
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${variantStyles[variant]} ${className}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border tracking-tight ${variantStyles[variant]} ${className}`}
     >
       {children}
     </span>

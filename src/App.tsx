@@ -25,30 +25,31 @@ const ReviewerRoleGate: React.FC<{ children: React.ReactNode }> = ({ children })
 
   if (!hasRole) {
     return (
-      <div className="max-w-md mx-auto py-12 px-4 text-center space-y-6">
-        <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-4 shadow-xl">
-          <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
-            <ShieldCheck className="w-6 h-6" />
+      <div className="max-w-md mx-auto py-16 px-4 text-center space-y-6">
+        <div className="p-8 bg-surface-card border border-border-subtle rounded-2xl space-y-5 shadow-lg">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center mx-auto">
+            <ShieldCheck className="w-7 h-7" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white font-['Outfit']">
+            <h2 className="text-xl font-bold text-text-primary tracking-tight">
               Reviewer Queue Access Gate
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-text-secondary mt-1.5">
               Restricted to institutional reviewers and heritage curators.
             </p>
           </div>
 
-          <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 text-left leading-relaxed">
-            <strong>Simulated Prototype Role Gate:</strong> Authentication is simulated for demo purposes. Select your role to view the curator triage queue.
+          <div className="p-3.5 bg-zone-regulated-bg border border-zone-regulated-border rounded-xl text-xs text-zone-regulated text-left leading-relaxed">
+            <strong className="block font-semibold mb-0.5">Simulated Prototype Role Gate:</strong>
+            Authentication is simulated for demonstration purposes. Select your role to enter the curator triage console.
           </div>
 
           <button
             type="button"
             onClick={handleSelectRole}
-            className="w-full py-3 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm transition-colors shadow-sm"
+            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-primary-saffron via-primary to-primary-container hover:opacity-95 text-white font-semibold text-sm transition-all shadow-md active:scale-[0.99]"
           >
-            Enter as: Reviewer (Simulated Role)
+            Enter as: Conservation Curator (Reviewer)
           </button>
         </div>
       </div>
@@ -61,9 +62,9 @@ const ReviewerRoleGate: React.FC<{ children: React.ReactNode }> = ({ children })
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-500 selection:text-slate-950">
+      <div className="min-h-screen flex flex-col bg-canvas-bg text-text-primary selection:bg-primary-fixed selection:text-primary">
         <Navbar />
-        <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 print:p-0 print:m-0 print:max-w-none">
+        <main className="flex-1 w-full mx-auto print:p-0 print:m-0 print:max-w-none">
           <Routes>
             <Route path="/" element={<Navigate to="/site" replace />} />
             <Route path="/site" element={<SiteContextPage />} />

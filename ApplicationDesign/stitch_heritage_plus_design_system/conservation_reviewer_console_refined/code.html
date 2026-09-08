@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    dialog::backdrop {
+      background: rgba(13, 28, 46, 0.45);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-well": "#f8fafc",
+            "surface-dim": "#ccdbf3",
+            "zone-regulated-bg": "#fffbeb",
+            "zone-survey-border": "#a7f3d0",
+            "on-secondary-fixed": "#001d31",
+            "surface-container-lowest": "#ffffff",
+            "tertiary": "#545c72",
+            "zone-core-bg": "#fef2f2",
+            "border-subtle": "#e2e8f0",
+            "inverse-on-surface": "#eaf1ff",
+            "on-secondary-container": "#00476e",
+            "error": "#ba1a1a",
+            "surface-container": "#e6eeff",
+            "surface-container-low": "#eff4ff",
+            "text-primary": "#0f172a",
+            "surface-container-high": "#dce9ff",
+            "zone-regulated": "#d97706",
+            "surface-bright": "#f8f9ff",
+            "surface-card": "#ffffff",
+            "on-tertiary-fixed": "#131b2e",
+            "on-error": "#ffffff",
+            "on-primary-container": "#fffbff",
+            "on-primary-fixed-variant": "#7f2b00",
+            "surface-tint": "#a73a00",
+            "error-container": "#ffdad6",
+            "zone-regulated-border": "#fde68a",
+            "outline": "#8e7166",
+            "secondary-fixed-dim": "#93ccff",
+            "background": "#f8f9ff",
+            "zone-core": "#dc2626",
+            "on-secondary": "#ffffff",
+            "surface-container-highest": "#d5e3fc",
+            "primary-fixed-dim": "#ffb599",
+            "text-secondary": "#475569",
+            "outline-variant": "#e2bfb2",
+            "tertiary-container": "#6c748b",
+            "on-tertiary-fixed-variant": "#3f465c",
+            "text-muted": "#94a3b8",
+            "surface": "#f8f9ff",
+            "secondary": "#006398",
+            "on-error-container": "#93000a",
+            "on-primary-fixed": "#370e00",
+            "zone-core-border": "#fecaca",
+            "primary-container": "#cc4900",
+            "on-background": "#0d1c2e",
+            "on-tertiary": "#ffffff",
+            "canvas-bg": "#f8fafc",
+            "tertiary-fixed": "#dae2fd",
+            "secondary-container": "#5bb8fe",
+            "tertiary-fixed-dim": "#bec6e0",
+            "interactive-focus": "#ea580c",
+            "surface-variant": "#d5e3fc",
+            "primary-fixed": "#ffdbce",
+            "zone-survey": "#059669",
+            "zone-survey-bg": "#ecfdf5",
+            "inverse-primary": "#ffb599",
+            "on-tertiary-container": "#fefcff",
+            "inverse-surface": "#233144",
+            "primary": "#a33900",
+            "secondary-fixed": "#cce5ff",
+            "border-strong": "#cbd5e1",
+            "on-surface": "#0d1c2e",
+            "on-primary": "#ffffff",
+            "on-surface-variant": "#5a4138"
+          },
+          borderRadius: {
+            DEFAULT: "0.125rem",
+            lg: "0.375rem",
+            xl: "0.625rem",
+            "2xl": "0.875rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            "headline-md": ["Inter", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "code-telemetry": ["monospace"],
+            "label-uppercase": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"],
+            "code-dossier": ["monospace"],
+            "body-default": ["Inter", "sans-serif"],
+            "display-hero": ["Inter", "sans-serif"],
+            "body-strong": ["Inter", "sans-serif"],
+            "title-case": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-canvas-bg font-body-default text-text-primary antialiased selection:bg-primary-fixed selection:text-primary">
+<!-- Left Navigation Rail -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-surface-card border-r border-border-subtle z-50 flex flex-col justify-between py-6">
+<div class="flex flex-col gap-6">
+<div class="px-6 flex items-center gap-3">
+<img alt="Heritage Plus National Emblem" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UEOjqYmNyO-hBV--jfpo6ZLTRVIqOrH1hHDLcJKe5xpBXp-90LfJ9h2n-TvyzmDARPxInk78kvv1SozYnUNAxykYuHVXqsA3YmNqWwNGlmgoMuKzlyFf09g8S1m78b-0eBaEtrFYkken1Ic7QmSJI2CmCx2d1WLR7GTdpQzuPXHFAjMCxkxZecOBozxpAyKgn2fOm-BaNneyaIj7ajTrQKRIfMSPEkIFfGZFU6zKxXiXYZ_xaZcypq"/>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[15px] font-bold tracking-tight text-text-primary">Heritage Plus</span>
+<span class="text-[11px] font-medium text-text-secondary tracking-wide uppercase">Directorate Console</span>
+</div>
+</div>
+<div class="px-5">
+<div class="bg-surface-well border border-border-subtle/80 px-3.5 py-2.5 rounded-lg flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold tracking-widest text-text-muted uppercase">CURATOR DESK</span>
+<span class="text-xs font-semibold text-text-primary truncate">Reviewer Tier 2</span>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-zone-survey-bg text-zone-survey">
+<span class="h-1.5 w-1.5 rounded-full bg-zone-survey animate-pulse"></span>
+            Online
+          </span>
+</div>
+</div>
+<nav class="flex flex-col gap-1 px-3">
+<a aria-current="page" class="flex items-center px-3 py-2 rounded-lg bg-primary-container text-on-primary font-medium text-sm transition-all shadow-sm" data-path="reviewer-console" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">tune</span>Curator Console
+        </a>
+<a class="flex items-center px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary transition-colors font-medium" data-path="reviewer-queue" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">inbox</span>Triage Queue
+        </a>
+<a class="flex items-center px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary transition-colors font-medium" data-path="change-ledger" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">history_edu</span>Change Ledger
+        </a>
+<a class="flex items-center px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary transition-colors font-medium" data-path="compliance-dossier" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">gavel</span>Dossier Deck
+        </a>
+<a class="flex items-center px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary transition-colors font-medium" data-path="site-context" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">map</span>Site Context
+        </a>
+<a class="flex items-center px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary transition-colors font-medium" data-path="team-status" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">groups</span>Team Status
+        </a>
+</nav>
+</div>
+<div class="px-5 flex flex-col gap-2">
+<div class="bg-surface-well border border-border-subtle p-3 rounded-lg text-center">
+<span class="font-code-dossier text-[10px] text-text-muted block font-semibold">BUILD v2.4-GOV</span>
+<span class="text-[11px] text-zone-survey font-semibold block mt-0.5">SECURE LEGAL CHANNEL</span>
+</div>
+</div>
+</aside>
+<!-- Main View Container -->
+<div class="pl-64 min-h-screen flex flex-col">
+<!-- Top Application Bar -->
+<header class="fixed top-0 left-64 right-0 h-16 bg-surface-card/90 backdrop-blur-md border-b border-border-subtle z-40 flex items-center justify-between px-8">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-surface-well border border-border-subtle px-3 py-1.5 rounded-lg text-xs">
+<span class="material-symbols-outlined text-zone-survey text-[18px]">satellite_alt</span>
+<span class="font-code-telemetry text-text-primary font-medium">GPS DIFFERENTIAL LOCKED · ±2.4m</span>
+</div>
+<div class="hidden sm:flex items-center gap-2 text-xs text-text-secondary">
+<span class="w-1 h-1 rounded-full bg-border-strong"></span>
+<span>Curator Desk Session #CR-09</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden md:block">
+<p class="text-xs font-semibold text-text-primary">Dr. Ananya Sen</p>
+<p class="text-[11px] text-text-secondary">Superintending Archaeologist</p>
+</div>
+<div class="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+          AS
+        </div>
+</div>
+</header>
+<!-- Main Workspace Content -->
+<main class="relative pt-20 pb-16 bg-canvas-bg min-h-screen w-full px-8 max-w-[1520px] mx-auto">
+<!-- ESSENTIAL INFORMATION FIRST: Clean Case Header -->
+<section class="w-full bg-surface-card border border-border-subtle rounded-xl p-6 shadow-sm mb-6">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+<!-- Left: Case Overview & Vital Breadcrumb -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-xs text-text-secondary">
+<a class="hover:text-primary transition-colors flex items-center gap-1 font-medium" href="#">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                Triage Queue
+              </a>
+<span class="text-text-muted">/</span>
+<span class="font-code-dossier font-bold text-primary">CASE-2026-0841</span>
+<span class="text-text-muted">•</span>
+<span class="text-text-secondary">Taj Mahal Eastern Perimeter, Agra</span>
+</div>
+<h1 class="text-2xl font-bold text-text-primary tracking-tight">
+              Unauthorized Concrete &amp; Masonry Footing
+            </h1>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-secondary pt-0.5">
+<span class="flex items-center gap-1.5 font-medium">
+<span class="material-symbols-outlined text-text-muted text-[17px]">person</span>
+                Inspector Vikram Sharma
+              </span>
+<span class="text-text-muted">•</span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-text-muted text-[17px]">schedule</span>
+                Logged today, 14:32 IST (2 hrs ago)
+              </span>
+<span class="text-text-muted">•</span>
+<button class="text-secondary hover:text-primary font-semibold underline underline-offset-2 flex items-center gap-1" onclick="document.getElementById('modal-coc').showModal()">
+<span class="material-symbols-outlined text-[15px]">verified</span>
+                Inspect Chain-of-Custody Proof
+              </button>
+</div>
+</div>
+<!-- Right: Clear Priority Badges -->
+<div class="flex flex-wrap lg:flex-col items-start lg:items-end gap-2.5">
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 bg-zone-core-bg border border-zone-core-border rounded-lg text-zone-core font-semibold text-xs tracking-tight shadow-xs">
+<span class="material-symbols-outlined text-[18px]">emergency_home</span>
+<span>Core Protected Zone Infraction · 72.4m</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 bg-red-100 text-red-700 font-bold text-[11px] rounded tracking-wide uppercase">
+                Urgent Action
+              </span>
+<span class="px-2.5 py-1 bg-surface-well border border-border-subtle text-text-secondary font-semibold text-[11px] rounded flex items-center gap-1.5">
+<span class="h-2 w-2 rounded-full bg-interactive-focus animate-ping"></span>
+                Under Review
+              </span>
+</div>
+</div>
+</div>
+</section>
+<!-- TWO-COLUMN HARMONY: Clean 55% / 45% Split with 24px Gap -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- LEFT COLUMN: Spatial Cartography & Forensic Evidence (55% -> 7 Cols) -->
+<div class="lg:col-span-7 flex flex-col gap-6 min-w-0">
+<!-- 1. Cartography / Map Card -->
+<div class="bg-surface-card border border-border-subtle rounded-xl p-6 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-base font-bold text-text-primary">Spatial Geodesic Cartography</h2>
+<p class="text-xs text-text-secondary mt-0.5">WGS-84 Dual Differential Vector Overlay • 27.1751° N, 78.0421° E</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-xs font-semibold text-secondary hover:text-primary bg-surface-well border border-border-subtle px-2.5 py-1 rounded transition-colors flex items-center gap-1" onclick="document.getElementById('modal-technical-logs').showModal()">
+<span class="material-symbols-outlined text-[15px]">terminal</span>
+                  Technical Telemetry Logs
+                </button>
+</div>
+</div>
+<!-- Vector Map Canvas Container -->
+<div class="relative w-full h-[350px] bg-surface-well border border-border-subtle rounded-lg overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-multiply" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD1idLqmMh3mwPNJSB0cDUYJxwPWv_xF7AOCbtjaxV9vi2mV3WBuxIW3fvr6dPVakzGzmHzsNSVwq18J6uNjCQaxw6HJADdtvd8a-nuF_FCYZbs0yPHM7WNEPxPuS_mCV5xuxAnjwsSGUYasiTdk-BzBSYt37VcAeuVufoAdTvb68sx3UfbLHS9eLwASavMhIj_LDZlimABccQtHTLiRqKrDvPGV0dNdhOS1fMTlr4BK6uM4a9uDa8')"></div>
+<!-- Clean Technical Grid & Distance Circles -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern height="35" id="grid-pattern" patternunits="userSpaceOnUse" width="35">
+<path d="M 35 0 L 0 0 0 35" fill="none" stroke="#cbd5e1" stroke-dasharray="2,2" stroke-width="0.65"></path>
+</pattern>
+<filter height="200%" id="incident-glow" width="200%" x="-50%" y="-50%">
+<fegaussianblur result="coloredBlur" stddeviation="5"></fegaussianblur>
+<femerge>
+<femergenode in="coloredBlur"></femergenode>
+<femergenode in="SourceGraphic"></femergenode>
+</femerge>
+</filter>
+</defs>
+<rect fill="url(#grid-pattern)" height="100%" width="100%"></rect>
+<!-- 300m Buffer -->
+<circle cx="44%" cy="52%" fill="#fffbeb" fill-opacity="0.3" r="150" stroke="#d97706" stroke-dasharray="6,4" stroke-width="1.5"></circle>
+<!-- 100m Prohibited Core -->
+<circle cx="44%" cy="52%" fill="#fef2f2" fill-opacity="0.45" r="82" stroke="#dc2626" stroke-width="2"></circle>
+<!-- Monument Anchor Center -->
+<circle cx="44%" cy="52%" fill="#006398" r="5"></circle>
+<circle cx="44%" cy="52%" fill="none" r="11" stroke="#006398" stroke-width="1.5"></circle>
+<text class="text-[11px] font-bold fill-[#00476e]" x="38%" y="47%">Monument Plinth Anchor</text>
+<!-- Geodesic Vector Line -->
+<line stroke="#006398" stroke-dasharray="4,3" stroke-linecap="round" stroke-width="2" x1="44%" x2="59%" y1="52%" y2="38%"></line>
+<!-- Incident Beacon -->
+<circle cx="59%" cy="38%" fill="#dc2626" fill-opacity="0.25" filter="url(#incident-glow)" r="16">
+<animate attributename="r" dur="2.2s" repeatcount="indefinite" values="10;22;10"></animate>
+<animate attributename="opacity" dur="2.2s" repeatcount="indefinite" values="0.8;0.1;0.8"></animate>
+</circle>
+<circle cx="59%" cy="38%" fill="#dc2626" r="6" stroke="#ffffff" stroke-width="2"></circle>
+</svg>
+<!-- Floating Distance Callout -->
+<div class="absolute top-[31%] left-[46%] -translate-y-1/2 bg-surface-card/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-zone-core-border shadow-md flex items-center gap-2 z-10">
+<span class="w-2.5 h-2.5 rounded-full bg-zone-core"></span>
+<span class="font-code-telemetry text-xs font-bold text-zone-core">72.4 m</span>
+<span class="text-[11px] text-text-secondary">(Ellipsoidal Distance)</span>
+</div>
+<!-- Map HUD overlay controls -->
+<div class="absolute top-3 right-3 flex flex-col gap-1.5 z-10">
+<button class="bg-surface-card/95 hover:bg-surface-card p-1.5 rounded-md border border-border-subtle shadow-xs text-text-secondary hover:text-text-primary transition-colors" title="Orient North">
+<span class="material-symbols-outlined text-[18px]">north</span>
+</button>
+<div class="bg-surface-card/95 rounded-md border border-border-subtle shadow-xs flex flex-col divide-y divide-border-subtle text-text-secondary">
+<button class="p-1.5 hover:text-text-primary hover:bg-surface-well transition-colors" title="Zoom in">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+<button class="p-1.5 hover:text-text-primary hover:bg-surface-well transition-colors" title="Zoom out">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+</div>
+</div>
+<!-- Compact Legend Footer -->
+<div class="absolute bottom-3 left-3 right-3 bg-surface-card/95 backdrop-blur px-3.5 py-1.5 rounded-lg border border-border-subtle shadow-xs flex items-center justify-between text-xs z-10">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-zone-core"></span>
+<span class="text-text-secondary text-[11px] font-medium">0–100m Core Prohibited</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-zone-regulated"></span>
+<span class="text-text-secondary text-[11px] font-medium">101–300m Buffer</span>
+</div>
+</div>
+<span class="font-code-dossier text-[10px] text-text-muted font-medium tracking-wide">AMASR GEODETIC GRID</span>
+</div>
+</div>
+<!-- Primary Spatial Metrics Strip -->
+<div class="grid grid-cols-3 gap-3">
+<div class="bg-surface-well border border-border-subtle p-3 rounded-lg text-center">
+<span class="text-[10px] font-bold uppercase tracking-wider text-text-muted block">Measured Offset</span>
+<span class="text-base font-bold text-zone-core">72.4 m</span>
+<span class="text-[10px] text-text-secondary block mt-0.5">-27.6m within core</span>
+</div>
+<div class="bg-surface-well border border-border-subtle p-3 rounded-lg text-center">
+<span class="text-[10px] font-bold uppercase tracking-wider text-text-muted block">Legal Limit</span>
+<span class="text-base font-bold text-text-primary">100.0 m</span>
+<span class="text-[10px] text-text-secondary block mt-0.5">AMASR Sec 20A</span>
+</div>
+<div class="bg-surface-well border border-border-subtle p-3 rounded-lg text-center">
+<span class="text-[10px] font-bold uppercase tracking-wider text-text-muted block">Bearing Angle</span>
+<span class="text-base font-bold text-text-primary">048° NE</span>
+<span class="text-[10px] text-text-secondary block mt-0.5">East Wall Sector</span>
+</div>
+</div>
+</div>
+<!-- 2. Evidence Card: Streamlined Photo & Clean Modal Access -->
+<div class="bg-surface-card border border-border-subtle rounded-xl p-6 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-base font-bold text-text-primary">Photographic Forensic Evidence</h2>
+<p class="text-xs text-text-secondary mt-0.5">Asset #IMG-2026-8819 • Sealed Chain of Custody</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-xs text-secondary hover:text-primary font-semibold flex items-center gap-1 bg-surface-well border border-border-subtle px-2.5 py-1 rounded" onclick="document.getElementById('modal-coc').showModal()">
+<span class="material-symbols-outlined text-[15px]">lock</span>
+                  EXIF &amp; Cryptographic Proof
+                </button>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Evidence Image with Quick Action Pill -->
+<div class="relative group rounded-lg overflow-hidden bg-surface-well border border-border-subtle">
+<img alt="Close-up field evidence photo of illegal brick and mortar construction actively taking place near an ancient sandstone perimeter wall with construction scaffolding, wet cement, and measuring rods" class="w-full h-72 object-cover object-center cursor-pointer transition-transform duration-300 group-hover:scale-[1.01]" id="primary-evidence-preview" onclick="document.getElementById('modal-photo').showModal()" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSBHGnU96L8-79iB0AWodrAGnzgZsRSVu-FtOgpRwNywT_8Yq1HKm0hLN8sIeYfP9AsnrR0qbPvvMJPT231Qrchu7BZV8JckK24otTD2sz6c4q2pbsgcuz0vf5VbQw-5T0eSW9tW77lhMilrLQR-1hlwdGe1XtqFRWuX12UYJ2LtLRaV7CrrtotXZcGPrxE7Z0ymZRKygb6zUxuE_MGufcuqR6Zbbv5HSuoNlBEVpfShWvc6VUZMg"/>
+<div class="absolute top-3 left-3 bg-surface-card/90 backdrop-blur px-2.5 py-1 rounded text-xs font-semibold text-text-primary shadow-xs border border-border-subtle flex items-center gap-1.5">
+<span class="h-2 w-2 rounded-full bg-zone-core"></span>
+                  EXHIBIT A · Active Masonry Trenches
+                </div>
+<button class="absolute bottom-3 right-3 bg-surface-card/95 hover:bg-white text-text-primary text-xs font-medium px-3 py-1.5 rounded-lg border border-border-subtle shadow-md flex items-center gap-1.5 transition-all" onclick="document.getElementById('modal-photo').showModal()">
+<span class="material-symbols-outlined text-secondary text-[16px]">fullscreen</span>
+                  Open Full-Screen Resolution Proof
+                </button>
+</div>
+<!-- Thumbnails & Photo Carousel Indicator -->
+<div class="flex items-center justify-between text-xs text-text-secondary pt-1">
+<div class="flex items-center gap-2">
+<button class="px-2 py-1 rounded bg-surface-well border border-primary/40 text-primary font-bold text-xs">Photo 1 (Primary)</button>
+<button class="px-2 py-1 rounded bg-surface-well border border-border-subtle text-text-secondary hover:text-text-primary text-xs">Photo 2 (Elevation)</button>
+<button class="px-2 py-1 rounded bg-surface-well border border-border-subtle text-text-secondary hover:text-text-primary text-xs">Photo 3 (Survey Peg)</button>
+</div>
+<span class="font-code-telemetry text-[11px] text-text-muted">TAMPER-FREE SHA-256 VERIFIED</span>
+</div>
+</div>
+<!-- Compact Ranger Sworn Statement -->
+<div class="mt-1 bg-surface-well border border-border-subtle p-4 rounded-lg flex flex-col gap-2">
+<div class="flex items-center justify-between text-xs">
+<span class="font-semibold text-text-primary flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[16px]">assignment</span>
+                  Field Inspector Attestation
+                </span>
+<span class="text-[11px] font-code-telemetry text-text-muted">ASI-RNG-0442</span>
+</div>
+<p class="text-xs text-text-secondary italic leading-relaxed">
+                "Observed active, unauthorized masonry work involving poured concrete foundation trenches and newly laid red-brick structural columns 72.4m from the primary plinth. Contractor failed to produce any Directorate NOC or approved variance."
+              </p>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Streamlined Curator Disposition (45% -> 5 Cols) -->
+<div class="lg:col-span-5 flex flex-col gap-6 min-w-0 sticky top-24">
+<div class="bg-surface-card border border-border-subtle rounded-xl p-6 shadow-sm flex flex-col gap-5">
+<!-- Disposition Header -->
+<div class="flex items-center justify-between pb-1 border-b border-border-subtle">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed/60 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">gavel</span>
+</div>
+<div>
+<h2 class="text-base font-bold text-text-primary">Curator Regulatory Disposition</h2>
+<p class="text-xs text-text-secondary">Statutory Determination Stage 2/3</p>
+</div>
+</div>
+<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-zone-regulated-bg text-zone-regulated border border-zone-regulated-border">
+                Decision Required
+              </span>
+</div>
+<!-- Disposition Decision Form -->
+<form class="flex flex-col gap-5" id="disposition-form" onsubmit="event.preventDefault();">
+<!-- 4 Distinct Radio Choice Cards -->
+<div class="flex flex-col gap-2.5">
+<label class="text-[11px] font-bold uppercase tracking-wider text-text-secondary">
+                  Mandatory Statutory Determination
+                </label>
+<!-- Option 1: Violation Citation (Selected) -->
+<label class="relative flex items-start gap-3 p-3.5 rounded-xl border-2 border-primary bg-primary-fixed/20 cursor-pointer transition-all hover:bg-primary-fixed/30">
+<input checked="" class="mt-0.5 h-4 w-4 text-primary focus:ring-primary border-border-strong" name="verdict" type="radio" value="approve_citation"/>
+<div class="flex flex-col gap-0.5">
+<span class="text-xs font-bold text-primary flex items-center gap-1.5">
+                      Approve Violation Notice &amp; Statutory Citation
+                      <span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>
+</span>
+<p class="text-[11px] text-text-secondary leading-normal">
+                      Confirms breach of 100m Core Prohibited Zone under Section 20A. Automatically triggers immediate ASI Stop-Work directive and local magistracy notice.
+                    </p>
+</div>
+</label>
+<!-- Option 2: Re-Inspect -->
+<label class="relative flex items-start gap-3 p-3.5 rounded-xl border border-border-subtle bg-surface-card hover:bg-surface-well hover:border-border-strong cursor-pointer transition-all">
+<input class="mt-0.5 h-4 w-4 text-primary focus:ring-primary border-border-strong" name="verdict" type="radio" value="re_inspect"/>
+<div class="flex flex-col gap-0.5">
+<span class="text-xs font-bold text-text-primary">Flag for On-Site Ranger Re-Inspection</span>
+<p class="text-[11px] text-text-secondary leading-normal">
+                      Request secondary GNSS verification survey or LIDAR scan if boundary markers or monuments are contested.
+                    </p>
+</div>
+</label>
+<!-- Option 3: Enforcement Escalation -->
+<label class="relative flex items-start gap-3 p-3.5 rounded-xl border border-border-subtle bg-surface-card hover:bg-surface-well hover:border-border-strong cursor-pointer transition-all">
+<input class="mt-0.5 h-4 w-4 text-primary focus:ring-primary border-border-strong" name="verdict" type="radio" value="escalate_enforcement"/>
+<div class="flex flex-col gap-0.5">
+<span class="text-xs font-bold text-zone-core">Escalate to Archaeological Enforcement Directorate</span>
+<p class="text-[11px] text-text-secondary leading-normal">
+                      Dispatch conservation police and request district magistrate demolition order for active heavy machinery.
+                    </p>
+</div>
+</label>
+<!-- Option 4: Dismiss -->
+<label class="relative flex items-start gap-3 p-3.5 rounded-xl border border-border-subtle bg-surface-card hover:bg-surface-well hover:border-border-strong cursor-pointer transition-all">
+<input class="mt-0.5 h-4 w-4 text-primary focus:ring-primary border-border-strong" name="verdict" type="radio" value="dismiss"/>
+<div class="flex flex-col gap-0.5">
+<span class="text-xs font-bold text-text-secondary">Dismiss / Inconclusive Field Evidence</span>
+<p class="text-[11px] text-text-secondary leading-normal">
+                      Activity falls beyond 300m regulated buffer or constitutes approved conservation maintenance.
+                    </p>
+</div>
+</label>
+</div>
+<!-- Mandatory Justification with Clean Counter -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="text-[11px] font-bold uppercase tracking-wider text-text-secondary" for="curator_justification">
+                    Curator Justification &amp; Rationale *
+                  </label>
+<span class="text-[10px] font-semibold text-zone-survey bg-zone-survey-bg px-1.5 py-0.5 rounded">LEGAL RECORD</span>
+</div>
+<textarea class="w-full bg-surface-well border border-border-subtle rounded-lg p-3 text-xs text-text-primary leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all" id="curator_justification" oninput="document.getElementById('char-count').innerText = this.value.length" rows="3">Geodesic spatial verification confirms the activity is located 72.4m from the primary monument boundary, strictly violating the 100m prohibited core buffer under Section 20A of AMASR Act. Urgent citation notice recommended.</textarea>
+<div class="flex items-center justify-between text-[11px] text-text-muted">
+<span>Standard statutory terminology checked.</span>
+<span><span class="font-semibold text-text-secondary" id="char-count">228</span> / 500 chars</span>
+</div>
+</div>
+<!-- Statutory Legal Attestation Checkbox -->
+<div class="bg-surface-well border border-border-subtle p-3 rounded-lg flex items-start gap-2.5">
+<input checked="" class="mt-0.5 h-4 w-4 text-primary rounded border-border-strong focus:ring-primary cursor-pointer" id="statutory_attest" type="checkbox"/>
+<label class="text-[11px] text-text-secondary leading-normal cursor-pointer select-none" for="statutory_attest">
+<strong class="text-text-primary block font-semibold mb-0.5">Statutory Legal Attestation</strong>
+                  I confirm that this determination adheres to statutory boundaries under the AMASR Act (2010 amendment), substantiated by calibrated GNSS geodetic calculations.
+                </label>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-2.5 pt-1">
+<!-- Highlighted Primary Action: Institutional Saffron-Orange -->
+<a class="w-full py-3 px-5 bg-gradient-to-r from-[#cc4900] to-[#a33900] hover:from-[#b84000] hover:to-[#913200] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md hover:shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 text-center focus:ring-2 focus:ring-offset-2 focus:ring-primary" data-path="compliance-dossier" href="#/packet/CASE-2026-0841">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+                  Finalize Verdict &amp; Issue Audit Dossier
+                </a>
+<!-- Clean Dual Secondary Actions with Slate/Sky-Blue borders -->
+<div class="grid grid-cols-2 gap-2.5">
+<button class="py-2.5 px-3 bg-surface-card hover:bg-surface-well border border-slate-300 hover:border-secondary text-text-secondary hover:text-text-primary font-semibold text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">bookmark_border</span>
+                    Save Draft Evaluation
+                  </button>
+<button class="py-2.5 px-3 bg-surface-card hover:bg-surface-well border border-slate-300 hover:border-secondary text-text-secondary hover:text-text-primary font-semibold text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs" onclick="window.print()" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">print</span>
+                    Print Case Summary
+                  </button>
+</div>
+</div>
+</form>
+<!-- Bottom Statutory Notice Trigger Link -->
+<div class="pt-3 border-t border-border-subtle flex items-center justify-between text-[11px] text-text-secondary">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-zone-regulated">policy</span>
+                Governed by AMASR Act 1958/2010
+              </span>
+<button class="text-secondary hover:text-primary font-semibold underline underline-offset-2" onclick="document.getElementById('modal-amasr').showModal()">
+                View AMASR Act Statutory Gazette
+              </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- POP-UP MODAL 1: Chain-of-Custody & Technical Forensics -->
+<dialog class="rounded-xl border border-border-subtle shadow-2xl p-0 max-w-lg w-full bg-surface-card text-text-primary backdrop:bg-on-surface/40" id="modal-coc">
+<div class="p-5 border-b border-border-subtle flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">security</span>
+<h3 class="text-sm font-bold">Cryptographic Chain-of-Custody Proof</h3>
+</div>
+<button class="text-text-muted hover:text-text-primary p-1" onclick="document.getElementById('modal-coc').close()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-6 flex flex-col gap-4 text-xs">
+<div class="bg-surface-well border border-border-subtle p-3 rounded-lg flex flex-col gap-2">
+<div class="flex justify-between py-1 border-b border-border-subtle/60">
+<span class="text-text-secondary">Capture Hardware</span>
+<span class="font-code-telemetry font-semibold">Leica Zeno FLX100 GNSS Rover</span>
+</div>
+<div class="flex justify-between py-1 border-b border-border-subtle/60">
+<span class="text-text-secondary">Field Ranger Key ID</span>
+<span class="font-code-dossier font-semibold">#RNG-0442-PKI (Verified)</span>
+</div>
+<div class="flex justify-between py-1 border-b border-border-subtle/60">
+<span class="text-text-secondary">Capture Timestamp</span>
+<span class="font-code-telemetry">2026-03-30 14:18:02 IST</span>
+</div>
+<div class="flex justify-between py-1 border-b border-border-subtle/60">
+<span class="text-text-secondary">Geodetic Altitude</span>
+<span class="font-code-telemetry">171.2 m MSL (Calibrated)</span>
+</div>
+<div class="flex flex-col gap-1 pt-1">
+<span class="text-text-secondary">Immutable SHA-256 Checksum:</span>
+<span class="font-code-dossier text-[10px] bg-white border border-border-subtle p-2 rounded text-text-primary break-all select-all font-mono">
+            8f4a3e2c91b702f9e4198c29c8e171b30528ef05b4b1a2de90382f7c6e7a2b91
+          </span>
+</div>
+</div>
+<p class="text-[11px] text-text-secondary">
+        This signature guarantees that the original EXIF and GNSS coordinate tags have remained unedited since upload from the field unit.
+      </p>
+</div>
+<div class="p-4 bg-surface-well border-t border-border-subtle flex justify-end">
+<button class="px-4 py-1.5 bg-surface-card border border-border-subtle hover:bg-surface-well text-xs font-semibold rounded-lg" onclick="document.getElementById('modal-coc').close()">
+        Close Inspector
+      </button>
+</div>
+</dialog>
+<!-- POP-UP MODAL 2: Full-Resolution Photographic Proof -->
+<dialog class="rounded-xl border border-border-subtle shadow-2xl p-0 max-w-4xl w-full bg-surface-card text-text-primary backdrop:bg-on-surface/50" id="modal-photo">
+<div class="p-4 border-b border-border-subtle flex items-center justify-between">
+<div>
+<h3 class="text-sm font-bold">Exhibit A · High-Resolution Forensic Inspection</h3>
+<p class="text-[11px] text-text-secondary">Captured at 27.1751° N, 78.0421° E • Focal Length 24mm</p>
+</div>
+<button class="text-text-muted hover:text-text-primary p-1" onclick="document.getElementById('modal-photo').close()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-4 bg-black flex items-center justify-center">
+<img alt="Full resolution evidence of illegal masonry" class="max-h-[70vh] w-auto object-contain rounded" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSBHGnU96L8-79iB0AWodrAGnzgZsRSVu-FtOgpRwNywT_8Yq1HKm0hLN8sIeYfP9AsnrR0qbPvvMJPT231Qrchu7BZV8JckK24otTD2sz6c4q2pbsgcuz0vf5VbQw-5T0eSW9tW77lhMilrLQR-1hlwdGe1XtqFRWuX12UYJ2LtLRaV7CrrtotXZcGPrxE7Z0ymZRKygb6zUxuE_MGufcuqR6Zbbv5HSuoNlBEVpfShWvc6VUZMg"/>
+</div>
+<div class="p-3 bg-surface-well border-t border-border-subtle flex items-center justify-between text-xs">
+<span class="text-text-secondary">Full raw uncompressed image verified by Digital Certificate #C-109</span>
+<button class="px-4 py-1.5 bg-primary text-white font-medium text-xs rounded-lg" onclick="document.getElementById('modal-photo').close()">
+        Done Inspecting
+      </button>
+</div>
+</dialog>
+<!-- POP-UP MODAL 3: AMASR Act Statutory Gazette Text -->
+<dialog class="rounded-xl border border-border-subtle shadow-2xl p-0 max-w-xl w-full bg-surface-card text-text-primary backdrop:bg-on-surface/40" id="modal-amasr">
+<div class="p-5 border-b border-border-subtle flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-zone-regulated">gavel</span>
+<h3 class="text-sm font-bold">AMASR Act Statutory Mandate &amp; Legal Text</h3>
+</div>
+<button class="text-text-muted hover:text-text-primary p-1" onclick="document.getElementById('modal-amasr').close()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-6 flex flex-col gap-3 text-xs leading-relaxed text-text-secondary max-h-[60vh] overflow-y-auto">
+<p class="font-semibold text-text-primary">Ancient Monuments and Archaeological Sites and Remains (Amendment and Validation) Act, 2010:</p>
+<div class="bg-surface-well p-3.5 rounded-lg border border-border-subtle flex flex-col gap-2">
+<span class="font-bold text-text-primary">Section 20A — Prohibited Areas:</span>
+<p>Every area, beginning at the limit of the protected area and extending to a distance of one hundred meters in all directions shall be a prohibited area in respect of such monument.</p>
+<p class="text-zone-core font-semibold">"No person other than an archaeological officer shall carry out any construction in any prohibited area."</p>
+</div>
+<div class="bg-surface-well p-3.5 rounded-lg border border-border-subtle flex flex-col gap-2">
+<span class="font-bold text-text-primary">Section 20B — Regulated Areas:</span>
+<p>Every area extending to a distance of two hundred meters beyond two hundred meters (total 300m) shall be a regulated area in respect of such monument.</p>
+</div>
+<div class="bg-surface-well p-3.5 rounded-lg border border-border-subtle flex flex-col gap-2">
+<span class="font-bold text-text-primary">Section 20F &amp; Penal Provisions:</span>
+<p>Any person who undertakes construction in a prohibited area is liable for rigorous imprisonment for a term which may extend to two years and fine up to one lakh rupees.</p>
+</div>
+</div>
+<div class="p-4 bg-surface-well border-t border-border-subtle flex justify-end">
+<button class="px-4 py-1.5 bg-surface-card border border-border-subtle text-xs font-semibold rounded-lg hover:bg-white" onclick="document.getElementById('modal-amasr').close()">
+        Close Gazette View
+      </button>
+</div>
+</dialog>
+<!-- POP-UP MODAL 4: Technical Telemetry Logs -->
+<dialog class="rounded-xl border border-border-subtle shadow-2xl p-0 max-w-lg w-full bg-surface-card text-text-primary backdrop:bg-on-surface/40" id="modal-technical-logs">
+<div class="p-5 border-b border-border-subtle flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">terminal</span>
+<h3 class="text-sm font-bold">GNSS Calibration &amp; Telemetry Logs</h3>
+</div>
+<button class="text-text-muted hover:text-text-primary p-1" onclick="document.getElementById('modal-technical-logs').close()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="p-5 flex flex-col gap-3 font-code-telemetry text-xs">
+<div class="bg-slate-900 text-slate-100 p-4 rounded-lg font-mono text-[11px] leading-relaxed overflow-x-auto space-y-1">
+<p class="text-emerald-400">[0.00] RTK-FIX: NavIC/GPS L1/L5 constellation locked</p>
+<p>[0.02] BASE-STN: Agra ASI Reference Station (AGRA-01) online</p>
+<p>[0.04] BASELINE-VECTOR: dx=48.21m dy=53.94m dz=2.10m</p>
+<p>[0.05] ELLIPSOID: WGS-84 (EPSG:4326) confirmed</p>
+<p class="text-amber-400">[0.08] DIST-TO-MONUMENT-ORIGIN: 72.412 meters</p>
+<p>[0.10] HORIZ-ACCURACY: ±0.018m | VERT-ACCURACY: ±0.029m</p>
+<p class="text-emerald-400">[0.12] ATTESTATION: ASI-VER-9982 key verification valid</p>
+</div>
+<p class="text-text-secondary text-[11px]">Calibrated according to Survey of India geodetic datum standards.</p>
+</div>
+<div class="p-4 bg-surface-well border-t border-border-subtle flex justify-end">
+<button class="px-4 py-1.5 bg-surface-card border border-border-subtle text-xs font-semibold rounded-lg hover:bg-white" onclick="document.getElementById('modal-technical-logs').close()">
+        Dismiss Logs
+      </button>
+</div>
+</dialog>
+</body></html>

@@ -207,12 +207,9 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   };
 
   const content = (
-    <Card
-      variant="elevated"
-      className={`border-amber-500/40 bg-slate-900/95 space-y-5 ${className}`}
-    >
+    <Card variant="elevated" className={`border-amber-500/40 bg-surface-card space-y-5 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-3 border-b border-border-subtle">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
             <ShieldCheck className="w-5 h-5" />
@@ -239,7 +236,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
             type="button"
             onClick={onClose}
             aria-label="Close reviewer modal"
-            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-text-secondary hover:text-white hover:bg-surface-well transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
           >
             <X className="w-5 h-5" />
           </button>
@@ -268,9 +265,9 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Permitted Action Selectors */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono flex items-center justify-between">
+          <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider font-mono flex items-center justify-between">
             <span>1. Select Reviewer Action</span>
-            <span className="text-[10px] text-slate-500 font-sans normal-case">
+            <span className="text-[10px] text-text-secondary font-sans normal-case">
               Append-only state transition
             </span>
           </label>
@@ -287,10 +284,10 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
                   onClick={() => setSelectedActionKey(action.key)}
                   disabled={isSubmitting}
                   className={`p-3 rounded-xl border text-left transition-all relative ${
-                    isSelected
-                      ? 'bg-slate-900 border-amber-500 ring-1 ring-amber-500/40 text-slate-100 shadow-md shadow-amber-950/40'
-                      : 'bg-slate-950/70 border-slate-800 hover:border-slate-700 text-slate-300 hover:bg-slate-900/40'
-                  }`}
+                      isSelected
+                        ? 'bg-surface-card border-amber-500 ring-1 ring-amber-500/40 text-text-primary shadow-md shadow-amber-950/40'
+                        : 'bg-surface-well/70 border-border-subtle hover:border-border-subtle text-text-secondary hover:bg-surface-card/40'
+                    }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2 font-semibold text-xs text-white">
@@ -301,7 +298,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
                       {action.eventType}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                  <p className="text-[11px] text-text-secondary line-clamp-2 leading-relaxed">
                     {action.description}
                   </p>
                 </button>
@@ -314,7 +311,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
         <div className="space-y-1.5">
           <label
             htmlFor="reviewer-notes"
-            className="text-xs font-semibold text-slate-300 uppercase tracking-wider font-mono flex items-center justify-between"
+            className="text-xs font-semibold text-text-secondary uppercase tracking-wider font-mono flex items-center justify-between"
           >
             <span>2. Action Justification & Institutional Rationale *</span>
             <span className="text-[10px] text-amber-500 font-sans normal-case">Required</span>
@@ -327,24 +324,24 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
             disabled={isSubmitting}
             rows={3}
             placeholder="Provide administrative rationale or context (e.g. boundary ambiguity requires secondary ground measurement)."
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-sans leading-relaxed"
+            className="w-full bg-surface-well border border-border-subtle rounded-xl p-3 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-sans leading-relaxed"
           />
 
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-text-secondary">
             Provide objective factual reasoning. Accusations, personal names, or non-technical allegations are strictly forbidden.
           </p>
         </div>
 
         {/* Audit Trail Continuity Footnote */}
-        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-950/80 border border-slate-900 text-[11px] text-slate-400">
+        <div className="flex items-center gap-2 p-2.5 rounded-lg bg-surface-well/80 border border-border-subtle text-[11px] text-text-secondary">
           <History className="w-3.5 h-3.5 text-amber-500 shrink-0" />
           <span>
-            <strong>Append-Only Audit Guarantee:</strong> Submitting appends an immutable event signed with role <code className="text-slate-300">REVIEWER</code>. Existing history cannot be altered or overwritten.
+            <strong>Append-Only Audit Guarantee:</strong> Submitting appends an immutable event signed with role <code className="text-text-primary">REVIEWER</code>. Existing history cannot be altered or overwritten.
           </span>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-border-subtle">
           {onClose && (
             <Button
               type="button"
@@ -384,7 +381,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   // If rendered as a modal/drawer overlay
   if (isDrawer) {
     return (
-      <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 bg-surface-well/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div className="max-w-2xl w-full">{content}</div>
       </div>
     );

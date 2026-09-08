@@ -12,3 +12,4 @@ export { MapLibreView } from './MapLibreView';
 export { Navbar } from './Navbar';
 export { Footer } from './Footer';
 export { DemoQuickbar } from './DemoQuickbar';
+export { NationalEmblem } from './NationalEmblem';

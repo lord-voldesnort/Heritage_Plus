@@ -182,18 +182,18 @@ export const ReviewerQueuePage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="purple">Institutional Triage</Badge>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-xs font-mono text-text-secondary">
               Curator Assessment Queue
             </span>
           </div>
           <h1 className="text-xl sm:text-3xl font-bold text-white font-['Outfit']">
             Reviewer Case Queue & Action Drawer
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-text-secondary mt-1">
             Inspect spatial observations, verify GPS accuracy telemetry, and record append-only triage decisions.
           </p>
         </div>
@@ -222,14 +222,14 @@ export const ReviewerQueuePage: React.FC = () => {
       {/* Action Toast Feedback */}
       {actionSuccessToast && (
         <div className="p-3.5 rounded-xl bg-emerald-950/70 border border-emerald-800 text-emerald-300 text-xs flex items-center justify-between animate-fade-in">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-surface-well p-2 rounded-lg">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{actionSuccessToast}</span>
           </div>
           <button
             type="button"
             onClick={() => setActionSuccessToast(null)}
-            className="text-slate-400 hover:text-white text-xs font-bold px-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            className="text-text-secondary hover:text-white text-xs font-bold px-3 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
           >
             Dismiss
           </button>
@@ -237,24 +237,24 @@ export const ReviewerQueuePage: React.FC = () => {
       )}
 
       {/* Search & Filter Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-well/60 p-3 rounded-xl border border-border-subtle">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-text-secondary absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by Case ID, category, or description..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-2.5 min-h-[44px] text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 font-sans"
+            className="w-full bg-surface-well border border-border-subtle rounded-lg pl-9 pr-3 py-2.5 min-h-[44px] text-xs text-text-primary placeholder:text-text-secondary focus:outline-none focus:border-primary font-sans"
           />
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <Filter className="w-3.5 h-3.5 text-text-secondary shrink-0" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2.5 min-h-[44px] text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+            className="bg-surface-well border border-border-subtle rounded-lg px-3 py-2.5 min-h-[44px] text-xs text-text-primary focus:outline-none focus:border-primary"
           >
             <option value="ALL">All Review Statuses</option>
             <option value="SUBMITTED">SUBMITTED</option>
@@ -267,20 +267,20 @@ export const ReviewerQueuePage: React.FC = () => {
       </div>
 
       {/* Responsive Case Queue: Desktop Table & Mobile Cards */}
-      <Card variant="bordered" className="overflow-hidden bg-slate-900/40 p-0 border-slate-800">
+      <Card variant="bordered" className="overflow-hidden bg-surface-well p-0 border-border-subtle">
         {/* Desktop View Table (sm and above) */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-950/80 text-slate-400 font-mono border-b border-slate-800">
-                <th className="p-3.5">Case ID & Timestamp</th>
-                <th className="p-3.5">Observation Category</th>
-                <th className="p-3.5">Spatial Classification</th>
-                <th className="p-3.5">Review Status</th>
-                <th className="p-3.5 text-right">Inspect Action</th>
+              <tr className="bg-surface-well text-text-primary border-b border-border-subtle">
+                <th className="p-3.5 text-text-secondary">Case ID & Timestamp</th>
+                <th className="p-3.5 text-text-secondary">Observation Category</th>
+                <th className="p-3.5 text-text-secondary">Spatial Classification</th>
+                <th className="p-3.5 text-text-secondary">Review Status</th>
+                <th className="p-3.5 text-right text-text-secondary">Inspect Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+            <tbody className="divide-y divide-border-subtle/80">
               {filteredQueue.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-8">
@@ -335,20 +335,20 @@ export const ReviewerQueuePage: React.FC = () => {
                   return (
                     <tr
                       key={item.caseId}
-                      className="hover:bg-slate-900/60 transition-colors group cursor-pointer"
+                      className="hover:bg-surface-card/80 transition-colors group cursor-pointer"
                       onClick={() => setSelectedCaseId(item.caseId)}
                     >
-                      <td className="p-3.5 font-mono">
+                      <td className="p-3.5 font-mono text-text-primary">
                         <div className="font-bold text-amber-400 flex items-center gap-1.5">
                           <span>{item.caseId}</span>
                           {item.hasPhoto && (
-                            <span className="text-[10px] text-slate-500 font-normal px-1 bg-slate-950 rounded border border-slate-800">
+                            <div className="text-[10px] text-text-secondary font-normal px-1 bg-surface-well rounded border border-border-subtle">
                               Photo
-                            </span>
+                            </div>
                           )}
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-slate-400" />
+                        <div className="text-text-secondary mt-0.5 flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-text-secondary" />
                           <span>
                             {new Date(item.timestamp).toLocaleString([], {
                               dateStyle: 'short',
@@ -358,9 +358,9 @@ export const ReviewerQueuePage: React.FC = () => {
                         </div>
                       </td>
 
-                      <td className="p-3.5 font-medium text-slate-200">
+                      <td className="p-3.5 font-medium text-text-primary">
                         {item.categoryLabel}
-                        <div className="text-[11px] text-slate-400 font-normal line-clamp-1 max-w-xs mt-0.5">
+                        <div className="text-[11px] text-text-secondary font-normal line-clamp-1 max-w-xs mt-0.5">
                           {item.description}
                         </div>
                       </td>
@@ -377,7 +377,7 @@ export const ReviewerQueuePage: React.FC = () => {
                         </Badge>
                       </td>
 
-                      <td className="p-3.5 text-right">
+                      <td className="p-3.5 text-right text-text-primary">
                         <div className="flex items-center justify-end gap-2">
                           <Button
                             size="sm"
@@ -394,8 +394,8 @@ export const ReviewerQueuePage: React.FC = () => {
                           <Link
                             to={`/cases/${item.caseId}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                            title="View Full Detail Page"
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-surface-well border border-border-subtle text-text-secondary hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            title={`View details for case ${item.caseId}`}
                             aria-label={`View details for case ${item.caseId}`}
                           >
                             <Eye className="w-4 h-4" />
@@ -411,9 +411,9 @@ export const ReviewerQueuePage: React.FC = () => {
         </div>
 
         {/* Mobile View Cards (below md, min 390px support) */}
-        <div className="md:hidden divide-y divide-slate-800/80">
+        <div className="md:hidden divide-y divide-border-subtle/80">
           {filteredQueue.length === 0 ? (
-            <div className="p-6">
+            <div className="p-6 bg-surface-well rounded-lg">
               <EmptyState
                 title={
                   queueItems.length === 0
@@ -464,7 +464,7 @@ export const ReviewerQueuePage: React.FC = () => {
               return (
                 <div
                   key={item.caseId}
-                  className="p-4 space-y-3 hover:bg-slate-900/40 transition-colors"
+                  className="p-4 space-y-3 hover:bg-surface-card/80 transition-colors"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-xs font-bold text-amber-400">
@@ -476,10 +476,10 @@ export const ReviewerQueuePage: React.FC = () => {
                   </div>
 
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-100">
+                    <h4 className="text-sm font-semibold text-text-primary">
                       {item.categoryLabel}
                     </h4>
-                    <p className="text-xs text-slate-400 line-clamp-2 mt-0.5 leading-relaxed">
+                    <p className="text-xs text-text-secondary line-clamp-2 mt-0.5 leading-relaxed">
                       {item.description}
                     </p>
                   </div>
@@ -489,7 +489,7 @@ export const ReviewerQueuePage: React.FC = () => {
                       {item.computedClassification}
                     </Badge>
 
-                    <span className="text-[10px] font-mono text-slate-500 flex items-center gap-1">
+                    <span className="text-[10px] font-mono text-text-secondary flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {new Date(item.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
@@ -498,10 +498,10 @@ export const ReviewerQueuePage: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-900">
+                  <div className="pt-2 flex items-center justify-end gap-2 border-t border-border-subtle">
                     <Link
                       to={`/cases/${item.caseId}`}
-                      className="px-3 min-h-[44px] rounded-lg border border-slate-800 text-slate-300 hover:text-white text-xs font-medium flex items-center gap-1.5"
+                      className="px-3 min_h-[44px] rounded-lg border border-border-subtle text-text-primary hover:text-white text-xs font-medium flex items-center gap-1.5"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       Detail View

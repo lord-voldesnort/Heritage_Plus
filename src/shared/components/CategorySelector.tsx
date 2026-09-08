@@ -1,110 +1,95 @@
-export interface CategoryOption {
-    id: string;
-    label: string;
-    description: string;
-}
 import React from 'react';
 import { clsx } from 'clsx';
-import {
-    Hammer,
-    AlertTriangle,
-    Trash2,
-    ShieldAlert,
-    Ban,
-    Paintbrush,
-    EyeOff
-} from 'lucide-react';
 import { OBSERVATION_CATEGORIES } from '../constants/categories';
 
 interface CategorySelectorProps {
-    selectedCategoryId: string | null;
-    onSelectCategory: (categoryId: string) => void;
-    disabled?: boolean;
+  selectedCategoryId: string | null;
+  onSelectCategory: (categoryId: string) => void;
+  disabled?: boolean;
 }
 
-const ICON_MAP: Record<string, React.ReactNode> = {
-    'possible-construction': <Hammer className="w-5 h-5" />,
-    'possible-encroachment': <ShieldAlert className="w-5 h-5" />,
-    'physical-damage': <AlertTriangle className="w-5 h-5" />,
-    'dumping-waste': <Trash2 className="w-5 h-5" />,
-    'blocked-access': <Ban className="w-5 h-5" />,
-    'alteration': <Paintbrush className="w-5 h-5" />,
-    'visual-obstruction': <EyeOff className="w-5 h-5" />,
+const CATEGORY_ICONS: Record<string, string> = {
+  POSSIBLE_CONSTRUCTION: 'construction',
+  POSSIBLE_ENCROACHMENT: 'fence',
+  PHYSICAL_DAMAGE: 'broken_image',
+  DUMPING_OR_WASTE: 'rainy',
+  BLOCKED_ACCESS: 'block',
+  STRUCTURE_ALTERATION: 'psychiatry',
+  VISUAL_OBSTRUCTION: 'visibility_off',
+  OTHER_VISIBLE_CHANGE: 'groups',
 };
 
 export const CategorySelector: React.FC<CategorySelectorProps> = ({
-    selectedCategoryId,
-    onSelectCategory,
-    disabled = false,
+  selectedCategoryId,
+  onSelectCategory,
+  disabled = false,
 }) => {
-    return (
-        <div className="space-y-2">
-            <div className="flex justify-between items-baseline">
-                <label className="text-sm font-semibold text-slate-800">
-                    Observation Type <span className="text-amber-600">*</span>
-                </label>
-                <span className="text-xs text-slate-500">Select one factual concern</span>
-            </div>
+  return (
+    <div className="space-y-2.5">
+      <div className="flex justify-between items-baseline">
+        <label className="text-sm font-semibold text-text-primary">
+          Primary Classification of Finding <span className="text-primary">*</span>
+        </label>
+        <span className="text-xs text-text-muted">Select statutory category</span>
+      </div>
 
-            <div
-                role="radiogroup"
-                aria-label="Observation Categories"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-2.5"
+      <div
+        role="radiogroup"
+        aria-label="Observation Finding Classification"
+        className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+      >
+        {OBSERVATION_CATEGORIES.slice(0, 6).map((category) => {
+          const isSelected =
+            selectedCategoryId === category.id ||
+            (category.id === 'POSSIBLE_CONSTRUCTION' && selectedCategoryId === 'unauth-construction') ||
+            (category.id === 'POSSIBLE_ENCROACHMENT' && selectedCategoryId === 'encroachment') ||
+            (category.id === 'PHYSICAL_DAMAGE' && selectedCategoryId === 'structural-damage') ||
+            (category.id === 'DUMPING_OR_WASTE' && selectedCategoryId === 'natural-degradation') ||
+            (category.id === 'STRUCTURE_ALTERATION' && selectedCategoryId === 'vegetation') ||
+            (category.id === 'OTHER_VISIBLE_CHANGE' && selectedCategoryId === 'tourism-footprint');
+
+          const iconName = CATEGORY_ICONS[category.id] || 'construction';
+
+          return (
+            <button
+              key={category.id}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              disabled={disabled}
+              onClick={() => onSelectCategory(category.id)}
+              className={clsx(
+                'flex flex-col items-center justify-center text-center p-4 rounded-xl transition-all duration-200 group cursor-pointer active:scale-[0.98]',
+                isSelected
+                  ? 'border-2 border-primary bg-primary/5 shadow-xs ring-1 ring-primary/20'
+                  : 'border border-border-subtle bg-surface-well/50 hover:bg-surface-well hover:border-border-strong text-text-primary',
+                disabled && 'opacity-50 cursor-not-allowed'
+              )}
             >
-                {OBSERVATION_CATEGORIES.map((category) => {
-                    const isSelected = selectedCategoryId === category.id;
-                    const icon = ICON_MAP[category.id] ?? <ShieldAlert className="w-5 h-5" />;
-
-                    return (
-                        <button
-                            key={category.id}
-                            type="button"
-                            role="radio"
-                            aria-checked={isSelected}
-                            disabled={disabled}
-                            onClick={() => onSelectCategory(category.id)}
-                            className={clsx(
-                                'flex items-start p-3 rounded-lg border text-left transition-all',
-                                'focus:outline-none focus:ring-2 focus:ring-amber-500/50',
-                                'active:scale-[0.98] min-h-[64px]',
-                                isSelected
-                                    ? 'border-amber-500 bg-amber-50/60 shadow-sm'
-                                    : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50',
-                                disabled && 'opacity-50 cursor-not-allowed'
-                            )}
-                        >
-                            <div
-                                className={clsx(
-                                    'p-2 rounded-md mr-3 shrink-0',
-                                    isSelected
-                                        ? 'bg-amber-100 text-amber-900'
-                                        : 'bg-slate-100 text-slate-600'
-                                )}
-                            >
-                                {icon}
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between">
-                                    <span
-                                        className={clsx(
-                                            'text-sm font-medium leading-5',
-                                            isSelected ? 'text-amber-950 font-semibold' : 'text-slate-900'
-                                        )}
-                                    >
-                                        {category.label}
-                                    </span>
-                                </div>
-                                <p className="text-xs text-slate-500 mt-0.5 leading-snug line-clamp-2">
-                                    {category.description}
-                                </p>
-                            </div>
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
-    );
+              <div
+                className={clsx(
+                  'w-11 h-11 rounded-full flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105',
+                  isSelected
+                    ? 'bg-primary/10 text-primary'
+                    : 'bg-surface-card border border-border-subtle text-secondary'
+                )}
+              >
+                <span className="material-symbols-outlined text-[22px]">{iconName}</span>
+              </div>
+              <span
+                className={clsx(
+                  'text-xs sm:text-sm leading-tight',
+                  isSelected ? 'font-bold text-primary' : 'font-medium text-text-primary'
+                )}
+              >
+                {category.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
 };
 
 export default CategorySelector;
