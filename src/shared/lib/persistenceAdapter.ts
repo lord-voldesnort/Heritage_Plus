@@ -20,9 +20,6 @@ export class ClientStorageAdapter implements PersistenceAdapter {
       let raw: string | null = null;
       if (typeof window !== 'undefined' && window.localStorage) {
         raw = window.localStorage.getItem(this.storageKey);
-        if (!raw && window.sessionStorage) {
-          raw = window.sessionStorage.getItem(this.storageKey);
-        }
       } else {
         raw = this.memoryFallback.get(this.storageKey) || null;
       }
@@ -45,9 +42,6 @@ export class ClientStorageAdapter implements PersistenceAdapter {
       const serialized = JSON.stringify(cases);
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.setItem(this.storageKey, serialized);
-        if (window.sessionStorage) {
-          window.sessionStorage.setItem(this.storageKey, serialized);
-        }
       } else {
         this.memoryFallback.set(this.storageKey, serialized);
       }
@@ -62,9 +56,6 @@ export class ClientStorageAdapter implements PersistenceAdapter {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.removeItem(this.storageKey);
-        if (window.sessionStorage) {
-          window.sessionStorage.removeItem(this.storageKey);
-        }
       }
       this.memoryFallback.delete(this.storageKey);
     } catch (err) {
