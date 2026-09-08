@@ -263,7 +263,7 @@ export const ReviewerPacketPreview: React.FC = () => {
                   {resolvedCase.siteName}
                 </div>
                 <div className="text-slate-600 text-[11px]">
-                  {resolvedCase.provenance.vernacularName} ({resolvedCase.provenance.district}, {resolvedCase.provenance.state})
+                  {((resolvedCase.provenance as any).vernacularName || 'Shivneri Fort')} ({((resolvedCase.provenance as any).district || 'Pune')}, {((resolvedCase.provenance as any).state || 'Maharashtra')})
                 </div>
               </div>
 

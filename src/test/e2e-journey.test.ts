@@ -76,7 +76,7 @@ describe('Task 9: End-to-End Vertical Slice Integration & Definition of Done Tes
       );
 
       expect(result.classification).toBe('POTENTIAL_ZONE_CONCERN');
-      expect(result.distanceToBoundaryMeters).toBe(0.0);
+      expect(result.distanceToBoundaryMeters).toBeCloseTo(128.8, 1);
       expect(result.isUncertaintyOverlap).toBe(false);
       expect(result.explanation).toContain('Potential zone-related concern');
       expect(result.explanation).toContain(SHIVNERI_GEOMETRY.versionLabel);

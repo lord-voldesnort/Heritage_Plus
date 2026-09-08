@@ -82,6 +82,10 @@ describe('A3 — Geometry & Source Provenance Verification', () => {
       computedClassification: 'POTENTIAL_ZONE_CONCERN',
       distanceToBoundaryMeters: 128.8,
       spatialReasoningExplanation: 'Point within protected area.',
+      spatialResult: calculateSpatialResult(
+        { latitude: 19.1980, longitude: 73.8580, gpsAccuracyMeters: 4.5, factualDescription: 'Observed foundation works near perimeter.' },
+        SHIVNERI_PROTECTED_GEOMETRY
+      ),
       currentStatus: 'SUBMITTED_FOR_REVIEW',
       evidenceList: [],
       eventsTimeline: [],

@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   UserCheck,
-  Filter,
   Search,
   RefreshCw,
   Eye,
