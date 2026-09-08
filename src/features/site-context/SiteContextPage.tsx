@@ -4,92 +4,10 @@ import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSit
 import { DEMO_SCENARIOS } from '../../shared/mock-data/mockScenarios';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { ShivneriPolygonMap } from '../../shared/components/ShivneriPolygonMap';
 import { Play } from 'lucide-react';
 
-interface SiteInfo {
-  id: string;
-  name: string;
-  location: string;
-  unescoRef: string;
-  lat: number;
-  lng: number;
-  activeObs: number;
-  coreViols: number;
-  pendingTriage: number;
-  photoUrl: string;
-}
-
-const MONUMENT_SITES: Record<string, SiteInfo> = {
-  'taj-mahal': {
-    id: 'taj-mahal',
-    name: 'Taj Mahal Complex, Agra',
-    location: 'Agra, Uttar Pradesh',
-    unescoRef: 'UNESCO REF: #252',
-    lat: 27.1751,
-    lng: 78.0421,
-    activeObs: 42,
-    coreViols: 3,
-    pendingTriage: 7,
-    photoUrl:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBWsqDGzpx86zmAq-nWo3utBy6uy5Zkz9SFTD2CJuCBvyYPqfSKaNxjNHtxPU3Jj5ezYUgEVK-2coeOU__3vTMrkApWoFMa4JYv4nSUgzyI8AqAUgyjPWAJQHj9K8LQJt5WJS0FCN33LNGqEr4ajbWff03aPYf209I31lUcPvImYBIPuBPWR2fQVGLtKJOu3b_9KLRknypRmDNa4ETvmvGvrn9c-yErH9snYGHW0AMxV5GhHssHmRM',
-  },
-  'shivneri-fort': {
-    id: 'shivneri-fort',
-    name: SHIVNERI_SITE.name,
-    location: `${SHIVNERI_SITE.district}, ${SHIVNERI_SITE.state}`,
-    unescoRef: 'ASI REF: MUMMH015',
-    lat: 19.1982,
-    lng: 73.8624,
-    activeObs: 18,
-    coreViols: 2,
-    pendingTriage: 4,
-    photoUrl: SHIVNERI_SITE.representativeImageUrl,
-  },
-  'red-fort': {
-    id: 'red-fort',
-    name: 'Red Fort Complex, Delhi',
-    location: 'Old Delhi, National Capital Territory',
-    unescoRef: 'UNESCO REF: #105',
-    lat: 28.6562,
-    lng: 77.241,
-    activeObs: 38,
-    coreViols: 5,
-    pendingTriage: 9,
-    photoUrl:
-      'https://images.unsplash.com/photo-1598556480150-56d2d75f52ad?auto=format&fit=crop&q=80&w=1200',
-  },
-  hampi: {
-    id: 'hampi',
-    name: 'Hampi Virupaksha, Bellary',
-    location: 'Vijayanagara, Karnataka',
-    unescoRef: 'UNESCO REF: #241',
-    lat: 15.335,
-    lng: 76.46,
-    activeObs: 19,
-    coreViols: 1,
-    pendingTriage: 2,
-    photoUrl:
-      'https://images.unsplash.com/photo-1600100397608-f010f443b76a?auto=format&fit=crop&q=80&w=1200',
-  },
-  konark: {
-    id: 'konark',
-    name: 'Sun Temple Konark, Puri',
-    location: 'Konark, Odisha',
-    unescoRef: 'UNESCO REF: #246',
-    lat: 19.8876,
-    lng: 86.0945,
-    activeObs: 14,
-    coreViols: 0,
-    pendingTriage: 1,
-    photoUrl:
-      'https://images.unsplash.com/photo-1628084478335-e12913e6d19a?auto=format&fit=crop&q=80&w=1200',
-  },
-};
-
 export const SiteContextPage: React.FC = () => {
-  const [selectedSiteKey, setSelectedSiteKey] = useState<string>('taj-mahal');
-  const [activeLayer, setActiveLayer] = useState<'standard' | 'satellite' | 'heatmap'>('standard');
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [highlightedCaseId, setHighlightedCaseId] = useState<string | null>(null);
 
   // Modals state
@@ -105,13 +23,14 @@ export const SiteContextPage: React.FC = () => {
     photoUrl?: string;
   } | null>(null);
 
-  const activeSite = MONUMENT_SITES[selectedSiteKey] || MONUMENT_SITES['taj-mahal'];
+  // Authoritative real cases from ledgerStore
   const allCases = ledgerStore.getCases();
-  const totalCasesCount = Math.max(allCases.length, activeSite.activeObs);
-
-  const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.2, 1.8));
-  const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.2, 0.6));
-  const handleResetZoom = () => setZoomLevel(1);
+  const coreBreachesCount = allCases.filter(
+    (c) => c.computedClassification === 'POTENTIAL_ZONE_CONCERN'
+  ).length;
+  const pendingTriageCount = allCases.filter(
+    (c) => c.currentStatus === 'SUBMITTED_FOR_REVIEW' || c.currentStatus === 'DRAFT'
+  ).length;
 
   const openEvidence = (
     caseId: string,
@@ -129,7 +48,7 @@ export const SiteContextPage: React.FC = () => {
       notes,
       photoUrl:
         photoUrl ||
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBIch_WM_beDmEK2LVrnWPz-wycASpxr99Z4UsE-2xjjc5gMraFWRuWz-20sEmLLT1gYnMXlSOB7o379GbQu4feEEiEY0YB_DAYqV5unEVjJuaYR5EKL-1aMD3y-2G1HKIqzPECXnl7mV5xoLwQBSMZH5r-IAyOqUyPdsTjaNY_dUK7bZ4KQvon7B7j93rheXq5okqCpi_3OEEokKk9xu1N_i2QOKu2WzMr1QdWZXHAFk3YKLa3-lE',
+        'https://images.unsplash.com/photo-1590059390047-975949d03154?auto=format&fit=crop&q=80&w=800',
     });
   };
 
@@ -140,14 +59,14 @@ export const SiteContextPage: React.FC = () => {
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-primary text-xs font-bold uppercase tracking-wider">
             <span className="material-symbols-outlined text-[18px]">account_balance</span>
-            <span>Statutory Protection & Spatial Context</span>
+            <span>Statutory Protection & Spatial Context · ASI Ref: MUMMH015</span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold text-text-primary tracking-tight font-sans">
-            Monitored Perimeter Overview
+            {SHIVNERI_SITE.name}
           </h1>
           <p className="text-sm text-text-secondary max-w-2xl leading-relaxed">
-            Real-time perimeter surveillance and statutory compliance monitoring adhering to AMASR
-            Act conservation guidelines.
+            {SHIVNERI_SITE.vernacularName} · {SHIVNERI_SITE.district}, {SHIVNERI_SITE.state}. Real-time perimeter
+            surveillance and statutory compliance monitoring adhering to AMASR Act conservation guidelines.
           </p>
         </div>
 
@@ -172,35 +91,24 @@ export const SiteContextPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 4 Essential Metrics Strip */}
+      {/* 4 Essential Metrics Strip (Strictly Shivneri Fort) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
-        {/* Metric 1: Selected Site Switcher Card */}
+        {/* Metric 1: Monument Identification Card */}
         <div className="bg-surface-card p-6 rounded-2xl border border-border-subtle shadow-xs flex flex-col justify-between space-y-3">
           <div className="flex items-center justify-between text-text-secondary">
-            <span className="text-xs font-bold uppercase tracking-wider">Active Site</span>
-            <span className="material-symbols-outlined text-[20px] text-primary">temple_hindu</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Monitored Site</span>
+            <span className="material-symbols-outlined text-[20px] text-primary">fort</span>
           </div>
           <div>
-            <div className="relative mt-1">
-              <select
-                aria-label="Select Monitored Archaeological Site"
-                className="w-full appearance-none bg-surface-well border border-border-subtle text-text-primary text-sm font-semibold rounded-xl px-3.5 py-2.5 pr-8 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                value={selectedSiteKey}
-                onChange={(e) => setSelectedSiteKey(e.target.value)}
-              >
-                <option value="taj-mahal">Taj Mahal Complex, Agra</option>
-                <option value="shivneri-fort">Fort of Shivner (Shivneri Fort)</option>
-                <option value="red-fort">Red Fort Complex, Delhi</option>
-                <option value="hampi">Hampi Virupaksha, Bellary</option>
-                <option value="konark">Sun Temple Konark, Puri</option>
-              </select>
-              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary text-[18px]">
-                expand_more
-              </span>
+            <div className="text-lg font-bold text-text-primary leading-snug">
+              Fort of Shivner
+            </div>
+            <div className="text-xs text-text-secondary mt-0.5 font-medium">
+              Junnar, Pune District, Maharashtra
             </div>
           </div>
           <div className="text-[11px] text-text-muted flex items-center gap-1.5 font-mono">
-            <span>{activeSite.unescoRef}</span>
+            <span>ASI REF: MUMMH015</span>
             <span>•</span>
             <button
               type="button"
@@ -220,26 +128,26 @@ export const SiteContextPage: React.FC = () => {
           </div>
           <div className="my-2">
             <div className="text-4xl font-extrabold text-text-primary tracking-tight">
-              {totalCasesCount}
+              {allCases.length}
             </div>
           </div>
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-zone-survey-bg text-zone-survey border border-zone-survey-border">
-              <span className="material-symbols-outlined text-[14px]">trending_up</span> +3 this week
+              <span className="material-symbols-outlined text-[14px]">verified</span> Persistent
             </span>
             <span className="text-xs text-text-muted">Telemetry Verified</span>
           </div>
         </div>
 
-        {/* Metric 3: Core Zone Violations (<100m) */}
+        {/* Metric 3: Core Zone Breaches (<100m) */}
         <div className="bg-surface-card p-6 rounded-2xl border border-zone-core-border/70 shadow-xs flex flex-col justify-between ring-1 ring-zone-core-border/40">
           <div className="flex items-center justify-between text-zone-core">
-            <span className="text-xs font-bold uppercase tracking-wider">Core Violations (&lt;100m)</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Core Breaches (&lt;100m)</span>
             <span className="material-symbols-outlined text-[20px]">warning</span>
           </div>
           <div className="my-2">
             <div className="text-4xl font-extrabold text-zone-core tracking-tight">
-              {activeSite.coreViols}
+              {coreBreachesCount}
             </div>
           </div>
           <div className="flex items-center justify-between">
@@ -258,7 +166,7 @@ export const SiteContextPage: React.FC = () => {
           </div>
           <div className="my-2">
             <div className="text-4xl font-extrabold text-zone-regulated tracking-tight">
-              {activeSite.pendingTriage}
+              {pendingTriageCount}
             </div>
           </div>
           <div className="flex items-center justify-between">
@@ -272,265 +180,33 @@ export const SiteContextPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Workspace: Spatial Canvas & Filtered Incidents */}
+      {/* Main Workspace: 3-Zone White Polygon Map & Filtered Incidents */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left: Map Component (7 Columns) */}
-        <div className="lg:col-span-7 bg-surface-card rounded-2xl border border-border-subtle shadow-xs overflow-hidden flex flex-col">
-          {/* Map Header & Filter Controls */}
-          <div className="p-4 lg:px-6 lg:py-4 border-b border-border-subtle flex flex-wrap items-center justify-between gap-4 bg-white">
-            {/* Layer Toggles */}
-            <div className="flex items-center gap-1.5 p-1 bg-surface-well rounded-xl">
-              <button
-                type="button"
-                onClick={() => setActiveLayer('standard')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  activeLayer === 'standard'
-                    ? 'bg-white text-text-primary shadow-xs'
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                Standard Vector
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveLayer('satellite')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  activeLayer === 'satellite'
-                    ? 'bg-white text-text-primary shadow-xs'
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                Satellite
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveLayer('heatmap')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  activeLayer === 'heatmap'
-                    ? 'bg-white text-text-primary shadow-xs'
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                Incident Heatmap
-              </button>
+        {/* Left: Authoritative 3-Zone White Background Polygon Map (7 Columns) */}
+        <div className="lg:col-span-7 flex flex-col space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[20px]">map</span>
+              <h2 className="text-base font-bold text-text-primary tracking-tight">
+                Shivneri Fort Local Polygon Map
+              </h2>
             </div>
-
-            {/* Quick Canvas Zoom Tools */}
-            <div className="flex items-center gap-1 bg-surface-well p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={handleZoomIn}
-                className="w-8 h-8 rounded-lg bg-white text-text-primary hover:bg-slate-50 flex items-center justify-center shadow-2xs transition"
-                title="Zoom In"
-              >
-                <span className="material-symbols-outlined text-[18px]">add</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleZoomOut}
-                className="w-8 h-8 rounded-lg bg-white text-text-primary hover:bg-slate-50 flex items-center justify-center shadow-2xs transition"
-                title="Zoom Out"
-              >
-                <span className="material-symbols-outlined text-[18px]">remove</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleResetZoom}
-                className="w-8 h-8 rounded-lg bg-white text-text-primary hover:bg-slate-50 flex items-center justify-center shadow-2xs transition"
-                title="Reset View"
-              >
-                <span className="material-symbols-outlined text-[18px]">my_location</span>
-              </button>
-            </div>
+            <span className="text-xs font-mono font-medium px-2.5 py-1 rounded-md bg-white border border-border-subtle text-text-secondary">
+              EPSG:4326 · WGS84
+            </span>
           </div>
 
-          {/* Spatial Vector Canvas Container */}
-          <div className="relative w-full h-[520px] bg-slate-50 overflow-hidden flex items-center justify-center select-none">
-            {/* Subtle clean grid */}
-            <div
-              className="absolute inset-0 opacity-25 pointer-events-none"
-              style={{
-                backgroundImage: 'radial-gradient(#94a3b8 1px, transparent 1px)',
-                backgroundSize: '28px 28px',
-              }}
-            />
-
-            {/* Satellite Underlay if satellite selected */}
-            {activeLayer === 'satellite' && (
-              <div
-                className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-multiply pointer-events-none"
-                style={{ backgroundImage: `url(${activeSite.photoUrl})` }}
-              />
-            )}
-
-            {/* Natural River Arc Envelope */}
-            <div className="absolute top-8 left-0 w-full h-24 bg-sky-100/40 -rotate-2 blur-xs pointer-events-none flex items-center justify-center">
-              <span className="text-[10px] font-mono tracking-widest text-sky-800/40 uppercase">
-                Riparian Buffer Envelope
-              </span>
-            </div>
-
-            {/* Vector SVG Rings */}
-            <svg
-              className="w-full h-full max-w-[520px] max-h-[520px] z-10 transition-transform duration-300 ease-out"
-              style={{ transform: `scale(${zoomLevel})` }}
-              viewBox="0 0 600 600"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#dc2626" stopOpacity="0.12" />
-                  <stop offset="100%" stopColor="#dc2626" stopOpacity="0.02" />
-                </radialGradient>
-                <radialGradient id="regulatedGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#d97706" stopOpacity="0.08" />
-                  <stop offset="100%" stopColor="#d97706" stopOpacity="0.01" />
-                </radialGradient>
-              </defs>
-
-              {/* Guide axes */}
-              <line x1="300" y1="40" x2="300" y2="560" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="4 4" />
-              <line x1="40" y1="300" x2="560" y2="300" stroke="#e2e8f0" strokeWidth="1.5" strokeDasharray="4 4" />
-
-              {/* 300m Outer Regulated Buffer */}
-              <circle
-                cx="300"
-                cy="300"
-                r="240"
-                stroke="#d97706"
-                strokeWidth="2"
-                strokeDasharray="8 6"
-                fill="url(#regulatedGlow)"
-                className="opacity-75"
-              />
-
-              {/* 100m Core Prohibited Zone */}
-              <circle
-                cx="300"
-                cy="300"
-                r="105"
-                stroke="#dc2626"
-                strokeWidth="2.5"
-                fill="url(#coreGlow)"
-              />
-
-              {/* Monument Ground Plot Envelope */}
-              <rect
-                x="273"
-                y="273"
-                width="54"
-                height="54"
-                rx="6"
-                fill="#ffffff"
-                stroke="#0f172a"
-                strokeWidth="2"
-                filter="drop-shadow(0 2px 4px rgba(0,0,0,0.08))"
-              />
-              <circle cx="300" cy="300" r="10" fill="#ffdbce" stroke="#a33900" strokeWidth="2" />
-              <circle cx="300" cy="300" r="3" fill="#a33900" />
-
-              {/* Pulse Beacon */}
-              <circle
-                cx="300"
-                cy="300"
-                r="26"
-                stroke="#a33900"
-                strokeWidth="2"
-                fill="none"
-                className="animate-ping opacity-25"
-              />
-
-              {/* Incident Markers */}
-              {/* CASE-0841 (72m, Core Zone) */}
-              <g
-                className="cursor-pointer group"
-                onClick={() => setHighlightedCaseId('CASE-2026-0841')}
-              >
-                <line x1="300" y1="300" x2="252" y2="246" stroke="#dc2626" strokeWidth="1.5" strokeDasharray="2 2" opacity="0.7" />
-                <circle cx="252" cy="246" r="14" fill="#dc2626" fillOpacity="0.25" className="animate-pulse" />
-                <circle cx="252" cy="246" r="8" fill="#dc2626" stroke="#ffffff" strokeWidth="2" />
-                <rect x="202" y="215" width="102" height="20" rx="4" fill="#ffffff" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.12))" />
-                <text x="253" y="229" textAnchor="middle" fill="#dc2626" fontSize="10" fontWeight="700" fontFamily="Inter">
-                  CASE-0841 (72m)
-                </text>
-              </g>
-
-              {/* CASE-0839 (184m, Regulated Buffer) */}
-              <g
-                className="cursor-pointer group"
-                onClick={() => setHighlightedCaseId('CASE-2026-0839')}
-              >
-                <line x1="300" y1="300" x2="425" y2="360" stroke="#d97706" strokeWidth="1.5" strokeDasharray="2 2" opacity="0.6" />
-                <circle cx="425" cy="360" r="7" fill="#d97706" stroke="#ffffff" strokeWidth="2" />
-                <rect x="375" y="375" width="102" height="20" rx="4" fill="#ffffff" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.12))" />
-                <text x="426" y="389" textAnchor="middle" fill="#d97706" fontSize="10" fontWeight="700" fontFamily="Inter">
-                  CASE-0839 (184m)
-                </text>
-              </g>
-
-              {/* CASE-0835 (340m, Compliant Exterior) */}
-              <g
-                className="cursor-pointer group"
-                onClick={() => setHighlightedCaseId('CASE-2026-0835')}
-              >
-                <circle cx="110" cy="420" r="7" fill="#059669" stroke="#ffffff" strokeWidth="2" />
-                <rect x="60" y="435" width="102" height="20" rx="4" fill="#ffffff" filter="drop-shadow(0 1px 2px rgba(0,0,0,0.12))" />
-                <text x="111" y="449" textAnchor="middle" fill="#059669" fontSize="10" fontWeight="700" fontFamily="Inter">
-                  CASE-0835 (340m)
-                </text>
-              </g>
-            </svg>
-
-            {/* Floating Map Legend */}
-            <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-xs px-4 py-2.5 rounded-xl border border-border-subtle shadow-xs flex items-center gap-4 text-xs z-20">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-zone-core"></span>
-                <span className="font-semibold text-text-secondary">Core (&lt;100m)</span>
-              </div>
-              <div className="h-3 w-px bg-border-subtle"></div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-zone-regulated"></span>
-                <span className="font-semibold text-text-secondary">Buffer (100–300m)</span>
-              </div>
-              <div className="h-3 w-px bg-border-subtle"></div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-zone-survey"></span>
-                <span className="font-semibold text-text-secondary">Survey (&gt;300m)</span>
-              </div>
-            </div>
-
-            {/* Compass Rose Badge */}
-            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-xs p-2 rounded-xl shadow-2xs border border-border-subtle flex flex-col items-center justify-center w-9 h-9">
-              <span className="text-[10px] font-bold text-primary leading-none">N</span>
-              <span className="material-symbols-outlined text-primary text-[14px]">navigation</span>
-            </div>
-          </div>
-
-          {/* Geospatial Status Footer */}
-          <div className="px-6 py-3 bg-white border-t border-border-subtle flex items-center justify-between text-xs text-text-secondary font-mono">
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 text-zone-survey font-medium">
-                <span className="w-2 h-2 rounded-full bg-zone-survey animate-pulse"></span> WGS-84 ACTIVE
-              </span>
-              <span className="text-text-muted">|</span>
-              <span>
-                {activeSite.lat.toFixed(4)}° N, {activeSite.lng.toFixed(4)}° E
-              </span>
-            </div>
-            <button
-              type="button"
-              className="text-secondary hover:underline font-sans font-semibold flex items-center gap-1 cursor-pointer"
-              onClick={() => setGeodesicModalOpen(true)}
-            >
-              Parameters & Datum <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-            </button>
-          </div>
+          {/* Dedicated 3-Zone White Polygon Map Component */}
+          <ShivneriPolygonMap
+            selectedCaseId={highlightedCaseId}
+            onSelectCase={(caseId) => setHighlightedCaseId(caseId)}
+            className="h-[540px] w-full"
+          />
         </div>
 
-        {/* Right: Active Incidents Micro-Feed & Archival Orthophoto (5 Columns) */}
+        {/* Right: Active Incidents Micro-Feed & Archival Reference (5 Columns) */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Incident Micro-Feed Card */}
+          {/* Incident Micro-Feed Card (from ledgerStore) */}
           <div className="bg-surface-card p-6 rounded-2xl border border-border-subtle shadow-xs space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -547,126 +223,75 @@ export const SiteContextPage: React.FC = () => {
             </div>
 
             {/* Incidents List */}
-            <div className="space-y-3.5">
-              {/* Incident 1 */}
-              <div
-                className={`p-4 rounded-xl border transition-all cursor-pointer space-y-2.5 ${
-                  highlightedCaseId === 'CASE-2026-0841'
-                    ? 'border-zone-core bg-red-50/40 shadow-xs'
-                    : 'border-border-subtle bg-surface-well/50 hover:bg-white hover:shadow-xs'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-text-primary">CASE-2026-0841</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-zone-core-bg text-zone-core border border-zone-core-border">
-                    72m Proximity · Core Breach
-                  </span>
-                </div>
-                <h3 className="text-sm font-semibold text-text-primary leading-snug">
-                  Unauthorized scaffolding structure in West Minaret perimeter
-                </h3>
-                <div className="pt-1 flex items-center justify-between">
-                  <button
-                    type="button"
-                    className="text-xs font-semibold text-primary hover:text-primary-container flex items-center gap-1 cursor-pointer transition"
-                    onClick={() =>
-                      openEvidence(
-                        'CASE-2026-0841',
-                        'Unauthorized Scaffolding at West Minaret',
-                        '72m from primary plinth',
-                        'Prohibited Core Zone (<100m)',
-                        'High-resolution capture shows bamboo/metal scaffolding erected without NMA ratification. Immediate stop-work recommendation issued.'
-                      )
-                    }
-                  >
-                    <span className="material-symbols-outlined text-[16px]">visibility</span>
-                    Quick View Evidence
-                  </button>
-                  <Link to="/reviewer/CASE-2026-0841" className="text-xs text-text-muted hover:text-text-secondary font-medium">
-                    Console Triage →
-                  </Link>
-                </div>
-              </div>
+            <div className="space-y-3.5 max-h-[380px] overflow-y-auto pr-1">
+              {allCases.map((caseItem) => {
+                const isCore = caseItem.computedClassification === 'POTENTIAL_ZONE_CONCERN';
+                const isUncertain = caseItem.computedClassification === 'LOCATION_UNCERTAIN';
+                const isHighlighted = highlightedCaseId === caseItem.caseId;
 
-              {/* Incident 2 */}
-              <div
-                className={`p-4 rounded-xl border transition-all cursor-pointer space-y-2.5 ${
-                  highlightedCaseId === 'CASE-2026-0839'
-                    ? 'border-zone-regulated bg-amber-50/40 shadow-xs'
-                    : 'border-border-subtle bg-surface-well/50 hover:bg-white hover:shadow-xs'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-text-primary">CASE-2026-0839</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-zone-regulated-bg text-zone-regulated border border-zone-regulated-border">
-                    184m Proximity · Buffer
-                  </span>
-                </div>
-                <h3 className="text-sm font-semibold text-text-primary leading-snug">
-                  Vegetation root intrusion on south boundary masonry
-                </h3>
-                <div className="pt-1 flex items-center justify-between">
-                  <button
-                    type="button"
-                    className="text-xs font-semibold text-primary hover:text-primary-container flex items-center gap-1 cursor-pointer transition"
-                    onClick={() =>
-                      openEvidence(
-                        'CASE-2026-0839',
-                        'Vegetation Root Intrusion on South Boundary',
-                        '184m South Boundary',
-                        'Regulated Buffer (100–300m)',
-                        'Ficus microcarpa root network penetrating mortar bed joints. Routine conservation intervention needed.'
-                      )
-                    }
-                  >
-                    <span className="material-symbols-outlined text-[16px]">visibility</span>
-                    Quick View Evidence
-                  </button>
-                  <Link to="/reviewer/CASE-2026-0839" className="text-xs text-text-muted hover:text-text-secondary font-medium">
-                    Console Triage →
-                  </Link>
-                </div>
-              </div>
+                const badgeBg = isCore
+                  ? 'bg-zone-core-bg text-zone-core border-zone-core-border'
+                  : isUncertain
+                  ? 'bg-zone-regulated-bg text-zone-regulated border-zone-regulated-border'
+                  : 'bg-zone-survey-bg text-zone-survey border-zone-survey-border';
 
-              {/* Incident 3 */}
-              <div
-                className={`p-4 rounded-xl border transition-all cursor-pointer space-y-2.5 ${
-                  highlightedCaseId === 'CASE-2026-0838'
-                    ? 'border-zone-regulated bg-amber-50/40 shadow-xs'
-                    : 'border-border-subtle bg-surface-well/50 hover:bg-white hover:shadow-xs'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-text-primary">CASE-2026-0838</span>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-zone-regulated-bg text-zone-regulated border border-zone-regulated-border">
-                    210m Proximity · Commercial
-                  </span>
-                </div>
-                <h3 className="text-sm font-semibold text-text-primary leading-snug">
-                  Commercial kiosk stall with unapproved generator placement
-                </h3>
-                <div className="pt-1 flex items-center justify-between">
-                  <button
-                    type="button"
-                    className="text-xs font-semibold text-primary hover:text-primary-container flex items-center gap-1 cursor-pointer transition"
-                    onClick={() =>
-                      openEvidence(
-                        'CASE-2026-0838',
-                        'Commercial Kiosk & Generator Installation',
-                        '210m Outer Plaza Corridor',
-                        'Regulated Buffer Zone (100–300m)',
-                        'Heavy diesel generator producing acoustic vibration and soot adjacent to sandstone gateway. Triage verification in progress.'
-                      )
-                    }
+                const badgeText = isCore
+                  ? 'Core Breach · Red Zone'
+                  : isUncertain
+                  ? 'Buffer · Yellow Zone'
+                  : 'Permitted · Green Zone';
+
+                return (
+                  <div
+                    key={caseItem.caseId}
+                    onClick={() => setHighlightedCaseId(caseItem.caseId)}
+                    className={`p-4 rounded-xl border transition-all cursor-pointer space-y-2.5 ${
+                      isHighlighted
+                        ? 'border-primary bg-primary-surface/40 shadow-xs'
+                        : 'border-border-subtle bg-surface-well/50 hover:bg-white hover:shadow-xs'
+                    }`}
                   >
-                    <span className="material-symbols-outlined text-[16px]">visibility</span>
-                    Quick View Evidence
-                  </button>
-                  <Link to="/reviewer/console" className="text-xs text-text-muted hover:text-text-secondary font-medium">
-                    Console Triage →
-                  </Link>
-                </div>
-              </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-text-primary">{caseItem.caseId}</span>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${badgeBg}`}>
+                        {badgeText}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-text-primary leading-snug">
+                      {caseItem.factualDescription}
+                    </h3>
+                    <div className="pt-1 flex items-center justify-between text-xs">
+                      <button
+                        type="button"
+                        className="font-semibold text-primary hover:text-primary-container flex items-center gap-1 cursor-pointer transition"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEvidence(
+                            caseItem.caseId,
+                            caseItem.factualDescription,
+                            caseItem.distanceToBoundaryMeters !== null && caseItem.distanceToBoundaryMeters !== undefined
+                              ? `${caseItem.distanceToBoundaryMeters.toFixed(1)}m from perimeter`
+                              : 'Proximity calculated',
+                            isCore ? 'Red — Protected Zone' : isUncertain ? 'Yellow — Neutral Zone' : 'Green — Permitted Zone',
+                            caseItem.spatialReasoningExplanation,
+                            caseItem.evidenceList?.[0]?.fileUrl
+                          );
+                        }}
+                      >
+                        <span className="material-symbols-outlined text-[16px]">visibility</span>
+                        Quick View
+                      </button>
+                      <Link
+                        to={`/reviewer/${caseItem.caseId}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-text-muted hover:text-text-secondary font-medium"
+                      >
+                        Reviewer Console →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -674,14 +299,14 @@ export const SiteContextPage: React.FC = () => {
           <div className="bg-surface-card p-6 rounded-2xl border border-border-subtle shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-text-secondary">
-                Official Survey Imagery
+                Fort of Shivner Orthophoto
               </span>
-              <span className="text-xs font-mono text-text-muted">2025-Q4.RAW</span>
+              <span className="text-xs font-mono text-text-muted">MUMMH015.RAW</span>
             </div>
             <div className="relative w-full h-36 rounded-xl overflow-hidden bg-surface-well group">
               <img
-                src={activeSite.photoUrl}
-                alt={`${activeSite.name} satellite aerial orthophoto`}
+                src={SHIVNERI_SITE.representativeImageUrl}
+                alt="Fort of Shivner satellite aerial orthophoto"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent flex items-end p-3">
@@ -790,11 +415,11 @@ export const SiteContextPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-4 bg-surface-well p-4 rounded-xl">
                 <div>
                   <span className="text-xs font-mono uppercase text-text-muted block">RECORD ID</span>
-                  <span className="font-semibold text-text-primary">{activeSite.unescoRef}</span>
+                  <span className="font-semibold text-text-primary">ASI REF: MUMMH015</span>
                 </div>
                 <div>
                   <span className="text-xs font-mono uppercase text-text-muted block">ADMINISTRATIVE CIRCLE</span>
-                  <span className="font-semibold text-text-primary">{activeSite.location}</span>
+                  <span className="font-semibold text-text-primary">Mumbai Circle / Junnar, Pune</span>
                 </div>
                 <div>
                   <span className="text-xs font-mono uppercase text-text-muted block">GAZETTE NOTIFICATION</span>
@@ -810,21 +435,30 @@ export const SiteContextPage: React.FC = () => {
                 <h4 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
                   Statutory Mandate Overview
                 </h4>
-                <div className="p-3.5 bg-zone-core-bg rounded-xl border border-zone-core-border flex gap-3 items-start">
-                  <span className="material-symbols-outlined text-zone-core text-[20px] shrink-0 mt-0.5">block</span>
-                  <p className="text-xs text-text-primary leading-relaxed">
-                    <strong>Core Prohibited Zone (0–100m):</strong> Total statutory ban on commercial
+                <div className="p-3.5 bg-red-50 rounded-xl border border-red-200 flex gap-3 items-start">
+                  <span className="material-symbols-outlined text-red-600 text-[20px] shrink-0 mt-0.5">block</span>
+                  <p className="text-xs text-red-950 leading-relaxed">
+                    <strong>Red — Protected Zone (0–100m):</strong> Total statutory ban on commercial
                     construction, excavation, and modifications without Parliament-ratified dispensation under the
                     AMASR (Amendment) Act 2010.
                   </p>
                 </div>
-                <div className="p-3.5 bg-zone-regulated-bg rounded-xl border border-zone-regulated-border flex gap-3 items-start">
-                  <span className="material-symbols-outlined text-zone-regulated text-[20px] shrink-0 mt-0.5">
+                <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 flex gap-3 items-start">
+                  <span className="material-symbols-outlined text-amber-700 text-[20px] shrink-0 mt-0.5">
                     notification_important
                   </span>
-                  <p className="text-xs text-text-primary leading-relaxed">
-                    <strong>Regulated Buffer Zone (100–300m):</strong> Mandatory prior clearance required from the
+                  <p className="text-xs text-amber-950 leading-relaxed">
+                    <strong>Yellow — Neutral Zone (100–300m):</strong> Mandatory prior clearance required from the
                     National Monuments Authority (NMA) for repair, reconstruction, or infrastructure projects.
+                  </p>
+                </div>
+                <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 flex gap-3 items-start">
+                  <span className="material-symbols-outlined text-emerald-700 text-[20px] shrink-0 mt-0.5">
+                    check_circle
+                  </span>
+                  <p className="text-xs text-emerald-950 leading-relaxed">
+                    <strong>Green — Zone where activities are permitted (&gt;300m):</strong> Beyond the statutory 300m
+                    perimeter; standard development and municipal permissions apply.
                   </p>
                 </div>
               </div>
@@ -865,14 +499,12 @@ export const SiteContextPage: React.FC = () => {
                 <span className="font-bold text-text-primary">WGS-84 / EPSG:4326</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border-subtle">
-                <span className="text-text-secondary font-sans">Epicenter Coordinates:</span>
-                <span className="font-bold text-text-primary">
-                  {activeSite.lat.toFixed(4)}° N, {activeSite.lng.toFixed(4)}° E
-                </span>
+                <span className="text-text-secondary font-sans">Shivneri Epicenter:</span>
+                <span className="font-bold text-text-primary">19.1982° N, 73.8624° E</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border-subtle">
                 <span className="text-text-secondary font-sans">AMSL Elevation:</span>
-                <span className="font-bold text-text-primary">171.4 meters</span>
+                <span className="font-bold text-text-primary">1,067 meters (Hill Fort)</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border-subtle">
                 <span className="text-text-secondary font-sans">Survey Precision:</span>
@@ -963,7 +595,7 @@ export const SiteContextPage: React.FC = () => {
             <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold text-text-primary">
-                  Archival Orthophoto Imagery — 2025-Q4
+                  Fort of Shivner Archival Imagery — MUMMH015
                 </h3>
                 <span className="text-xs text-text-muted">High-resolution multi-spectral survey feed</span>
               </div>
@@ -978,8 +610,8 @@ export const SiteContextPage: React.FC = () => {
             <div className="p-6">
               <div className="w-full h-[420px] rounded-xl overflow-hidden bg-slate-900">
                 <img
-                  src={activeSite.photoUrl}
-                  alt={`Full ${activeSite.name} Orthophoto`}
+                  src={SHIVNERI_SITE.representativeImageUrl}
+                  alt="Full Fort of Shivner Orthophoto"
                   className="w-full h-full object-contain"
                 />
               </div>

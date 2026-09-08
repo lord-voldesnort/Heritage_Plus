@@ -11,5 +11,6 @@ export { SiteContextCard } from './SiteContextCard';
 export { EmptyState } from './EmptyState';
 export { Skeleton, CardSkeleton } from './LoadingSkeleton';
 export { MapLibreView } from './MapLibreView';
+export { ShivneriPolygonMap } from './ShivneriPolygonMap';
 export { DemoQuickbar } from './DemoQuickbar';
 export { NationalEmblem } from './NationalEmblem';

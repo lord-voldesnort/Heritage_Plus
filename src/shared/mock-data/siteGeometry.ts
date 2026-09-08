@@ -161,6 +161,57 @@ export const SHIVNERI_REGULATED_GEOJSON: GeoJSON.MultiPolygon = {
   ],
 };
 
+export const SHIVNERI_PERMITTED_GEOJSON: GeoJSON.MultiPolygon = {
+  type: 'MultiPolygon',
+  coordinates: [
+    [
+      [
+        [73.84574580, 19.19316710],
+        [73.84600604, 19.19214612],
+        [73.84621137, 19.19158203],
+        [73.84652569, 19.19106466],
+        [73.84714029, 19.19024435],
+        [73.84754611, 19.18979790],
+        [73.84803281, 19.18943059],
+        [73.84970345, 19.18839551],
+        [73.85029043, 19.18810612],
+        [73.85093126, 19.18793238],
+        [73.85176446, 19.18761661],
+        [73.85259767, 19.18730084],
+        [73.85380786, 19.18713516],
+        [73.85736582, 19.18677051],
+        [73.86046574, 19.18673666],
+        [73.86181978, 19.18687634],
+        [73.86335990, 19.18658610],
+        [73.86443455, 19.18683324],
+        [73.86534062, 19.18744089],
+        [73.86589647, 19.18814126],
+        [73.86615123, 19.18880113],
+        [73.86613322, 19.19046224],
+        [73.86641837, 19.19221185],
+        [73.86751044, 19.19504652],
+        [73.86790036, 19.19687296],
+        [73.86738905, 19.19945234],
+        [73.86645777, 19.20207913],
+        [73.86575474, 19.20553632],
+        [73.86466947, 19.20784461],
+        [73.86315004, 19.20956980],
+        [73.86109349, 19.21026964],
+        [73.85865853, 19.21026251],
+        [73.85662458, 19.20960520],
+        [73.85445985, 19.20702262],
+        [73.85306497, 19.20586035],
+        [73.85162678, 19.20425868],
+        [73.84907693, 19.20296585],
+        [73.84774998, 19.20058270],
+        [73.84689963, 19.19749579],
+        [73.84598613, 19.19490374],
+        [73.84574580, 19.19316710],
+      ],
+    ],
+  ],
+};
+
 export const SHIVNERI_PROTECTED_GEOMETRY: GeometryRecord = {
   geometryId: 'MUMMH015-asi_protected_areas-7068',
   siteId: 'site-shivneri-01',
@@ -200,4 +251,17 @@ export const SHIVNERI_REGULATED_GEOMETRY: GeometryRecord = {
   geojson: SHIVNERI_REGULATED_GEOJSON,
 };
 
+export const SHIVNERI_PERMITTED_GEOMETRY: GeometryRecord = {
+  geometryId: 'MUMMH015-asi_permitted_zone-survey',
+  siteId: 'site-shivneri-01',
+  versionLabel: 'v1.0-exterior-permitted-zone',
+  sourceDocumentOrUrl: PROVENANCE_METADATA.portalUrl,
+  captureDate: PROVENANCE_METADATA.retrievalDate,
+  limitationNote: 'Zone beyond 300m statutory boundary where normal activities and development are permitted under standard municipal norms.',
+  governanceState: 'PILOT_PUBLISHED',
+  layerConfidenceScore: 0.95,
+  geojson: SHIVNERI_PERMITTED_GEOJSON,
+};
+
 export const SHIVNERI_GEOMETRY: GeometryRecord = SHIVNERI_PROTECTED_GEOMETRY;
+
