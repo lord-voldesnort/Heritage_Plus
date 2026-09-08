@@ -4,8 +4,7 @@ export type ObservationType =
   | 'PHYSICAL_DAMAGE'
   | 'DUMPING_OR_WASTE'
   | 'BLOCKED_ACCESS'
-  | 'STRUCTURE_ALTERATION'
-  | 'VISUAL_OBSTRUCTION'
+  | 'ALTERATION_OR_OBSTRUCTION'
   | 'OTHER_VISIBLE_CHANGE';
 
 export type SpatialClassification =

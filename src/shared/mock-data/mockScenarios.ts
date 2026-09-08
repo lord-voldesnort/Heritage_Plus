@@ -31,7 +31,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     id: 'scenario-2-outside',
     name: 'Scenario 2: Clearly Outside Regulated Zone',
     description: 'Observation well outside the 300m regulated boundary (gid: 2394) with high GPS precision (±5.0m).',
-    category: 'VISUAL_OBSTRUCTION',
+    category: 'ALTERATION_OR_OBSTRUCTION',
     factualNotes: 'Commercial advertising board erected on approach road beyond 300m zone.',
     latitude: 19.2085,
     longitude: 73.8750,

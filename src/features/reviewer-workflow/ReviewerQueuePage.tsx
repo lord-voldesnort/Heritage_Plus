@@ -34,13 +34,12 @@ export interface QueueItem {
 
 // Category display mapping using approved neutral non-accusatory terminology
 const APPROVED_CATEGORY_LABELS: Record<string, string> = {
-  POSSIBLE_CONSTRUCTION: 'Possible construction or extension',
-  POSSIBLE_ENCROACHMENT: 'Possible encroachment',
+  POSSIBLE_CONSTRUCTION: 'Possible construction',
+  POSSIBLE_ENCROACHMENT: 'Possible alteration',
   PHYSICAL_DAMAGE: 'Physical damage',
   DUMPING_OR_WASTE: 'Dumping or waste',
   BLOCKED_ACCESS: 'Blocked access',
-  STRUCTURE_ALTERATION: 'Structure alteration',
-  VISUAL_OBSTRUCTION: 'Visual obstruction',
+  ALTERATION_OR_OBSTRUCTION: 'Visual obstruction',
   OTHER_VISIBLE_CHANGE: 'Other visible change',
 };
 
