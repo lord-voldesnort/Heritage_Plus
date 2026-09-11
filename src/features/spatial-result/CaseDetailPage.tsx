@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Shield,
@@ -11,7 +11,7 @@ import {
   FileText,
   MapPin
 } from 'lucide-react';
-import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { apiClient } from '../../shared/lib/apiClient';
 import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
@@ -30,50 +30,81 @@ import {
 import { TimelineEventItem } from '../../shared/components/LedgerTimeline';
 import { SiteContextData } from '../../shared/components/SiteContextCard';
 
+function buildResolvedCase(storeRecord: Awaited<ReturnType<typeof apiClient.getCaseById>>) {
+  if (!storeRecord) return null;
+  const isOverlap =
+    storeRecord.spatialResult.classification === 'LOCATION_UNCERTAIN' ||
+    (storeRecord.spatialResult.distanceToBoundaryMeters !== null &&
+      storeRecord.spatialResult.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
+
+  return {
+    source: 'ledgerStore' as const,
+    id: storeRecord.caseId,
+    siteName: SHIVNERI_SITE.name,
+    category: storeRecord.category,
+    description: storeRecord.factualDescription,
+    latitude: storeRecord.latitude,
+    longitude: storeRecord.longitude,
+    accuracyMeters: storeRecord.gpsAccuracyMeters,
+    distanceToBoundaryMeters: storeRecord.spatialResult.distanceToBoundaryMeters,
+    computedClassification: storeRecord.spatialResult.classification,
+    isUncertaintyOverlap: isOverlap,
+    explanation: storeRecord.spatialResult.explanation,
+    timestamp: storeRecord.observedTimestamp,
+    photoUrl: storeRecord.evidenceList?.[0]?.fileUrl || null,
+    photoMetadata: storeRecord.evidenceList?.[0]
+      ? {
+          fileName: 'evidence-capture.jpg',
+          sizeKb: Math.round(storeRecord.evidenceList[0].fileSizeBytes / 1024),
+          capturedDate: storeRecord.evidenceList[0].uploadTimestamp.split('T')[0],
+        }
+      : null,
+    eventsTimeline: storeRecord.eventsTimeline,
+    currentStatus: storeRecord.currentStatus,
+  };
+}
+
 export const CaseDetailPage: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
 
-  // 1. Data Retrieval: Exclusively from ledgerStore
-  const resolvedCase = useMemo(() => {
-    if (!caseId) return null;
+  // 1. Data Retrieval: Exclusively from the real API (Postgres, via ledger routes)
+  const [resolvedCase, setResolvedCase] = useState<ReturnType<typeof buildResolvedCase>>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-    // Check ledger store
-    const storeRecord = ledgerStore.getCaseById(caseId);
-    if (storeRecord) {
-      const isOverlap =
-        storeRecord.spatialResult.classification === 'LOCATION_UNCERTAIN' ||
-        (storeRecord.spatialResult.distanceToBoundaryMeters !== null &&
-          storeRecord.spatialResult.distanceToBoundaryMeters <= storeRecord.gpsAccuracyMeters);
-
-      return {
-        source: 'ledgerStore' as const,
-        id: storeRecord.caseId,
-        siteName: SHIVNERI_SITE.name,
-        category: storeRecord.category,
-        description: storeRecord.factualDescription,
-        latitude: storeRecord.latitude,
-        longitude: storeRecord.longitude,
-        accuracyMeters: storeRecord.gpsAccuracyMeters,
-        distanceToBoundaryMeters: storeRecord.spatialResult.distanceToBoundaryMeters,
-        computedClassification: storeRecord.spatialResult.classification,
-        isUncertaintyOverlap: isOverlap,
-        explanation: storeRecord.spatialResult.explanation,
-        timestamp: storeRecord.observedTimestamp,
-        photoUrl: storeRecord.evidenceList?.[0]?.fileUrl || null,
-        photoMetadata: storeRecord.evidenceList?.[0]
-          ? {
-              fileName: 'evidence-capture.jpg',
-              sizeKb: Math.round(storeRecord.evidenceList[0].fileSizeBytes / 1024),
-              capturedDate: storeRecord.evidenceList[0].uploadTimestamp.split('T')[0],
-            }
-          : null,
-        eventsTimeline: storeRecord.eventsTimeline,
-        currentStatus: storeRecord.currentStatus,
-      };
+  useEffect(() => {
+    if (!caseId) {
+      setResolvedCase(null);
+      setIsLoading(false);
+      return;
     }
-
-    return null;
+    let cancelled = false;
+    setIsLoading(true);
+    apiClient
+      .getCaseById(caseId)
+      .then((storeRecord) => {
+        if (!cancelled) setResolvedCase(buildResolvedCase(storeRecord));
+      })
+      .catch((err) => {
+        console.error('Failed to load case detail:', err);
+        if (!cancelled) setResolvedCase(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [caseId]);
+
+  // While the fetch is in flight, avoid flashing "not found" for a case that
+  // simply hasn't loaded yet.
+  if (isLoading) {
+    return (
+      <div className="max-w-xl mx-auto py-12 px-4">
+        <EmptyState title="Loading case record…" description="Fetching this case from the Change Ledger." />
+      </div>
+    );
+  }
 
   // If case is not found, render EmptyState component
   if (!resolvedCase) {

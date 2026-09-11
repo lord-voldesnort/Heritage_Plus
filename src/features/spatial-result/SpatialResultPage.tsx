@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { apiClient } from '../../shared/lib/apiClient';
+import { ObservationRecord } from '../../shared/types';
 import { SpatialMapCard } from './SpatialMapCard';
 import { Card } from '../../shared/components/Card';
 import { Button } from '../../shared/components/Button';
@@ -14,7 +15,23 @@ import {
 
 export const SpatialResultPage: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
-  const caseRecord = caseId && caseId !== 'demo' ? ledgerStore.getCaseById(caseId) : undefined;
+  const [caseRecord, setCaseRecord] = useState<ObservationRecord | undefined>(undefined);
+
+  useEffect(() => {
+    if (!caseId || caseId === 'demo') {
+      setCaseRecord(undefined);
+      return;
+    }
+    let cancelled = false;
+    apiClient.getCaseById(caseId).then((record) => {
+      if (!cancelled) setCaseRecord(record || undefined);
+    }).catch((err) => {
+      console.error('Failed to load case for spatial result page:', err);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [caseId]);
 
   // Determine initial scenario ID if caseRecord is linked to one
   let initialScenarioId = 'scenario-1-inside';

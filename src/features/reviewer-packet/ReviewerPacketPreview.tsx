@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Printer,
@@ -6,7 +6,7 @@ import {
   FileText,
   Image as ImageIcon,
 } from 'lucide-react';
-import { getReviewerPacketData, CANONICAL_NON_LEGAL_NOTICE } from './packetData';
+import { getReviewerPacketData, CANONICAL_NON_LEGAL_NOTICE, ReviewerPacketData } from './packetData';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
 import { CASE_STATUSES } from '../../shared/constants/caseStatuses';
 import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/contracts/heritagePulseContract';
@@ -22,10 +22,41 @@ import { TimelineEventItem } from '../../shared/components/LedgerTimeline';
 export const ReviewerPacketPreview: React.FC = () => {
   const { caseId } = useParams<{ caseId: string }>();
 
-  // 1. Data Retrieval: Exclusively via shared packet data function
-  const resolvedCase = useMemo(() => {
-    return caseId ? getReviewerPacketData(caseId) : null;
+  // 1. Data Retrieval: Exclusively via shared packet data function, backed by the real API
+  const [resolvedCase, setResolvedCase] = useState<ReviewerPacketData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!caseId) {
+      setResolvedCase(null);
+      setIsLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setIsLoading(true);
+    getReviewerPacketData(caseId)
+      .then((data) => {
+        if (!cancelled) setResolvedCase(data);
+      })
+      .catch((err) => {
+        console.error('Failed to load reviewer packet data:', err);
+        if (!cancelled) setResolvedCase(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [caseId]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-xl mx-auto py-12 px-4 print:hidden">
+        <EmptyState title="Loading reviewer packet…" description="Fetching this case from the Change Ledger." />
+      </div>
+    );
+  }
 
   // If missing, render the shared EmptyState component
   if (!resolvedCase) {

@@ -3,7 +3,7 @@ import { CANONICAL_LEGAL_DISCLAIMER } from '../constants/disclaimer';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="border-t border-border-subtle bg-white py-8 px-6 lg:px-8 mt-auto print:hidden">
+    <footer className="border-t border-border-subtle bg-surface-card py-8 px-6 lg:px-8 mt-auto print:hidden">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-text-secondary">
         <div className="flex items-start gap-3 max-w-3xl text-left">
           <span className="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">policy</span>

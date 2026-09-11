@@ -1,12 +1,13 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
+import * as turf from '@turf/turf';
 import {
   SHIVNERI_PROTECTED_GEOJSON,
   SHIVNERI_REGULATED_GEOJSON,
   SHIVNERI_PERMITTED_GEOJSON,
   PROVENANCE_METADATA,
 } from '../mock-data/siteGeometry';
-import { ledgerStore } from '../lib/ledgerStore';
+import { apiClient } from '../lib/apiClient';
 import { ObservationRecord } from '../types';
 
 export interface ShivneriPolygonMapProps {
@@ -42,13 +43,26 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
   const [svgZoom, setSvgZoom] = useState(1);
   const [svgPan, setSvgPan] = useState({ x: 0, y: 0 });
 
-  // Get active cases from ledgerStore
-  const activeCases: ObservationRecord[] = useMemo(() => {
-    return ledgerStore.getCases().filter((c) => c.latitude && c.longitude);
+  // Get active cases from the real API
+  const [activeCases, setActiveCases] = useState<ObservationRecord[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    apiClient.listCases().then((cases) => {
+      if (!cancelled) setActiveCases(cases.filter((c) => c.latitude && c.longitude));
+    }).catch((err) => {
+      console.error('Failed to load cases for map overlay:', err);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Shivneri Centroid
-  const centroid: [number, number] = [73.8624, 19.1982]; // [lng, lat]
+  // Derive the map center from the authoritative sourced boundary.
+  const centroid = turf.centroid({
+    type: 'Feature',
+    properties: {},
+    geometry: SHIVNERI_PROTECTED_GEOJSON as any,
+  }).geometry.coordinates as [number, number];
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -56,22 +70,11 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
     let map: maplibregl.Map;
 
     try {
-      // Create MapLibre with a pure white background style
+      // Use a light, road-detailed CARTO "Positron" basemap so streets, place
+      // labels, and terrain context are visible while the overall palette stays white.
       map = new maplibregl.Map({
         container: mapContainerRef.current,
-        style: {
-          version: 8,
-          sources: {},
-          layers: [
-            {
-              id: 'background',
-              type: 'background',
-              paint: {
-                'background-color': '#ffffff',
-              },
-            },
-          ],
-        },
+        style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
         center: centroid,
         zoom: 14.3,
         attributionControl: false,
@@ -220,7 +223,7 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
                    class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-white font-bold text-[10px]">
                 !
               </div>
-              <div class="bg-white/95 text-slate-800 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shadow-sm border border-slate-200 mt-0.5 whitespace-nowrap">
+              <div class="bg-surface-card/95 text-text-primary text-[10px] font-mono font-bold px-1.5 py-0.5 rounded shadow-sm border border-border-subtle mt-0.5 whitespace-nowrap">
                 ${caseRecord.caseId}
               </div>
             </div>
@@ -247,7 +250,7 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
       console.warn('MapLibre WebGL unavailable or failed to initialize; falling back to SVG vector renderer.', err);
       setUseSvgFallback(true);
     }
-  }, []);
+  }, [activeCases]);
 
   // Update layer visibility when toggles change in MapLibre instance
   useEffect(() => {
@@ -327,9 +330,9 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
   };
 
   return (
-    <div className={`relative rounded-2xl overflow-hidden border border-border-subtle bg-white shadow-xs flex flex-col ${className}`}>
+    <div className={`relative rounded-2xl overflow-hidden border border-border-subtle bg-surface-card shadow-xs flex flex-col ${className}`}>
       {/* Top Map Control Bar */}
-      <div className="p-3 lg:px-4 lg:py-2.5 border-b border-border-subtle flex flex-wrap items-center justify-between gap-3 bg-white z-10">
+      <div className="p-3 lg:px-4 lg:py-2.5 border-b border-border-subtle flex flex-wrap items-center justify-between gap-3 bg-surface-card z-10">
         {/* Layer Filter Toggles */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-xs font-bold uppercase tracking-wider text-text-secondary mr-1">
@@ -402,7 +405,7 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
           <button
             type="button"
             onClick={handleZoomIn}
-            className="w-7 h-7 rounded-lg bg-white text-text-primary hover:bg-slate-100 flex items-center justify-center shadow-2xs transition cursor-pointer"
+            className="w-7 h-7 rounded-lg bg-surface-card text-text-primary hover:bg-surface-well flex items-center justify-center shadow-2xs transition cursor-pointer"
             title="Zoom In"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
@@ -410,7 +413,7 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
           <button
             type="button"
             onClick={handleZoomOut}
-            className="w-7 h-7 rounded-lg bg-white text-text-primary hover:bg-slate-100 flex items-center justify-center shadow-2xs transition cursor-pointer"
+            className="w-7 h-7 rounded-lg bg-surface-card text-text-primary hover:bg-surface-well flex items-center justify-center shadow-2xs transition cursor-pointer"
             title="Zoom Out"
           >
             <span className="material-symbols-outlined text-[16px]">remove</span>
@@ -418,7 +421,7 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
           <button
             type="button"
             onClick={handleResetCenter}
-            className="w-7 h-7 rounded-lg bg-white text-text-primary hover:bg-slate-100 flex items-center justify-center shadow-2xs transition cursor-pointer"
+            className="w-7 h-7 rounded-lg bg-surface-card text-text-primary hover:bg-surface-well flex items-center justify-center shadow-2xs transition cursor-pointer"
             title="Reset Centroid View (Fort of Shivner)"
           >
             <span className="material-symbols-outlined text-[16px]">my_location</span>
@@ -427,7 +430,7 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
       </div>
 
       {/* Map Body: Pure White Background Vector Canvas */}
-      <div className="relative flex-1 w-full h-full min-h-[460px] bg-white overflow-hidden select-none">
+      <div className="relative flex-1 w-full h-full min-h-[460px] bg-surface-card overflow-hidden select-none">
         {/* Subtle coordinate grid watermark */}
         <div
           className="absolute inset-0 opacity-30 pointer-events-none"
@@ -446,7 +449,7 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
 
         {/* High-Fidelity SVG Projection Engine (Fallback or Overlay) */}
         {useSvgFallback && (
-          <div className="w-full h-full flex items-center justify-center bg-white p-4">
+          <div className="w-full h-full flex items-center justify-center bg-surface-card p-4">
             <svg
               className="w-full h-full max-w-[600px] max-h-[500px] transition-transform duration-200 ease-out"
               viewBox="0 0 600 520"
@@ -586,7 +589,7 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
 
         {/* Interactive Hover Tooltip for Zone Inspection */}
         {activeZoneTooltip && (
-          <div className="absolute top-4 left-4 max-w-sm bg-white/95 backdrop-blur-xs p-3.5 rounded-xl border border-border-subtle shadow-md z-30 space-y-1 animate-in fade-in duration-150">
+          <div className="absolute top-4 left-4 max-w-sm bg-surface-card/95 backdrop-blur-xs p-3.5 rounded-xl border border-border-subtle shadow-md z-30 space-y-1 animate-in fade-in duration-150">
             <span className={`text-xs font-bold px-2 py-0.5 rounded-md border inline-block ${activeZoneTooltip.color}`}>
               {activeZoneTooltip.name}
             </span>
@@ -598,7 +601,7 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
         )}
 
         {/* Floating 3-Zone Explicit Color Legend (Requested by User) */}
-        <div className="absolute bottom-3 left-3 right-3 sm:right-auto bg-white/95 backdrop-blur-xs p-3 rounded-xl border border-border-subtle shadow-md z-20 flex flex-wrap items-center gap-4 text-xs">
+        <div className="absolute bottom-3 left-3 right-3 sm:right-auto bg-surface-card/95 backdrop-blur-xs p-3 rounded-xl border border-border-subtle shadow-md z-20 flex flex-wrap items-center gap-4 text-xs">
           <div className="flex items-center gap-2">
             <span className="w-3.5 h-3.5 rounded-full bg-red-600 border border-white shadow-2xs"></span>
             <div>
@@ -629,20 +632,20 @@ export const ShivneriPolygonMap: React.FC<ShivneriPolygonMapProps> = ({
         </div>
 
         {/* Compass Rose Badge */}
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs p-2 rounded-xl shadow-2xs border border-border-subtle flex flex-col items-center justify-center w-8 h-8 z-20">
+        <div className="absolute top-3 right-3 bg-surface-card/90 backdrop-blur-xs p-2 rounded-xl shadow-2xs border border-border-subtle flex flex-col items-center justify-center w-8 h-8 z-20">
           <span className="text-[9px] font-bold text-primary leading-none">N</span>
           <span className="material-symbols-outlined text-primary text-[13px]">navigation</span>
         </div>
       </div>
 
       {/* Geospatial Status Footer */}
-      <div className="px-4 py-2.5 bg-white border-t border-border-subtle flex flex-wrap items-center justify-between gap-2 text-xs text-text-secondary font-mono">
+      <div className="px-4 py-2.5 bg-surface-card border-t border-border-subtle flex flex-wrap items-center justify-between gap-2 text-xs text-text-secondary font-mono">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-emerald-600 font-semibold">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> WGS-84 ACTIVE
           </span>
           <span className="text-text-muted">|</span>
-          <span>Centroid: 19.1982° N, 73.8624° E</span>
+          <span>Centroid: {centroid[1].toFixed(6)}° N, {centroid[0].toFixed(6)}° E</span>
           <span className="text-text-muted hidden sm:inline">|</span>
           <span className="text-text-muted hidden sm:inline">{PROVENANCE_METADATA.monumentNumber}</span>
         </div>

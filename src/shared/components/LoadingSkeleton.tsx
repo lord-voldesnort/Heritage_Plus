@@ -9,7 +9,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({ className }) => {
     return (
         <div
             className={clsx(
-                'animate-pulse rounded-md bg-slate-200/80',
+                'animate-pulse rounded-md bg-surface-container-high/80',
                 className
             )}
         />
@@ -18,7 +18,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({ className }) => {
 
 export const CardSkeleton: React.FC = () => {
     return (
-        <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3">
+        <div className="p-4 rounded-xl border border-border-subtle bg-surface-card space-y-3">
             <Skeleton className="h-40 w-full rounded-lg" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />

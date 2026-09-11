@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { DEMO_SCENARIOS } from '../../shared/mock-data/mockScenarios';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
-import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { apiClient } from '../../shared/lib/apiClient';
+import { ObservationRecord } from '../../shared/types';
 import { ShivneriPolygonMap } from '../../shared/components/ShivneriPolygonMap';
+import { CommandCenterDashboard } from './CommandCenterDashboard';
 import { Play } from 'lucide-react';
 
 export const SiteContextPage: React.FC = () => {
@@ -23,8 +25,19 @@ export const SiteContextPage: React.FC = () => {
     photoUrl?: string;
   } | null>(null);
 
-  // Authoritative real cases from ledgerStore
-  const allCases = ledgerStore.getCases();
+  // Authoritative real cases, fetched from the live API
+  const [allCases, setAllCases] = useState<ObservationRecord[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    apiClient.listCases().then((cases) => {
+      if (!cancelled) setAllCases(cases);
+    }).catch((err) => {
+      console.error('Failed to load cases for site context:', err);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const coreBreachesCount = allCases.filter(
     (c) => c.computedClassification === 'POTENTIAL_ZONE_CONCERN'
   ).length;
@@ -90,6 +103,9 @@ export const SiteContextPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Command Center Dashboard — real-time monitoring view built from live ledger data */}
+      <CommandCenterDashboard />
 
       {/* 4 Essential Metrics Strip (Strictly Shivneri Fort) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
@@ -191,7 +207,7 @@ export const SiteContextPage: React.FC = () => {
                 Shivneri Fort Local Polygon Map
               </h2>
             </div>
-            <span className="text-xs font-mono font-medium px-2.5 py-1 rounded-md bg-white border border-border-subtle text-text-secondary">
+            <span className="text-xs font-mono font-medium px-2.5 py-1 rounded-md bg-surface-well border border-border-subtle text-text-secondary">
               EPSG:4326 · WGS84
             </span>
           </div>
@@ -248,7 +264,7 @@ export const SiteContextPage: React.FC = () => {
                     className={`p-4 rounded-xl border transition-all cursor-pointer space-y-2.5 ${
                       isHighlighted
                         ? 'border-primary bg-primary-surface/40 shadow-xs'
-                        : 'border-border-subtle bg-surface-well/50 hover:bg-white hover:shadow-xs'
+                        : 'border-border-subtle bg-surface-well/50 hover:bg-surface-bright hover:shadow-xs'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -345,7 +361,7 @@ export const SiteContextPage: React.FC = () => {
             <Link
               key={sc.id}
               to={`/capture?scenario=${sc.id}`}
-              className="p-3.5 rounded-xl border border-border-subtle bg-surface-well/40 hover:bg-white hover:border-primary/40 hover:shadow-xs transition-all text-left group"
+              className="p-3.5 rounded-xl border border-border-subtle bg-surface-well/40 hover:bg-surface-bright hover:border-primary/40 hover:shadow-xs transition-all text-left group"
             >
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-semibold text-text-primary group-hover:text-primary transition-colors">
@@ -385,7 +401,7 @@ export const SiteContextPage: React.FC = () => {
           </div>
           <div>
             <span className="text-text-muted font-mono block">Statutory Precision:</span>
-            <span className="font-semibold text-zone-survey">±2.4m DGPS Calibrated</span>
+            <span className="font-semibold text-text-primary">Not independently calibrated</span>
           </div>
         </div>
         <div className="p-3 bg-surface-well rounded-xl border border-border-subtle text-xs text-text-secondary leading-relaxed">
@@ -396,7 +412,7 @@ export const SiteContextPage: React.FC = () => {
 
       {/* MODAL 1: Statutory Gazette & Legal Registry Details */}
       {statutoryModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-surface-card w-full max-w-xl rounded-2xl border border-border-subtle shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-5 border-b border-border-subtle flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -467,7 +483,7 @@ export const SiteContextPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setStatutoryModalOpen(false)}
-                className="px-5 py-2.5 rounded-xl bg-text-primary text-white text-xs font-semibold hover:bg-slate-800 transition cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition cursor-pointer"
               >
                 Close Registry
               </button>
@@ -478,7 +494,7 @@ export const SiteContextPage: React.FC = () => {
 
       {/* MODAL 2: Geodesic Parameters & Telemetry */}
       {geodesicModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-surface-card w-full max-w-md rounded-2xl border border-border-subtle shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-5 border-b border-border-subtle flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -500,7 +516,7 @@ export const SiteContextPage: React.FC = () => {
               </div>
               <div className="flex justify-between py-2 border-b border-border-subtle">
                 <span className="text-text-secondary font-sans">Shivneri Epicenter:</span>
-                <span className="font-bold text-text-primary">19.1982° N, 73.8624° E</span>
+                <span className="font-bold text-text-primary">Source-labelled site centroid</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border-subtle">
                 <span className="text-text-secondary font-sans">AMSL Elevation:</span>
@@ -508,7 +524,7 @@ export const SiteContextPage: React.FC = () => {
               </div>
               <div className="flex justify-between py-2 border-b border-border-subtle">
                 <span className="text-text-secondary font-sans">Survey Precision:</span>
-                <span className="font-bold text-zone-survey">±2.4m DGPS Certified</span>
+                <span className="font-bold text-text-primary">Unknown / not calibrated</span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-text-secondary font-sans">Projection Standard:</span>
@@ -519,7 +535,7 @@ export const SiteContextPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setGeodesicModalOpen(false)}
-                className="px-5 py-2.5 rounded-xl bg-surface-well hover:bg-slate-200 text-text-primary text-xs font-semibold transition cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-surface-well hover:bg-surface-container-high text-text-primary text-xs font-semibold transition cursor-pointer"
               >
                 Dismiss
               </button>
@@ -530,7 +546,7 @@ export const SiteContextPage: React.FC = () => {
 
       {/* MODAL 3: Evidence Quick-View Pop-up */}
       {evidenceModalData && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-surface-card w-full max-w-lg rounded-2xl border border-border-subtle shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-5 border-b border-border-subtle flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -561,7 +577,7 @@ export const SiteContextPage: React.FC = () => {
                   alt="Evidence Orthophoto Crop"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute bottom-2 left-2 bg-slate-900/80 text-white font-mono text-[10px] px-2 py-0.5 rounded">
+                <div className="absolute bottom-2 left-2 bg-black/70 text-white font-mono text-[10px] px-2 py-0.5 rounded">
                   GPS: ±1.8m VERIFIED
                 </div>
               </div>
@@ -590,7 +606,7 @@ export const SiteContextPage: React.FC = () => {
 
       {/* MODAL 4: Orthophoto Expanded Preview */}
       {orthophotoModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-surface-card w-full max-w-3xl rounded-2xl border border-border-subtle shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
               <div>
@@ -620,7 +636,7 @@ export const SiteContextPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setOrthophotoModalOpen(false)}
-                className="px-5 py-2.5 rounded-xl bg-text-primary text-white text-xs font-medium hover:bg-slate-800 transition cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-medium hover:bg-primary-container transition cursor-pointer"
               >
                 Close Preview
               </button>

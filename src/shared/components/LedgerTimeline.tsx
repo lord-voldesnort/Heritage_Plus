@@ -47,7 +47,7 @@ const EVENT_ICON_MAP: Record<TimelineEventItem['eventType'], React.ReactNode> = 
     REVIEW_REQUESTED: <Send className="w-4 h-4 text-sky-600" />,
     INFO_REQUESTED: <HelpCircle className="w-4 h-4 text-amber-700" />,
     STATUS_UPDATED: <CheckCircle2 className="w-4 h-4 text-teal-600" />,
-    CASE_CLOSED: <XCircle className="w-4 h-4 text-slate-600" />,
+    CASE_CLOSED: <XCircle className="w-4 h-4 text-text-secondary" />,
 };
 
 export const LedgerTimeline: React.FC<LedgerTimelineProps> = ({
@@ -57,7 +57,7 @@ export const LedgerTimeline: React.FC<LedgerTimelineProps> = ({
 }) => {
     if (!events || events.length === 0) {
         return (
-            <div className="p-6 text-center border border-dashed border-slate-200 rounded-lg text-slate-400 text-xs sm:text-sm">
+            <div className="p-6 text-center border border-dashed border-border-subtle rounded-lg text-text-muted text-xs sm:text-sm">
                 <Clock className="w-6 h-6 mx-auto mb-1.5 opacity-50" />
                 <p>{emptyMessage}</p>
             </div>
@@ -67,35 +67,35 @@ export const LedgerTimeline: React.FC<LedgerTimelineProps> = ({
     return (
         <div className={clsx('relative pl-6 space-y-6', className)}>
             <div
-                className="absolute top-2 bottom-2 left-2.5 w-0.5 bg-slate-200 -translate-x-1/2"
+                className="absolute top-2 bottom-2 left-2.5 w-0.5 bg-surface-container-high -translate-x-1/2"
                 aria-hidden="true"
             />
 
             {events.map((event) => {
-                const icon = EVENT_ICON_MAP[event.eventType] ?? <Clock className="w-4 h-4 text-slate-500" />;
+                const icon = EVENT_ICON_MAP[event.eventType] ?? <Clock className="w-4 h-4 text-text-muted" />;
 
                 return (
                     <div key={event.id} className="relative group">
-                        <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-slate-300 flex items-center justify-center shadow-xs">
+                        <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-surface-card border-2 border-border-strong flex items-center justify-center shadow-xs">
                             <span className="scale-75">{icon}</span>
                         </div>
 
-                        <div className="bg-white border border-slate-200/80 rounded-lg p-3 shadow-xs transition-colors hover:border-slate-300">
+                        <div className="bg-surface-card border border-border-subtle/80 rounded-lg p-3 shadow-xs transition-colors hover:border-border-strong">
                             <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
-                                <span className="text-xs font-semibold text-slate-800 tracking-tight">
+                                <span className="text-xs font-semibold text-text-primary tracking-tight">
                                     {event.title}
                                 </span>
-                                <span className="text-[11px] text-slate-400 font-mono">
+                                <span className="text-[11px] text-text-muted font-mono">
                                     {event.timestamp}
                                 </span>
                             </div>
 
-                            <p className="text-xs text-slate-600 leading-relaxed mb-2">
+                            <p className="text-xs text-text-secondary leading-relaxed mb-2">
                                 {event.description}
                             </p>
 
-                            <div className="flex items-center gap-2 pt-1 border-t border-slate-100 text-[11px]">
-                                <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-mono uppercase tracking-wider">
+                            <div className="flex items-center gap-2 pt-1 border-t border-border-subtle text-[11px]">
+                                <span className="px-1.5 py-0.5 rounded bg-surface-well text-text-secondary font-mono uppercase tracking-wider">
                                     {event.actorRole}
                                 </span>
                                 {event.metadataBadge && (

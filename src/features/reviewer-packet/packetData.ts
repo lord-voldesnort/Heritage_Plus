@@ -1,8 +1,8 @@
-import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { apiClient } from '../../shared/lib/apiClient';
 import { SHIVNERI_SITE } from '../../shared/mock-data/mockSite';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/constants/disclaimer';
-import { CaseStatus, ObservationType, SpatialClassification, ReviewEvent } from '../../shared/types';
+import { CaseStatus, ObservationType, SpatialClassification, ReviewEvent, ObservationRecord } from '../../shared/types';
 
 export const APPROVED_CATEGORY_LABELS: Record<string, string> = {
   POSSIBLE_CONSTRUCTION: 'Possible construction',
@@ -40,11 +40,7 @@ export interface ReviewerPacketData {
     fileMimeType: string;
     evidenceId?: string;
   } | null;
-  evidenceList: typeof ledgerStore extends { getCaseById: (...args: any[]) => infer R }
-    ? R extends { evidenceList: infer E }
-      ? E
-      : never
-    : never;
+  evidenceList: ObservationRecord['evidenceList'];
   rawEvents: ReviewEvent[];
   latestReviewEvent: ReviewEvent | null;
   provenance: typeof PROVENANCE_METADATA;
@@ -67,10 +63,10 @@ export const CANONICAL_NON_LEGAL_NOTICE =
  * Single shared packet data extraction function.
  * Consumed by both screen interactive view, printable dossier view, and test assertions.
  */
-export function getReviewerPacketData(caseId: string): ReviewerPacketData | null {
+export async function getReviewerPacketData(caseId: string): Promise<ReviewerPacketData | null> {
   if (!caseId) return null;
 
-  const storeRecord = ledgerStore.getCaseById(caseId);
+  const storeRecord = await apiClient.getCaseById(caseId);
   if (!storeRecord) return null;
 
   const isOverlap =

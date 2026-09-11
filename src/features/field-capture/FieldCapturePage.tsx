@@ -20,8 +20,7 @@ import { PhotoMetadata } from '../../shared/components/PhotoDropzone';
 import { GpsAccuracyHud } from './GpsAccuracyHud';
 import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/contracts/heritagePulseContract';
 import { getGuidelineById, APPROVED_PRIVACY_WARNING } from '../site-context/observationGuidelines';
-import { resolveMultiTierSpatialResult } from '../../shared/lib/spatialEngine';
-import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { apiClient, ApiError } from '../../shared/lib/apiClient';
 import { containsBannedLanguage } from '../../shared/constants/bannedLanguage';
 import { SHIVNERI_SITE, SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { DEMO_SCENARIOS } from '../../shared/mock-data/mockScenarios';
@@ -37,8 +36,8 @@ export const FieldCapturePage: React.FC = () => {
   const [photo, setPhoto] = useState<PhotoMetadata | null>(null);
 
   // GPS states with explicit coordinate tuple type: [longitude, latitude]
-  const [coordinates, setCoordinates] = useState<[number, number]>([73.8624, 19.1982]);
-  const [accuracyMeters, setAccuracyMeters] = useState<number>(4.5);
+  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  const [accuracyMeters, setAccuracyMeters] = useState<number | null>(null);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
   const [isGpsAcquired, setIsGpsAcquired] = useState(false);
@@ -72,7 +71,7 @@ export const FieldCapturePage: React.FC = () => {
     setGpsError(null);
 
     if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by your browser. Using simulated site baseline coordinates.');
+      setGpsError('Geolocation is not supported by your browser. Hardware GPS telemetry is required before submission.');
       setGpsLoading(false);
       return;
     }
@@ -112,9 +111,9 @@ export const FieldCapturePage: React.FC = () => {
     }
   };
 
-  const hasValidGps = coordinates !== null && Number.isFinite(accuracyMeters);
+  const hasValidGps = coordinates !== null && accuracyMeters !== null && Number.isFinite(accuracyMeters);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
 
@@ -153,35 +152,28 @@ export const FieldCapturePage: React.FC = () => {
     try {
       const [lng, lat] = coordinates;
 
-      // 1. Authoritative Multi-Tier Spatial Calculation executed ONCE at creation boundary
-      const spatialResult = resolveMultiTierSpatialResult({
+      // The authoritative spatial classification is now computed server-side,
+      // against geometry loaded fresh from PostGIS, inside apiClient.createCase.
+      // The client never sends a pre-computed classification to be trusted.
+      const newCase = await apiClient.createCase({
+        siteId: SHIVNERI_SITE.siteId,
+        category: categoryId as ObservationType,
+        factualDescription: description.trim(),
         latitude: lat,
         longitude: lng,
         gpsAccuracyMeters: accuracyMeters,
-        factualDescription: description.trim(),
+        reporterType: 'VISITOR',
+        photoFile: photo ? photo.file : null,
       });
 
-      // 2. Register case into immutable append-only ledgerStore
-      const newCase = ledgerStore.createCase(
-        {
-          siteId: SHIVNERI_SITE.siteId,
-          geometryId: SHIVNERI_GEOMETRY.geometryId,
-          category: categoryId as ObservationType,
-          factualDescription: description.trim(),
-          latitude: lat,
-          longitude: lng,
-          gpsAccuracyMeters: accuracyMeters,
-          reporterType: 'VISITOR',
-          photoUrl: photo ? photo.previewUrl : undefined,
-        },
-        spatialResult
-      );
-
-      // 3. Navigate directly to result view with stable Case ID
       navigate(`/result/${newCase.caseId}`);
     } catch (err: any) {
       console.error('Failed to register ledger case:', err);
-      setSubmitError(`Failed to persist observation to Change Ledger: ${err?.message || 'Storage error'}. Please retry.`);
+      setSubmitError(
+        err instanceof ApiError
+          ? `Failed to submit observation: ${err.message}`
+          : `Failed to persist observation to Change Ledger: ${err?.message || 'Storage error'}. Please retry.`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -251,11 +243,10 @@ export const FieldCapturePage: React.FC = () => {
 
           <div className="space-y-2">
             <GpsAccuracyHud
-              latitude={coordinates[1]}
-              longitude={coordinates[0]}
+              latitude={coordinates?.[1] ?? null}
+              longitude={coordinates?.[0] ?? null}
               accuracyMeters={accuracyMeters}
               onRefresh={handleGetLocation}
-              isSimulated={!isGpsAcquired}
             />
 
             {!isGpsAcquired && (
@@ -280,7 +271,7 @@ export const FieldCapturePage: React.FC = () => {
             )}
 
             {/* Degraded GPS Precision Warning */}
-            {accuracyMeters > 35 && (
+            {accuracyMeters !== null && accuracyMeters > 35 && (
               <div className="p-3 rounded-xl bg-zone-regulated-bg border border-zone-regulated-border text-zone-regulated text-xs space-y-1">
                 <div className="flex items-center gap-1.5 font-semibold">
                   <AlertTriangle className="w-4 h-4" />

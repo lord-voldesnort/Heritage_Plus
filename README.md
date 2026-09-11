@@ -12,3 +12,6 @@ Heritage Pulse is deliberately **not** a tourism application, digital twin, 3D r
 
 Primary Prototype Site: **Shivneri Fort**, Junnar, Pune District, Maharashtra.
 
+## Quick start
+
+For the easiest installation path, see [QUICKSTART.md](./QUICKSTART.md) and run `./setup.sh` from the project directory. The script installs both applications, creates environment templates, generates a local session secret, and runs migration/seed steps when a PostgreSQL/PostGIS `DATABASE_URL` is configured.

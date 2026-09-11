@@ -58,10 +58,10 @@ export const TeamStatusPage: React.FC = () => {
             </div>
             <h2 className="text-lg font-bold text-primary flex items-center gap-2">
               {!isGatePassed && <AlertTriangle className="w-5 h-5 text-zone-core flex-shrink-0" />}
-              {gateStatusData.geometryGate.name}
+              {gateStatusData.geometryGate.monumentName} ({gateStatusData.geometryGate.monumentNumber})
             </h2>
             <p className="text-xs text-text-secondary leading-relaxed max-w-lg">
-              {gateStatusData.geometryGate.description}
+              Source: {gateStatusData.geometryGate.sourceAgency} &middot; {gateStatusData.geometryGate.geometryType} &middot; {gateStatusData.geometryGate.crs}
             </p>
           </div>
 
@@ -73,20 +73,14 @@ export const TeamStatusPage: React.FC = () => {
           )}
         </div>
 
-        {gateStatusData.geometryGate.validationChecks && (
+        {gateStatusData.geometryGate.layers && (
           <div className="mt-4 pt-4 border-t border-border-subtle space-y-2">
-            <div className="text-[10px] font-mono text-text-muted uppercase font-bold tracking-wide">Validation Checks:</div>
+            <div className="text-[10px] font-mono text-text-muted uppercase font-bold tracking-wide">Boundary Layers:</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {gateStatusData.geometryGate.validationChecks.map((check: any, i: number) => (
-                <div key={i} className={`flex items-center gap-2 text-xs p-2 rounded-lg border ${
-                  check.pass
-                    ? 'bg-zone-survey-bg border-zone-survey-border text-zone-survey'
-                    : 'bg-zone-core-bg border-zone-core-border text-zone-core'
-                }`}>
-                  {check.pass
-                    ? <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
-                    : <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />}
-                  <span className="font-medium">{check.name}</span>
+              {gateStatusData.geometryGate.layers.map((layer, i: number) => (
+                <div key={i} className="flex items-center gap-2 text-xs p-2 rounded-lg border bg-zone-survey-bg border-zone-survey-border text-zone-survey">
+                  <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="font-medium">{layer.name} (gid {layer.gid})</span>
                 </div>
               ))}
             </div>
@@ -138,7 +132,7 @@ export const TeamStatusPage: React.FC = () => {
                     ? 'text-primary font-semibold'
                     : 'text-text-secondary'
                 }`}>
-                  {task.name}
+                  {task.title ?? task.name}
                 </span>
               </div>
               <Badge variant={task.status === 'DONE' ? 'emerald' : task.status === 'IN_PROGRESS' ? 'amber' : 'slate'}>
@@ -152,10 +146,10 @@ export const TeamStatusPage: React.FC = () => {
       {/* 3. Team Members */}
       <div>
         <h2 className="text-xs font-semibold text-secondary uppercase tracking-wider font-mono mb-3">
-          Team Members ({teamMembersData.members.length})
+          Team Members ({teamMembersData.length})
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {teamMembersData.members.map((member: any) => (
+          {teamMembersData.map((member: any) => (
             <Card key={member.name} variant="default" className="p-4 flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 text-primary flex items-center justify-center font-bold text-sm border border-primary/20 flex-shrink-0">
                 {member.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}

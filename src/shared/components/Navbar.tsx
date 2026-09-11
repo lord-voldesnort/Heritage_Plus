@@ -1,6 +1,8 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NationalEmblem } from './NationalEmblem';
+import { ThemeToggle } from './ThemeToggle';
+import { useAuth } from '../lib/AuthContext';
 import {
   Menu,
   X,
@@ -12,11 +14,14 @@ import {
   Compass,
   Users,
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  LogOut
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const mainNavLinks = [
@@ -42,7 +47,7 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-border-subtle shadow-xs print:hidden">
+    <header className="sticky top-0 w-full z-40 bg-surface-card/95 backdrop-blur-md border-b border-border-subtle shadow-xs print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
         {/* Brand with Official National Emblem */}
         <Link to="/site" className="flex items-center gap-3.5 group shrink-0">
@@ -108,16 +113,29 @@ export const Navbar: React.FC = () => {
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-surface-well rounded-full border border-border-subtle">
             <span className="w-2 h-2 rounded-full bg-zone-survey animate-pulse"></span>
             <span className="text-[11px] font-mono font-semibold text-text-secondary">
-              GPS LOCKED · ±2.4m
+              GPS TELEMETRY · FIELD CAPTURE
             </span>
           </div>
 
-          <div
-            className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/20 cursor-default"
-            title="Active Desk: Conservation Curator"
+          <ThemeToggle compact className="hidden sm:inline-flex" />
+
+          <button
+            type="button"
+            onClick={async () => {
+              if (user) {
+                await logout();
+                navigate('/site');
+              } else {
+                navigate('/reviewer');
+              }
+            }}
+            className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs border border-primary/20 hover:bg-primary/20 transition-colors"
+            title={user ? `Signed in: ${user.displayName} (${user.role}) — click to sign out` : 'Not signed in — click to sign in as reviewer'}
           >
-            CC
-          </div>
+            {user
+              ? user.displayName.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+              : <LogOut className="w-4 h-4 rotate-180" />}
+          </button>
 
           {/* Mobile Menu Toggle */}
           <div className="flex lg:hidden items-center">
@@ -134,9 +152,12 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-b border-border-subtle bg-white px-4 pt-3 pb-5 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="px-2 pb-2 text-[10px] font-bold uppercase tracking-wider text-text-muted border-b border-border-subtle">
-            Primary Workflows
+        <div className="lg:hidden border-b border-border-subtle bg-surface-card px-4 pt-3 pb-5 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between px-2 pb-2 border-b border-border-subtle">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
+              Primary Workflows
+            </span>
+            <ThemeToggle compact />
           </div>
           {mainNavLinks.map((link) => {
             const Icon = link.icon;

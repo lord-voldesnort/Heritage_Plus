@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   UserCheck,
@@ -10,7 +10,7 @@ import {
   SlidersHorizontal,
   FileText,
 } from 'lucide-react';
-import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { apiClient, ApiError } from '../../shared/lib/apiClient';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
 import { CANONICAL_LEGAL_DISCLAIMER } from '../../shared/contracts/heritagePulseContract';
 import { Badge, Button, Card, NoticeBanner, EmptyState } from '../../shared/components';
@@ -71,24 +71,46 @@ export const ReviewerQueuePage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [actionSuccessToast, setActionSuccessToast] = useState<string | null>(null);
 
-  // Load cases directly from ledgerStore (canonical single source of truth - NO recalculation)
-  const queueItems: QueueItem[] = useMemo(() => {
-    const storeCases = ledgerStore.getCases();
-    return storeCases
-      .map((c) => ({
-        caseId: c.caseId,
-        timestamp: c.observedTimestamp || new Date().toISOString(),
-        category: c.category,
-        categoryLabel: APPROVED_CATEGORY_LABELS[c.category] || c.category.replace(/_/g, ' '),
-        description: c.factualDescription,
-        coordinates: [c.longitude, c.latitude] as [number, number],
-        accuracyMeters: c.gpsAccuracyMeters,
-        computedClassification: c.spatialResult?.classification || c.computedClassification || 'LOCATION_UNCERTAIN',
-        currentStatus: c.currentStatus,
-        hasPhoto: Boolean(c.evidenceList && c.evidenceList.length > 0),
-        source: 'ledgerStore' as const,
-      }))
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Load cases from the real API (canonical single source of truth - NO recalculation)
+  const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    setLoadError(null);
+    apiClient
+      .listCases()
+      .then((storeCases) => {
+        if (cancelled) return;
+        const items = storeCases
+          .map((c) => ({
+            caseId: c.caseId,
+            timestamp: c.observedTimestamp || new Date().toISOString(),
+            category: c.category,
+            categoryLabel: APPROVED_CATEGORY_LABELS[c.category] || c.category.replace(/_/g, ' '),
+            description: c.factualDescription,
+            coordinates: [c.longitude, c.latitude] as [number, number],
+            accuracyMeters: c.gpsAccuracyMeters,
+            computedClassification: c.spatialResult?.classification || c.computedClassification || 'LOCATION_UNCERTAIN',
+            currentStatus: c.currentStatus,
+            hasPhoto: Boolean(c.evidenceList && c.evidenceList.length > 0),
+            source: 'ledgerStore' as const,
+          }))
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setQueueItems(items);
+      })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err instanceof ApiError ? err.message : 'Could not load the reviewer queue.');
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [refreshTrigger]);
 
   // Filter items by search query, status filter, and category filter
@@ -168,6 +190,12 @@ export const ReviewerQueuePage: React.FC = () => {
         {CANONICAL_LEGAL_DISCLAIMER}
       </NoticeBanner>
 
+      {loadError && (
+        <NoticeBanner variant="insufficient" title="Could Not Load Reviewer Queue">
+          {loadError}
+        </NoticeBanner>
+      )}
+
       {/* Success Toast */}
       {actionSuccessToast && (
         <div className="p-3.5 rounded-xl bg-zone-survey-bg border border-zone-survey-border text-zone-survey text-xs flex items-center justify-between gap-2 shadow-xs animate-fade-in">
@@ -235,12 +263,16 @@ export const ReviewerQueuePage: React.FC = () => {
                   <td colSpan={5} className="p-8 text-center">
                     <EmptyState
                       title={
-                        queueItems.length === 0
+                        isLoading
+                          ? 'Loading reviewer queue…'
+                          : queueItems.length === 0
                           ? 'Review queue is currently empty'
                           : 'No cases match search or filter criteria'
                       }
                       description={
-                        queueItems.length === 0
+                        isLoading
+                          ? 'Fetching cases from the Heritage Pulse API…'
+                          : queueItems.length === 0
                           ? 'No field observations have been submitted yet. Cases submitted through Field Capture or Demo scenarios will appear here.'
                           : "Try adjusting your search terms or selecting 'All Review Statuses' to view all institutional triage records."
                       }
@@ -375,12 +407,16 @@ export const ReviewerQueuePage: React.FC = () => {
             <div className="p-6 bg-surface-well rounded-lg">
               <EmptyState
                 title={
-                  queueItems.length === 0
+                  isLoading
+                    ? 'Loading reviewer queue…'
+                    : queueItems.length === 0
                     ? 'Review queue is currently empty'
                     : 'No cases match search or filter criteria'
                 }
                 description={
-                  queueItems.length === 0
+                  isLoading
+                    ? 'Fetching cases from the Heritage Pulse API…'
+                    : queueItems.length === 0
                     ? 'No field observations have been submitted yet. Cases submitted through Field Capture or Demo scenarios will appear here.'
                     : "Try adjusting your search terms or selecting 'All Review Statuses' to view all institutional triage records."
                 }

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DEMO_SCENARIOS } from '../mock-data/mockScenarios';
 import { SHIVNERI_GEOMETRY, SHIVNERI_SITE } from '../mock-data/mockSite';
-import { resolveMultiTierSpatialResult } from '../lib/spatialEngine';
-import { ledgerStore } from '../lib/ledgerStore';
+import { apiClient } from '../lib/apiClient';
+import { useAuth } from '../lib/AuthContext';
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -12,89 +12,66 @@ import {
 
 export const DemoQuickbar: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [resetToast, setResetToast] = useState<string | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
 
-  const handleResetStore = (e: React.MouseEvent) => {
+  const handleResetStore = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirmReset) {
       setConfirmReset(true);
       setTimeout(() => setConfirmReset(false), 4000);
       return;
     }
-    ledgerStore.resetDemoData();
+    try {
+      await apiClient.resetDemoData();
+      setResetToast('Demo scenarios reset; user observations preserved');
+    } catch (err) {
+      console.error('Failed to reset demo data:', err);
+      setResetToast('Could not reset demo data — see console for details');
+    }
     setActiveScenarioId(null);
     setConfirmReset(false);
-    setResetToast('Demo scenarios reset; user observations preserved');
     setTimeout(() => setResetToast(null), 3000);
   };
 
-  // Load a scenario live and calculate deterministic spatial outputs
-  const handleSelectScenario = (scenarioId: string) => {
+  // Load a scenario live via the real API — the server computes the
+  // authoritative spatial classification against PostGIS geometry.
+  const handleSelectScenario = async (scenarioId: string) => {
     const scenario = DEMO_SCENARIOS.find((s) => s.id === scenarioId);
     if (!scenario) return;
 
     setActiveScenarioId(scenarioId);
 
-    // Calculate multi-tier spatial result
-    const spatial = resolveMultiTierSpatialResult({
-      latitude: scenario.latitude,
-      longitude: scenario.longitude,
-      gpsAccuracyMeters: scenario.gpsAccuracyMeters,
-      factualDescription: scenario.factualNotes,
-    });
-
-    // Create case in ledgerStore marked as a demo scenario
-    const newCase = ledgerStore.createCase(
-      {
+    try {
+      const newCase = await apiClient.createCase({
         siteId: SHIVNERI_SITE.siteId,
-        geometryId: SHIVNERI_GEOMETRY.geometryId,
         category: scenario.category,
         factualDescription: scenario.factualNotes,
         latitude: scenario.latitude,
         longitude: scenario.longitude,
         gpsAccuracyMeters: scenario.gpsAccuracyMeters,
         reporterType: 'VISITOR',
-      },
-      spatial,
-      true // Mark as demo scenario
-    );
+        isDemoScenario: true,
+      });
 
-    // Persist in sessionStorage for cross-screen flow
-    sessionStorage.setItem(
-      `case_${newCase.caseId}`,
-      JSON.stringify({
-        id: newCase.caseId,
-        siteId: newCase.siteId,
-        siteName: SHIVNERI_SITE.name,
-        categoryId: newCase.category,
-        description: newCase.factualDescription,
-        coordinates: [newCase.longitude, newCase.latitude],
-        accuracyMeters: newCase.gpsAccuracyMeters,
-        timestamp: newCase.observedTimestamp,
-        currentStatus: newCase.currentStatus,
-      })
-    );
-
-    // Navigate to Spatial Result page for immediate judge inspection
-    navigate(`/result/${newCase.caseId}`);
+      // Navigate to Spatial Result page for immediate judge inspection
+      navigate(`/result/${newCase.caseId}`);
+    } catch (err) {
+      console.error('Failed to create demo scenario case:', err);
+      setActiveScenarioId(null);
+    }
   };
 
   const handleSimulateCoreBreach = () => {
     handleSelectScenario('scenario-1-inside');
   };
 
-  const handleToggleRole = () => {
-    const current = sessionStorage.getItem('simulated_reviewer_role') === 'true';
-    sessionStorage.setItem('simulated_reviewer_role', String(!current));
-    if (!current) {
-      navigate('/reviewer/console');
-    } else {
-      navigate('/capture');
-    }
+  const handleGoToReviewerSignIn = () => {
+    navigate(user ? '/capture' : '/reviewer/console');
   };
 
   const handleReset = () => {
@@ -170,11 +147,11 @@ export const DemoQuickbar: React.FC = () => {
 
             <button
               type="button"
-              onClick={handleToggleRole}
+              onClick={handleGoToReviewerSignIn}
               className="px-3 py-1.5 rounded-lg bg-secondary-surface hover:bg-sky-100 text-secondary border border-secondary-border font-semibold transition flex items-center gap-1.5 shadow-2xs"
             >
               <span className="material-symbols-outlined text-[15px]">switch_account</span>
-              <span>Toggle Curator / Ranger</span>
+              <span>{user ? 'Go to Curator Console' : 'Curator Sign-In'}</span>
             </button>
           </div>
 

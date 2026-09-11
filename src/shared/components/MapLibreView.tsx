@@ -31,7 +31,7 @@ export const MapLibreView: React.FC<MapLibreViewProps> = ({
 
     const defaultCenter: [number, number] = observationPoint
       ? [observationPoint.longitude, observationPoint.latitude]
-      : [73.8624, 19.1982];
+      : (turf.centroid({ type: 'Feature', properties: {}, geometry: geometryRecord.geojson as any }).geometry.coordinates as [number, number]);
 
     try {
       const map = new maplibregl.Map({
@@ -162,7 +162,7 @@ export const MapLibreView: React.FC<MapLibreViewProps> = ({
   return (
     <div className={`relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 ${className}`}>
       <div ref={mapContainer} className="w-full h-full" />
-      <div className="absolute bottom-2 left-2 z-10 px-2 py-1 rounded bg-slate-900/90 backdrop-blur border border-slate-800 text-[10px] text-slate-400 font-mono">
+      <div className="absolute bottom-2 left-2 z-10 px-2 py-1 rounded bg-slate-900/90 backdrop-blur border border-slate-800 text-[10px] text-text-muted font-mono">
         Source: {geometryRecord.versionLabel} (EPSG:4326)
       </div>
       {observationPoint?.accuracyMeters && (
@@ -174,4 +174,3 @@ export const MapLibreView: React.FC<MapLibreViewProps> = ({
     </div>
   );
 };
-

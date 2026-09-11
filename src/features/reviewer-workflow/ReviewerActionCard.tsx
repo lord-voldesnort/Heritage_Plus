@@ -16,7 +16,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { CaseStatus } from '../../shared/types';
-import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { apiClient } from '../../shared/lib/apiClient';
 import { SHIVNERI_GEOMETRY } from '../../shared/mock-data/mockSite';
 import { PROVENANCE_METADATA } from '../../shared/mock-data/siteGeometry';
 import { containsBannedLanguage } from '../../shared/constants/bannedLanguage';
@@ -125,7 +125,16 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   isDrawer = false,
   className = '',
 }) => {
-  const caseRecord = ledgerStore.getCaseById(caseId);
+  const [caseRecord, setCaseRecord] = useState<Awaited<ReturnType<typeof apiClient.getCaseById>>>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    apiClient.getCaseById(caseId).then((record) => {
+      if (!cancelled) setCaseRecord(record);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [caseId]);
   const effectiveStatus = caseRecord?.currentStatus || currentStatus || 'SUBMITTED_FOR_REVIEW';
 
   // Enforce closed-case protection: terminal statuses cannot be re-edited
@@ -147,7 +156,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
   const selectedAction =
     PERMITTED_ACTIONS.find((a) => a.key === selectedActionKey) || PERMITTED_ACTIONS[0];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isCaseClosed) {
       setErrorMessage('This case is closed. Historical records cannot be modified.');
@@ -181,21 +190,18 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
     try {
       const now = new Date().toISOString();
 
-      // Append to in-memory ledger store
-      const updatedCase = ledgerStore.appendReviewerDecision(
+      // Record the decision through the real API — the server enforces
+      // closed-case/REFERRED governance authoritatively and appends the
+      // review event to the append-only audit trail in Postgres.
+      const { case: updatedCase } = await apiClient.recordReview({
         caseId,
-        selectedAction.label,
-        selectedAction.targetStatus,
-        trimmedNotes,
-        selectedAction.eventType,
-        'REVIEWER'
-      );
+        action: selectedAction.targetStatus,
+        notes: trimmedNotes,
+        actionTitle: selectedAction.label,
+        eventType: selectedAction.eventType,
+      });
 
-      if (!updatedCase) {
-        setErrorMessage(`Case ${caseId} not found in Change Ledger store.`);
-        setIsSubmitting(false);
-        return;
-      }
+      setCaseRecord(updatedCase);
 
       const payload: ReviewerActionPayload = {
         caseId,
@@ -222,7 +228,7 @@ export const ReviewerActionCard: React.FC<ReviewerActionCardProps> = ({
       }
     } catch (err: any) {
       console.error('Failed to record reviewer decision:', err);
-      setErrorMessage('Failed to append action to Change Ledger. Please try again.');
+      setErrorMessage(err?.message ? `Failed to record decision: ${err.message}` : 'Failed to append action to Change Ledger. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

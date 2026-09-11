@@ -1,0 +1,36 @@
+name: Heritage Plus CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+      - name: Contract validation
+        run: npm run contract:validate
+      - name: Geometry gate
+        run: npm run gate:check
+      - name: Task-status validation
+        run: npm run team:validate
+      - name: Frontend build and tests
+        run: npm run build && npm test -- --run
+      - name: Server build and tests
+        working-directory: server
+        run: npm run build && npm test -- --run
+      - name: Production dependency audit
+        working-directory: server
+        run: npm audit --omit=dev

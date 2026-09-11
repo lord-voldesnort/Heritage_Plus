@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ledgerStore } from '../../shared/lib/ledgerStore';
+import { apiClient, ApiError } from '../../shared/lib/apiClient';
 import { CASE_STATUSES } from '../../shared/constants/caseStatuses';
 import { SPATIAL_CLASSIFICATIONS } from '../../shared/constants/spatialClassifications';
 import { Card } from '../../shared/components/Card';
 import { Button } from '../../shared/components/Button';
 import { Badge } from '../../shared/components/Badge';
+import { CardSkeleton } from '../../shared/components/LoadingSkeleton';
+import { NoticeBanner } from '../../shared/components/NoticeBanner';
 import { ObservationRecord } from '../../shared/types';
 import {
   UserCheck,
@@ -15,10 +17,32 @@ import {
 import { ReviewerActionCard } from './ReviewerActionCard';
 
 export const ReviewerConsolePage: React.FC = () => {
-  const [cases, setCases] = useState<ObservationRecord[]>(ledgerStore.getCases());
-  const [selectedCase, setSelectedCase] = useState<ObservationRecord | null>(cases[0] || null);
+  const [cases, setCases] = useState<ObservationRecord[]>([]);
+  const [selectedCase, setSelectedCase] = useState<ObservationRecord | null>(null);
   const [actionModalOpen, setActionModalOpen] = useState(false);
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiClient
+      .listCases()
+      .then((loaded) => {
+        if (cancelled) return;
+        setCases(loaded);
+        setSelectedCase((prev) => prev || loaded[0] || null);
+      })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err instanceof ApiError ? err.message : 'Could not load cases.');
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -42,6 +66,12 @@ export const ReviewerConsolePage: React.FC = () => {
         </Badge>
       </div>
 
+      {loadError && (
+        <NoticeBanner variant="insufficient" title="Could Not Load Reviewer Console">
+          {loadError}
+        </NoticeBanner>
+      )}
+
       {actionSuccessMessage && (
         <div className="p-3.5 rounded-xl bg-zone-survey-bg border border-zone-survey-border text-zone-survey text-xs flex items-center gap-2">
           <Check className="w-4 h-4" />
@@ -58,7 +88,13 @@ export const ReviewerConsolePage: React.FC = () => {
           </h2>
 
           <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
-            {cases.map(c => {
+            {isLoading ? (
+              <>
+                <CardSkeleton />
+                <CardSkeleton />
+              </>
+            ) : (
+              cases.map(c => {
               const isSelected = selectedCase?.caseId === c.caseId;
               const statusMeta = CASE_STATUSES[c.currentStatus];
 
@@ -95,7 +131,13 @@ export const ReviewerConsolePage: React.FC = () => {
                   </div>
                 </button>
               );
-            })}
+              })
+            )}
+            {!isLoading && cases.length === 0 && (
+              <div className="p-4 text-xs text-text-secondary bg-surface-well rounded-xl border border-border-subtle">
+                No cases in the triage queue yet.
+              </div>
+            )}
           </div>
         </div>
 
@@ -201,11 +243,16 @@ export const ReviewerConsolePage: React.FC = () => {
           currentStatus={selectedCase.currentStatus}
           isDrawer={true}
           onClose={() => setActionModalOpen(false)}
-          onActionComplete={(payload) => {
-            const updated = ledgerStore.getCaseById(selectedCase.caseId);
-            if (updated) {
-              setCases(ledgerStore.getCases());
-              setSelectedCase(updated);
+          onActionComplete={async (payload) => {
+            try {
+              const [updated, refreshedCases] = await Promise.all([
+                apiClient.getCaseById(selectedCase.caseId),
+                apiClient.listCases(),
+              ]);
+              if (updated) setSelectedCase(updated);
+              setCases(refreshedCases);
+            } catch (err) {
+              console.error('Failed to refresh after reviewer action:', err);
             }
             setActionSuccessMessage(`Decision "${payload.actionTitle}" recorded to Change Ledger.`);
             setTimeout(() => setActionSuccessMessage(null), 4000);
