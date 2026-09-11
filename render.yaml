@@ -1,0 +1,61 @@
+services:
+  - type: web
+    name: heritage-plus-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm ci && npm run build && npm run migrate && npm run seed
+    startCommand: npm start
+    healthCheckPath: /ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: STORAGE_PROVIDER
+        value: supabase
+      - key: STORAGE_BUCKET
+        value: heritage-evidence
+      - key: STAC_CATALOG_URL
+        value: https://earth-search.aws.element84.com/v1
+      - key: ENABLE_DEMO_SEED_ROUTES
+        value: 'false'
+      - key: WORKER_ENABLED
+        value: 'false'
+      - key: EO_PROCESSING_ENABLED
+        value: 'false'
+
+  - type: worker
+    name: heritage-plus-worker
+    runtime: node
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    startCommand: npm run worker
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: STORAGE_PROVIDER
+        value: supabase
+      - key: STORAGE_BUCKET
+        value: heritage-evidence
+      - key: WORKER_ENABLED
+        value: 'true'
+      - key: EO_PROCESSING_ENABLED
+        value: 'false'
+      - key: WORKER_CONCURRENCY
+        value: '1'

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { display: none; }
+    .dialog-backdrop {
+      background-color: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-well": "#f1f5f9",
+            "surface-dim": "#ccdbf3",
+            "zone-regulated-bg": "#fffbeb",
+            "zone-survey-border": "#a7f3d0",
+            "on-secondary-fixed": "#001d31",
+            "surface-container-lowest": "#ffffff",
+            "tertiary": "#545c72",
+            "zone-core-bg": "#fef2f2",
+            "border-subtle": "#e2e8f0",
+            "inverse-on-surface": "#eaf1ff",
+            "on-secondary-container": "#00476e",
+            "error": "#ba1a1a",
+            "surface-container": "#e6eeff",
+            "surface-container-low": "#eff4ff",
+            "text-primary": "#0f172a",
+            "surface-container-high": "#dce9ff",
+            "zone-regulated": "#d97706",
+            "surface-bright": "#f8f9ff",
+            "surface-card": "#ffffff",
+            "on-tertiary-fixed": "#131b2e",
+            "on-error": "#ffffff",
+            "on-primary-container": "#fffbff",
+            "on-primary-fixed-variant": "#7f2b00",
+            "surface-tint": "#a73a00",
+            "error-container": "#ffdad6",
+            "zone-regulated-border": "#fde68a",
+            "outline": "#8e7166",
+            "secondary-fixed-dim": "#93ccff",
+            "background": "#f8f9ff",
+            "zone-core": "#dc2626",
+            "on-secondary": "#ffffff",
+            "surface-container-highest": "#d5e3fc",
+            "primary-fixed-dim": "#ffb599",
+            "text-secondary": "#475569",
+            "outline-variant": "#e2bfb2",
+            "tertiary-container": "#6c748b",
+            "on-tertiary-fixed-variant": "#3f465c",
+            "text-muted": "#94a3b8",
+            "surface": "#f8f9ff",
+            "secondary": "#006398",
+            "on-error-container": "#93000a",
+            "on-primary-fixed": "#370e00",
+            "zone-core-border": "#fecaca",
+            "primary-container": "#cc4900",
+            "on-background": "#0d1c2e",
+            "on-tertiary": "#ffffff",
+            "canvas-bg": "#f8fafc",
+            "tertiary-fixed": "#dae2fd",
+            "secondary-container": "#5bb8fe",
+            "tertiary-fixed-dim": "#bec6e0",
+            "interactive-focus": "#ea580c",
+            "surface-variant": "#d5e3fc",
+            "primary-fixed": "#ffdbce",
+            "zone-survey": "#059669",
+            "zone-survey-bg": "#ecfdf5",
+            "inverse-primary": "#ffb599",
+            "on-tertiary-container": "#fefcff",
+            "inverse-surface": "#233144",
+            "primary": "#a33900",
+            "secondary-fixed": "#cce5ff",
+            "border-strong": "#cbd5e1",
+            "on-surface": "#0d1c2e",
+            "on-primary": "#ffffff",
+            "on-surface-variant": "#5a4138"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            "2xl": "1rem",
+            full: "9999px"
+          },
+          spacing: {
+            "max-width-content": "80rem"
+          },
+          fontFamily: {
+            "code-telemetry": ["monospace"],
+            "code-dossier": ["monospace"],
+            sans: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-canvas-bg font-sans text-text-primary antialiased">
+<!-- Main Header -->
+<header class="fixed top-0 w-full z-50 bg-surface-card/95 backdrop-blur-md border-b border-border-subtle">
+<div class="h-16 max-w-max-width-content mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<img alt="Heritage Plus National Emblem" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UEOjqYmNyO-hBV--jfpo6ZLTRVIqOrH1hHDLcJKe5xpBXp-90LfJ9h2n-TvyzmDARPxInk78kvv1SozYnUNAxykYuHVXqsA3YmNqWwNGlmgoMuKzlyFf09g8S1m78b-0eBaEtrFYkken1Ic7QmSJI2CmCx2d1WLR7GTdpQzuPXHFAjMCxkxZecOBozxpAyKgn2fOm-BaNneyaIj7ajTrQKRIfMSPEkIFfGZFU6zKxXiXYZ_xaZcypq"/>
+<div class="flex flex-col">
+<span class="text-base font-bold text-text-primary tracking-tight leading-none">Heritage Plus</span>
+<span class="text-xs text-text-secondary mt-0.5">National Heritage Monitoring Portal</span>
+</div>
+</div>
+<div class="hidden xl:flex items-center gap-2.5 bg-surface-well px-3.5 py-1.5 rounded-lg border border-border-subtle">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-zone-survey text-[18px]">satellite_alt</span>
+<span class="font-code-telemetry text-xs font-semibold text-text-primary">GPS LOCKED · ±2.4m</span>
+</div>
+<div class="h-3 w-px bg-border-strong"></div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[16px]">badge</span>
+<span class="text-[11px] font-semibold tracking-wider text-secondary uppercase">CONSERVATION CURATOR</span>
+</div>
+</div>
+<nav class="hidden lg:flex items-center gap-1">
+<a class="px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary rounded-lg transition-colors" data-path="site-context" href="#">Site Context</a>
+<a aria-current="page" class="px-3 py-1.5 text-sm bg-primary-container text-on-primary font-semibold rounded-lg transition-colors" data-path="field-capture" href="#">Field Capture</a>
+<a class="px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary rounded-lg transition-colors" data-path="change-ledger" href="#">Change Ledger</a>
+<a class="px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary rounded-lg transition-colors" data-path="reviewer-queue" href="#">Reviewer Queue</a>
+<a class="px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary rounded-lg transition-colors" data-path="compliance-dossier" href="#">Compliance Dossier</a>
+<a class="px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary rounded-lg transition-colors" data-path="team-status" href="#">Team Status</a>
+<a class="px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-well hover:text-text-primary rounded-lg transition-colors" data-path="evaluator-faq" href="#">FAQ</a>
+</nav>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+</div>
+</div>
+</div>
+</header>
+<main class="w-full pt-16 bg-canvas-bg min-h-[calc(100vh-4rem)]">
+<div class="flex flex-col w-full">
+<!-- Calm, Uncluttered Sticky Telemetry HUD -->
+<div class="sticky top-16 z-40 w-full bg-surface-card/90 backdrop-blur border-b border-border-subtle">
+<div class="max-w-3xl mx-auto px-6 py-2.5 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-zone-survey opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-zone-survey"></span>
+</span>
+<span class="text-xs font-semibold text-text-primary font-code-telemetry tracking-tight">
+              GPS Locked · 3.2m High Precision
+            </span>
+<span class="hidden sm:inline text-border-strong">|</span>
+<span class="hidden sm:inline font-code-telemetry text-[11px] text-text-muted" id="hud-timestamp">2026-04-18 10:24:19 UTC</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-surface-well text-text-secondary">
+              Statutory Accuracy &lt;5m Met
+            </span>
+</div>
+</div>
+</div>
+<!-- Form Viewport with Generous Breathing Room -->
+<div class="w-full px-4 md:px-6 py-10 flex justify-center">
+<div class="w-full max-w-3xl flex flex-col gap-8">
+<!-- Page Header & Active Dossier Summary -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border-subtle">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-bold uppercase tracking-wider text-primary">Statutory Field Capture</span>
+<span class="text-xs text-text-muted">· AMASR Act 1958/2010</span>
+</div>
+<h1 class="text-2xl font-bold tracking-tight text-text-primary mt-1">Observation &amp; Spatial Intake</h1>
+<p class="text-sm text-text-secondary mt-1 max-w-xl">
+                File contemporaneous statutory ground records with verified satellite telemetry and cryptographic verification.
+              </p>
+</div>
+<div class="flex sm:flex-col items-center sm:items-end justify-between bg-surface-card px-4 py-2.5 rounded-xl border border-border-subtle shadow-xs shrink-0">
+<span class="text-[10px] uppercase font-bold text-text-muted tracking-wider">Active Dossier</span>
+<span class="text-xs font-bold font-code-dossier text-primary">CAS-2026-TJM-0882</span>
+<span class="text-[10px] text-zone-survey font-medium flex items-center gap-1 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-zone-survey"></span> Cryptographic Seal Active
+              </span>
+</div>
+</div>
+<!-- Main Evidence Form -->
+<form class="flex flex-col gap-8" id="evidence-form" onsubmit="event.preventDefault();">
+<!-- SECTION 1: Site & Classification Selection -->
+<section class="bg-surface-card p-6 md:p-8 rounded-2xl border border-border-subtle shadow-sm flex flex-col gap-6">
+<div class="flex items-center justify-between pb-2 border-b border-border-subtle">
+<div class="flex items-center gap-3">
+<span class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">01</span>
+<h2 class="text-lg font-semibold text-text-primary">Site Identification &amp; Classification</h2>
+</div>
+<span class="text-[11px] font-semibold text-zone-regulated bg-zone-regulated-bg border border-zone-regulated-border px-2 py-0.5 rounded-full">
+                  Mandatory
+                </span>
+</div>
+<!-- Protected Monument Select -->
+<div class="flex flex-col gap-2">
+<label class="text-sm font-semibold text-text-primary flex items-center gap-1.5" for="monument-select">
+<span class="material-symbols-outlined text-[18px] text-secondary">account_balance</span>
+                  Protected Monument / Archaeological Site
+                </label>
+<div class="relative w-full">
+<select class="w-full bg-surface-well border border-border-subtle text-text-primary text-sm font-medium py-3.5 px-4 pr-10 rounded-xl appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-xs" id="monument-select">
+<option selected="" value="TJM-01">Taj Mahal Complex, Agra (ASI Ref: N-UP-A28)</option>
+<option value="AGF-02">Agra Fort, Agra (ASI Ref: N-UP-A02)</option>
+<option value="FTS-03">Fatehpur Sikri, Agra (ASI Ref: N-UP-A44)</option>
+<option value="QTB-04">Qutb Minar Complex, Mehrauli (ASI Ref: N-DL-D01)</option>
+<option value="HUM-05">Humayun's Tomb, New Delhi (ASI Ref: N-DL-D12)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none text-[20px]">unfold_more</span>
+</div>
+<p class="text-xs text-text-secondary">Statutory Buffer: 100m Prohibited Core · 200m Regulated Construction Buffer</p>
+</div>
+<!-- Simplified Airy Category Cards -->
+<div class="flex flex-col gap-2.5 pt-2">
+<label class="text-sm font-semibold text-text-primary">Primary Classification of Finding</label>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="category-grid">
+<!-- Category 1 (Selected) -->
+<button class="category-tile flex flex-col items-center justify-center text-center p-4 rounded-xl border-2 border-primary bg-primary/5 shadow-xs transition-all group" data-cat="unauth-construction" type="button">
+<div class="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105">
+<span class="material-symbols-outlined text-[22px]">construction</span>
+</div>
+<span class="text-sm font-semibold text-primary">Unauthorized Construction</span>
+</button>
+<!-- Category 2 -->
+<button class="category-tile flex flex-col items-center justify-center text-center p-4 rounded-xl border border-border-subtle bg-surface-well/50 hover:bg-surface-well hover:border-border-strong text-text-primary transition-all group" data-cat="encroachment" type="button">
+<div class="w-11 h-11 rounded-full bg-surface-card border border-border-subtle text-secondary flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105">
+<span class="material-symbols-outlined text-[22px]">fence</span>
+</div>
+<span class="text-sm font-medium">Encroachment</span>
+</button>
+<!-- Category 3 -->
+<button class="category-tile flex flex-col items-center justify-center text-center p-4 rounded-xl border border-border-subtle bg-surface-well/50 hover:bg-surface-well hover:border-border-strong text-text-primary transition-all group" data-cat="structural-damage" type="button">
+<div class="w-11 h-11 rounded-full bg-surface-card border border-border-subtle text-secondary flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105">
+<span class="material-symbols-outlined text-[22px]">broken_image</span>
+</div>
+<span class="text-sm font-medium">Structural Damage</span>
+</button>
+<!-- Category 4 -->
+<button class="category-tile flex flex-col items-center justify-center text-center p-4 rounded-xl border border-border-subtle bg-surface-well/50 hover:bg-surface-well hover:border-border-strong text-text-primary transition-all group" data-cat="natural-degradation" type="button">
+<div class="w-11 h-11 rounded-full bg-surface-card border border-border-subtle text-secondary flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105">
+<span class="material-symbols-outlined text-[22px]">rainy</span>
+</div>
+<span class="text-sm font-medium">Natural Degradation</span>
+</button>
+<!-- Category 5 -->
+<button class="category-tile flex flex-col items-center justify-center text-center p-4 rounded-xl border border-border-subtle bg-surface-well/50 hover:bg-surface-well hover:border-border-strong text-text-primary transition-all group" data-cat="vegetation" type="button">
+<div class="w-11 h-11 rounded-full bg-surface-card border border-border-subtle text-secondary flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105">
+<span class="material-symbols-outlined text-[22px]">psychiatry</span>
+</div>
+<span class="text-sm font-medium">Vegetation Overgrowth</span>
+</button>
+<!-- Category 6 -->
+<button class="category-tile flex flex-col items-center justify-center text-center p-4 rounded-xl border border-border-subtle bg-surface-well/50 hover:bg-surface-well hover:border-border-strong text-text-primary transition-all group" data-cat="tourism-footprint" type="button">
+<div class="w-11 h-11 rounded-full bg-surface-card border border-border-subtle text-secondary flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105">
+<span class="material-symbols-outlined text-[22px]">groups</span>
+</div>
+<span class="text-sm font-medium">Tourism Footprint</span>
+</button>
+</div>
+</div>
+</section>
+<!-- SECTION 2: Spatial Geolocation & Buffer Determination -->
+<section class="bg-surface-card p-6 md:p-8 rounded-2xl border border-border-subtle shadow-sm flex flex-col gap-6">
+<div class="flex items-center justify-between pb-2 border-b border-border-subtle">
+<div class="flex items-center gap-3">
+<span class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">02</span>
+<h2 class="text-lg font-semibold text-text-primary">Spatial Geolocation &amp; Buffer Assessment</h2>
+</div>
+<label class="flex items-center gap-2 cursor-pointer select-none">
+<span class="text-xs text-text-secondary">Manual Edit</span>
+<div class="relative">
+<input class="sr-only peer" id="override-toggle" type="checkbox"/>
+<div class="w-8 h-4 bg-border-strong peer-checked:bg-primary rounded-full transition-colors"></div>
+<div class="absolute left-0.5 top-0.5 w-3 h-3 bg-surface-card rounded-full transition-transform peer-checked:translate-x-4 shadow-xs"></div>
+</div>
+</label>
+</div>
+<!-- Coordinates Inputs -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold uppercase tracking-wider text-text-secondary" for="lat-input">Latitude (WGS84)</label>
+<div class="relative">
+<input class="w-full bg-surface-well border border-border-subtle text-text-primary font-code-telemetry text-sm py-3 px-3.5 pr-8 rounded-xl focus:outline-none transition-colors" id="lat-input" readonly="" type="text" value="27.175142"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-muted font-sans">° N</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-semibold uppercase tracking-wider text-text-secondary" for="lon-input">Longitude (WGS84)</label>
+<div class="relative">
+<input class="w-full bg-surface-well border border-border-subtle text-text-primary font-code-telemetry text-sm py-3 px-3.5 pr-8 rounded-xl focus:outline-none transition-colors" id="lon-input" readonly="" type="text" value="78.042118"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-muted font-sans">° E</span>
+</div>
+</div>
+</div>
+<!-- GPS Action Bar & Clean Calculated Zone Badge -->
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+<button class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-well hover:bg-surface-container-high border border-border-subtle text-text-primary font-medium text-sm rounded-xl transition-all active:scale-[0.98]" id="refresh-gps-btn" type="button">
+<span class="material-symbols-outlined text-secondary text-[18px]">my_location</span>
+<span>Acquire Current Location</span>
+</button>
+<button class="text-xs text-secondary hover:text-primary font-medium flex items-center gap-1 justify-center sm:justify-end" onclick="document.getElementById('datum-modal').showModal()" type="button">
+<span class="material-symbols-outlined text-[16px]">info</span>
+<span>View Datum Reference</span>
+</button>
+</div>
+<!-- High-Contrast Clean Buffer Infraction Banner -->
+<div class="p-4 rounded-xl bg-zone-core-bg border border-zone-core-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<span class="w-9 h-9 rounded-lg bg-zone-core text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+</span>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold uppercase tracking-wider text-zone-core">Core Zone Infraction</span>
+<span class="text-[10px] bg-zone-core text-on-primary px-1.5 py-0.2 rounded font-semibold">Prohibited</span>
+</div>
+<p class="text-sm font-medium text-text-primary mt-0.5">Observation within statutory zero-tolerance perimeter.</p>
+</div>
+</div>
+<div class="self-end sm:self-center bg-surface-card border border-zone-core-border/60 px-3 py-1.5 rounded-lg shadow-2xs">
+<span class="font-code-telemetry font-bold text-zone-core text-sm">72.4m</span>
+<span class="text-xs text-text-secondary">from epicenter (&lt;100m)</span>
+</div>
+</div>
+</section>
+<!-- SECTION 3: Photographic Evidence -->
+<section class="bg-surface-card p-6 md:p-8 rounded-2xl border border-border-subtle shadow-sm flex flex-col gap-6">
+<div class="flex items-center justify-between pb-2 border-b border-border-subtle">
+<div class="flex items-center gap-3">
+<span class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">03</span>
+<h2 class="text-lg font-semibold text-text-primary">Photographic Evidence</h2>
+</div>
+<span class="text-xs text-text-secondary">EXIF Geotag Verification</span>
+</div>
+<!-- Dropzone -->
+<div class="border-2 border-dashed border-border-strong hover:border-primary/50 bg-canvas-bg hover:bg-surface-container-low transition-colors rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer group" id="dropzone">
+<div class="w-12 h-12 rounded-full bg-surface-card border border-border-subtle text-primary flex items-center justify-center mb-3 shadow-xs group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[24px]">add_a_photo</span>
+</div>
+<span class="text-sm font-semibold text-text-primary">Tap to capture or upload evidentiary photo</span>
+<span class="text-xs text-text-secondary mt-1">Accepts JPG, PNG, RAW, TIFF (up to 35MB per frame)</span>
+</div>
+<!-- Streamlined Evidence Item -->
+<div class="flex items-center gap-4 p-3.5 bg-surface-well border border-border-subtle rounded-xl">
+<div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-border-subtle">
+<img class="w-full h-full object-cover" data-alt="Clear field photo of unauthorized masonry construction with red brick course and scaffolding" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIch_WM_beDmEK2LVrnWPz-wycASpxr99Z4UsE-2xjjc5gMraFWRuWz-20sEmLLT1gYnMXlSOB7o379GbQu4feEEiEY0YB_DAYqV5unEVjJuaYR5EKL-1aMD3y-2G1HKIqzPECXnl7mV5xoLwQBSMZH5r-IAyOqUyPdsTjaNY_dUK7bZ4KQvon7B7j93rheXq5okqCpi_3OEEokKk9xu1N_i2QOKu2WzMr1QdWZXHAFk3YKLa3-lE"/>
+<span class="absolute bottom-0.5 left-0.5 bg-text-primary/80 text-on-primary text-[8px] px-1 rounded font-code-telemetry">GEO</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="text-sm font-semibold text-text-primary truncate">IMG_20260418_1024.jpg</span>
+<span class="text-[11px] font-medium text-zone-survey bg-zone-survey-bg border border-zone-survey-border px-1.5 py-0.2 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">check_circle</span> Geotag Validated
+                    </span>
+</div>
+<div class="flex items-center gap-3 mt-1.5">
+<button class="text-xs text-secondary hover:text-primary font-medium flex items-center gap-1" onclick="document.getElementById('exif-modal').showModal()" type="button">
+<span class="material-symbols-outlined text-[15px]">fingerprint</span>
+<span>Inspect EXIF &amp; Cryptographic Seal</span>
+</button>
+</div>
+</div>
+<button class="p-2 text-text-muted hover:text-error hover:bg-surface-card rounded-lg transition-colors" title="Delete photograph" type="button">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+<!-- Recommendation slot -->
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl text-xs text-text-secondary border border-border-subtle/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[18px]">camera_alt</span>
+<span>Recommendation: Supplement with an oblique perspective showing landmark benchmark.</span>
+</div>
+<button class="text-primary font-semibold hover:underline shrink-0" type="button">+ Add Angle</button>
+</div>
+</section>
+<!-- SECTION 4: Field Observation Narrative -->
+<section class="bg-surface-card p-6 md:p-8 rounded-2xl border border-border-subtle shadow-sm flex flex-col gap-6">
+<div class="flex items-center justify-between pb-2 border-b border-border-subtle">
+<div class="flex items-center gap-3">
+<span class="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">04</span>
+<h2 class="text-lg font-semibold text-text-primary">Observation Narrative &amp; Statutory Linting</h2>
+</div>
+<button class="text-xs text-secondary hover:text-primary font-medium flex items-center gap-1" onclick="document.getElementById('lexicon-modal').showModal()" type="button">
+<span class="material-symbols-outlined text-[15px]">gavel</span>
+<span>View Statutory Lexicon</span>
+</button>
+</div>
+<!-- Observation Statement -->
+<div class="flex flex-col gap-1.5">
+<label class="text-sm font-semibold text-text-primary" for="narrative-input">
+                  Observational Statement (Admissible Court Record)
+                </label>
+<textarea class="w-full bg-surface-well border border-border-subtle text-text-primary text-sm p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-surface-card transition-all resize-y" id="narrative-input" rows="4">Alleged unauthorized masonry construction observed 72m southwest of boundary pillar.</textarea>
+<div class="flex justify-between items-center text-xs text-text-muted mt-0.5">
+<span id="char-counter">Characters: 82 / 1000 · Keep descriptions purely factual and objective.</span>
+<button class="text-secondary hover:underline font-medium" id="btn-insert-phrase" type="button">Insert Standard Phrase</button>
+</div>
+</div>
+<!-- Clean, Subtle Legal Linting Advisory -->
+<div class="p-3.5 rounded-xl bg-zone-survey-bg border border-zone-survey-border flex items-start gap-3 transition-all" id="lexicon-banner">
+<span class="material-symbols-outlined text-zone-survey text-[20px] shrink-0 mt-0.5">verified</span>
+<div class="flex-1 text-xs">
+<span class="font-semibold text-text-primary">Statutory Lexicon Compliant:</span>
+<span class="text-text-secondary ml-1" id="lexicon-banner-text">Neutral evidentiary term “alleged unauthorized activity” verified. Free of prejudicial phrasing.</span>
+</div>
+</div>
+<!-- Urgency Level Selection -->
+<div class="flex flex-col gap-2 pt-2">
+<label class="text-sm font-semibold text-text-primary">Enforcement Urgency Level</label>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="urgency-grid">
+<!-- Routine -->
+<label class="cursor-pointer flex flex-col p-3.5 rounded-xl border border-border-subtle bg-surface-well/60 hover:bg-surface-well transition-all">
+<div class="flex items-center justify-between mb-1">
+<span class="text-sm font-medium text-text-primary">Routine</span>
+<input class="accent-primary" name="urgency" type="radio" value="routine"/>
+</div>
+<span class="text-xs text-text-secondary">14-Day Standard Review</span>
+</label>
+<!-- Priority -->
+<label class="cursor-pointer flex flex-col p-3.5 rounded-xl border border-border-subtle bg-surface-well/60 hover:bg-surface-well transition-all">
+<div class="flex items-center justify-between mb-1">
+<span class="text-sm font-medium text-text-primary">Priority</span>
+<input class="accent-primary" name="urgency" type="radio" value="priority"/>
+</div>
+<span class="text-xs text-zone-regulated font-medium">48-Hour Rapid Triage</span>
+</label>
+<!-- Urgent Emergency (Selected) -->
+<label class="cursor-pointer flex flex-col p-3.5 rounded-xl border-2 border-zone-core bg-zone-core-bg text-zone-core transition-all">
+<div class="flex items-center justify-between mb-1">
+<span class="text-sm font-bold text-zone-core flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">bolt</span> Urgent Emergency
+                      </span>
+<input checked="" class="accent-zone-core" name="urgency" type="radio" value="emergency"/>
+</div>
+<span class="text-xs font-semibold text-zone-core">&lt;4h Immediate Escalation</span>
+</label>
+</div>
+</div>
+<!-- Attestation Checkbox -->
+<div class="p-3.5 bg-surface-well rounded-xl border border-border-subtle flex items-start gap-3">
+<input checked="" class="mt-0.5 w-4 h-4 rounded text-primary focus:ring-primary accent-primary cursor-pointer" id="statutory-attest" type="checkbox"/>
+<label class="text-xs text-text-secondary leading-relaxed cursor-pointer select-none" for="statutory-attest">
+                  I solemnly attest under statutory provisions of the AMASR Act that the coordinates, spatial distances, and evidentiary images recorded here were collected on-site in person and represent an accurate contemporaneous observation.
+                </label>
+</div>
+</section>
+<!-- SECTION 5: Tactile Actions -->
+<section class="flex flex-col gap-4 pb-12">
+<div class="flex flex-col sm:flex-row items-center gap-3">
+<!-- Secondary Clean Button -->
+<button class="w-full sm:w-auto px-5 py-3.5 bg-surface-card hover:bg-surface-well border border-border-strong text-text-secondary hover:text-text-primary font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2" id="reset-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+<span>Clear Form &amp; Reset</span>
+</button>
+<!-- High-Impact Authoritative Primary Button -->
+<button class="w-full sm:flex-1 px-6 py-3.5 bg-primary hover:bg-[#8e3200] active:scale-[0.99] text-on-primary font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2.5" id="submit-btn" type="submit">
+<span class="material-symbols-outlined text-[20px]">lock_clock</span>
+<span>Submit Observation &amp; Verify Spatial Buffer</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+<!-- Clean Statutory Disclaimer -->
+<p class="text-center text-[11px] text-text-muted leading-relaxed max-w-xl mx-auto">
+                Statutory Notice: Submissions are cryptographically sealed with the active ranger hardware credential. Falsification of statutory evidence is punishable under AMASR Act Section 30.
+              </p>
+</section>
+</form>
+</div>
+</div>
+</div>
+</main>
+<!-- MODAL 1: Geodesic Datum Reference Pop-up -->
+<dialog class="rounded-2xl p-0 border border-border-subtle shadow-2xl backdrop:bg-slate-900/50 max-w-lg w-full" id="datum-modal">
+<div class="p-6 flex flex-col gap-4 bg-surface-card">
+<div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+<div class="flex items-center gap-2 text-primary font-semibold text-base">
+<span class="material-symbols-outlined">satellite_alt</span>
+<h3>Geodesic Datum Reference</h3>
+</div>
+<button class="text-text-muted hover:text-text-primary" onclick="document.getElementById('datum-modal').close()" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="space-y-3 text-xs text-text-secondary">
+<div class="p-3 bg-surface-well rounded-xl flex flex-col gap-1">
+<span class="font-bold text-text-primary">Monument Benchmark Anchor</span>
+<span class="font-code-telemetry text-text-primary">ASI-AGR-09 · Southwestern Perimeter Plinth</span>
+<span class="text-text-muted">Coordinate Datum: WGS84 (EPSG:4326) / UTM Zone 43N</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div class="p-2.5 bg-surface-well rounded-lg">
+<span class="block text-text-muted text-[10px] uppercase font-bold">Constellation</span>
+<span class="font-semibold text-text-primary">GPS + Galileo + GLONASS</span>
+</div>
+<div class="p-2.5 bg-surface-well rounded-lg">
+<span class="block text-text-muted text-[10px] uppercase font-bold">DOP Rating</span>
+<span class="font-semibold text-zone-survey">0.82 (Optimal Geometry)</span>
+</div>
+</div>
+<p class="leading-relaxed">
+          Statutory measurements automatically compute direct geodesic Euclidean distances to the ASI cadastral monument polygon. Any reading within 100 meters triggers an automatic statutory core alert.
+        </p>
+</div>
+<div class="pt-2 flex justify-end">
+<button class="px-4 py-2 text-xs font-semibold bg-surface-well hover:bg-surface-container-high rounded-lg text-text-primary transition-colors" onclick="document.getElementById('datum-modal').close()" type="button">
+          Close Reference
+        </button>
+</div>
+</div>
+</dialog>
+<!-- MODAL 2: EXIF & Cryptographic Seal Pop-up -->
+<dialog class="rounded-2xl p-0 border border-border-subtle shadow-2xl backdrop:bg-slate-900/50 max-w-lg w-full" id="exif-modal">
+<div class="p-6 flex flex-col gap-4 bg-surface-card">
+<div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+<div class="flex items-center gap-2 text-primary font-semibold text-base">
+<span class="material-symbols-outlined">verified_user</span>
+<h3>EXIF Forensic &amp; Cryptographic Seal</h3>
+</div>
+<button class="text-text-muted hover:text-text-primary" onclick="document.getElementById('exif-modal').close()" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="space-y-3 font-code-telemetry text-xs">
+<div class="p-3 bg-surface-well rounded-xl space-y-1.5 text-text-primary">
+<div class="flex justify-between border-b border-border-subtle pb-1">
+<span class="text-text-muted">Filename:</span>
+<span class="font-semibold">IMG_20260418_1024.jpg</span>
+</div>
+<div class="flex justify-between border-b border-border-subtle pb-1">
+<span class="text-text-muted">File Size:</span>
+<span>4.8 MB (4,832,109 bytes)</span>
+</div>
+<div class="flex justify-between border-b border-border-subtle pb-1">
+<span class="text-text-muted">Embedded EXIF GPS:</span>
+<span class="text-secondary font-bold">27.17514° N, 78.04211° E</span>
+</div>
+<div class="flex justify-between border-b border-border-subtle pb-1">
+<span class="text-text-muted">Sensor Altitude / Heading:</span>
+<span>171.4m AMSL · 214° SW</span>
+</div>
+<div class="flex justify-between border-b border-border-subtle pb-1">
+<span class="text-text-muted">Hardware Terminal:</span>
+<span>Trimble Ranger 7 Tactical [ID: TR-982]</span>
+</div>
+<div class="flex flex-col pt-1">
+<span class="text-text-muted text-[10px] uppercase font-bold">SHA-256 Digest:</span>
+<span class="text-[11px] text-text-secondary break-all">9f8a47b2c011e89f4dc192084aa330ef89921b302cba043441</span>
+</div>
+</div>
+<p class="font-sans text-xs text-zone-survey flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+          Cryptographic signature verified against field officer's HSM token.
+        </p>
+</div>
+<div class="pt-2 flex justify-end">
+<button class="px-4 py-2 text-xs font-semibold bg-primary text-on-primary rounded-lg transition-colors" onclick="document.getElementById('exif-modal').close()" type="button">
+          Done
+        </button>
+</div>
+</div>
+</dialog>
+<!-- MODAL 3: Statutory Lexicon Reference Pop-up -->
+<dialog class="rounded-2xl p-0 border border-border-subtle shadow-2xl backdrop:bg-slate-900/50 max-w-lg w-full" id="lexicon-modal">
+<div class="p-6 flex flex-col gap-4 bg-surface-card">
+<div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+<div class="flex items-center gap-2 text-primary font-semibold text-base">
+<span class="material-symbols-outlined">gavel</span>
+<h3>Statutory Lexicon Guidelines</h3>
+</div>
+<button class="text-text-muted hover:text-text-primary" onclick="document.getElementById('lexicon-modal').close()" type="button">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="space-y-3 text-xs text-text-secondary leading-relaxed">
+<p>
+          Under statutory tribunal rules (AMASR Act §§ 20A &amp; 20B), observations submitted in preliminary intake must adhere strictly to objective factual terminology to avoid pre-judgment claims during judicial review.
+        </p>
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div class="p-2.5 bg-zone-core-bg border border-zone-core-border rounded-lg">
+<span class="block text-zone-core font-bold uppercase text-[10px] mb-1">Avoid (Prejudicial)</span>
+<ul class="space-y-1 text-zone-core">
+<li>• "Criminal encroachment"</li>
+<li>• "Illegal scam construction"</li>
+<li>• "Deliberate trespass"</li>
+</ul>
+</div>
+<div class="p-2.5 bg-zone-survey-bg border border-zone-survey-border rounded-lg">
+<span class="block text-zone-survey font-bold uppercase text-[10px] mb-1">Standard (Admissible)</span>
+<ul class="space-y-1 text-zone-survey">
+<li>• "Alleged unauthorized activity"</li>
+<li>• "Unlicensed brickwork observed"</li>
+<li>• "Unverified perimeter activity"</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="pt-2 flex justify-end">
+<button class="px-4 py-2 text-xs font-semibold bg-surface-well hover:bg-surface-container-high rounded-lg text-text-primary transition-colors" onclick="document.getElementById('lexicon-modal').close()" type="button">
+          Dismiss
+        </button>
+</div>
+</div>
+</dialog>
+<!-- Footer -->
+<footer class="w-full bg-surface-card border-t border-border-subtle py-8">
+<div class="max-w-max-width-content mx-auto px-4 md:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+<div class="space-y-1 max-w-xl">
+<p class="text-xs text-text-secondary leading-relaxed">
+          Statutory Notice: Observations and spatial determinations are advisory triage assessments for heritage preservation authorities and do not constitute a judicial ruling.
+        </p>
+<p class="font-code-dossier text-[11px] text-text-muted">
+          Heritage Plus Core Architecture · Archaeological Survey Directorate · System Version v2.4-gov
+        </p>
+</div>
+<div class="flex flex-wrap items-center justify-center gap-4 text-xs text-text-secondary">
+<a class="hover:text-primary transition-colors" data-path="site-context" href="#">Site Context</a>
+<a class="hover:text-primary transition-colors" data-path="field-capture" href="#">Capture</a>
+<a class="hover:text-primary transition-colors" data-path="change-ledger" href="#">Ledger</a>
+<a class="hover:text-primary transition-colors" data-path="reviewer-queue" href="#">Queue</a>
+<a class="hover:text-primary transition-colors" data-path="ps-fit" href="#">PS Fit</a>
+<a class="hover:text-primary transition-colors" data-path="evaluator-faq" href="#">FAQ</a>
+</div>
+</div>
+</footer>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Clock Telemetry update
+      const timestampEl = document.getElementById('hud-timestamp');
+      setInterval(() => {
+        const now = new Date();
+        if (timestampEl) {
+          timestampEl.textContent = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+        }
+      }, 1000);
+
+      // 2. Category Tile Selection Toggle
+      const tiles = document.querySelectorAll('.category-tile');
+      tiles.forEach(tile => {
+        tile.addEventListener('click', () => {
+          tiles.forEach(t => {
+            t.classList.remove('border-primary', 'bg-primary/5', 'shadow-xs');
+            t.classList.add('border-border-subtle', 'bg-surface-well/50');
+            const label = t.querySelector('span.text-sm');
+            if (label) {
+              label.classList.remove('text-primary', 'font-semibold');
+              label.classList.add('font-medium');
+            }
+            const iconWrap = t.querySelector('div');
+            if (iconWrap) {
+              iconWrap.className = 'w-11 h-11 rounded-full bg-surface-card border border-border-subtle text-secondary flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105';
+            }
+          });
+
+          tile.classList.remove('border-border-subtle', 'bg-surface-well/50');
+          tile.classList.add('border-primary', 'bg-primary/5', 'shadow-xs');
+          const label = tile.querySelector('span.text-sm');
+          if (label) {
+            label.classList.remove('font-medium');
+            label.classList.add('text-primary', 'font-semibold');
+          }
+          const iconWrap = tile.querySelector('div');
+          if (iconWrap) {
+            iconWrap.className = 'w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2.5 transition-transform group-hover:scale-105';
+          }
+        });
+      });
+
+      // 3. Manual Override Toggle
+      const overrideToggle = document.getElementById('override-toggle');
+      const latInput = document.getElementById('lat-input');
+      const lonInput = document.getElementById('lon-input');
+
+      if (overrideToggle && latInput && lonInput) {
+        overrideToggle.addEventListener('change', (e) => {
+          const isManual = e.target.checked;
+          latInput.readOnly = !isManual;
+          lonInput.readOnly = !isManual;
+          if (isManual) {
+            latInput.classList.remove('bg-surface-well');
+            latInput.classList.add('bg-surface-card', 'border-primary');
+            lonInput.classList.remove('bg-surface-well');
+            lonInput.classList.add('bg-surface-card', 'border-primary');
+            latInput.focus();
+          } else {
+            latInput.classList.add('bg-surface-well');
+            latInput.classList.remove('bg-surface-card', 'border-primary');
+            lonInput.classList.add('bg-surface-well');
+            lonInput.classList.remove('bg-surface-card', 'border-primary');
+          }
+        });
+      }
+
+      // 4. GPS Refresh Button
+      const refreshBtn = document.getElementById('refresh-gps-btn');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+          const icon = refreshBtn.querySelector('.material-symbols-outlined');
+          if (icon) icon.classList.add('animate-spin');
+          setTimeout(() => {
+            if (icon) icon.classList.remove('animate-spin');
+            latInput.value = '27.175142';
+            lonInput.value = '78.042118';
+          }, 800);
+        });
+      }
+
+      // 5. Narrative Lexicon Linter & Character Counter
+      const narrativeInput = document.getElementById('narrative-input');
+      const banner = document.getElementById('lexicon-banner');
+      const bannerText = document.getElementById('lexicon-banner-text');
+      const charCounter = document.getElementById('char-counter');
+      const insertPhraseBtn = document.getElementById('btn-insert-phrase');
+
+      if (narrativeInput && banner && bannerText) {
+        narrativeInput.addEventListener('input', (e) => {
+          const text = e.target.value;
+          if (charCounter) {
+            charCounter.textContent = `Characters: ${text.length} / 1000 · Keep descriptions purely factual and objective.`;
+          }
+
+          const lower = text.toLowerCase();
+          const bannedWords = ['illegal', 'criminal', 'encroacher', 'scam', 'trespasser'];
+          const found = bannedWords.some(w => lower.includes(w));
+
+          if (found) {
+            banner.className = 'p-3.5 rounded-xl bg-zone-regulated-bg border border-zone-regulated-border flex items-start gap-3 transition-all';
+            banner.innerHTML = `
+              <span class="material-symbols-outlined text-zone-regulated text-[20px] shrink-0 mt-0.5">warning</span>
+              <div class="flex-1 text-xs">
+                <span class="font-semibold text-zone-regulated">Prejudicial Phrase Detected:</span>
+                <span class="text-text-primary ml-1">Replace definitive criminal assertions with neutral terms like "alleged unauthorized activity".</span>
+              </div>
+            `;
+          } else {
+            banner.className = 'p-3.5 rounded-xl bg-zone-survey-bg border border-zone-survey-border flex items-start gap-3 transition-all';
+            banner.innerHTML = `
+              <span class="material-symbols-outlined text-zone-survey text-[20px] shrink-0 mt-0.5">verified</span>
+              <div class="flex-1 text-xs">
+                <span class="font-semibold text-text-primary">Statutory Lexicon Compliant:</span>
+                <span class="text-text-secondary ml-1">Neutral evidentiary term “alleged unauthorized activity” verified. Free of prejudicial phrasing.</span>
+              </div>
+            `;
+          }
+        });
+      }
+
+      if (insertPhraseBtn && narrativeInput) {
+        insertPhraseBtn.addEventListener('click', () => {
+          narrativeInput.value = "Alleged unauthorized masonry activity observed within the statutory buffer zone.";
+          narrativeInput.dispatchEvent(new Event('input'));
+        });
+      }
+
+      // 6. Reset Form Action
+      const resetBtn = document.getElementById('reset-btn');
+      if (resetBtn && narrativeInput) {
+        resetBtn.addEventListener('click', () => {
+          narrativeInput.value = '';
+          narrativeInput.dispatchEvent(new Event('input'));
+        });
+      }
+    });
+  </script>
+</body></html>

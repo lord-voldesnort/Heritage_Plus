@@ -1,0 +1,39 @@
+{
+  "geometryGate": {
+    "status": "PASSED_WITH_LIMITATIONS",
+    "targetSite": "Fort of Shivner (Shivneri Fort) [MUMMH015]",
+    "monumentNumber": "MUMMH015",
+    "monumentName": "Fort of Shivner",
+    "sourceAgency": "Bhuvan / NRSC (ISRO) in association with ASI",
+    "sourceUrl": "https://bhuvan-app1.nrsc.gov.in/culture_monuments/",
+    "wmsEndpoint": "https://bhuvan-vec2.nrsc.gov.in/bhuvan/wms",
+    "sourceDate": "2026-09-07",
+    "crs": "EPSG:4326",
+    "geometryType": "MultiPolygon",
+    "layers": [
+      {
+        "name": "asi:protected_areas",
+        "gid": 7068,
+        "buffDist": "base monument footprint"
+      },
+      {
+        "name": "asi:prohibited_boundary",
+        "gid": 9785,
+        "buffDist": 100
+      },
+      {
+        "name": "asi:regulated_boundary",
+        "gid": 2394,
+        "buffDist": 300
+      }
+    ],
+    "testPointsValidated": true,
+    "poorGpsHandled": true,
+    "nestingValidated": true,
+    "fidInstabilityRule": "Dynamic fid ignored; durable key is mon_num (MUMMH015) + layer name + gid",
+    "bhuvanVersionStatement": "Version 1.0 source data; not independently legally verified",
+    "bhuvanLegalLimitation": "Bhuvan explicitly states that these boundaries were mapped in association with ASI, require ASI verification for correctness/completeness, are for visualization/indicative purposes only, and cannot be used for any legal purpose. Bhuvan also separately states this is 'version 1.0 data' and disclaims responsibility for inadvertent errors.",
+    "passedBy": "Ameya (Integration Lead)",
+    "passedAt": "2026-09-07T11:55:00+05:30"
+  }
+}

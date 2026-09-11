@@ -1,0 +1,54 @@
+{
+  "productName": "Heritage Pulse",
+  "problemStatement": "PS 26197",
+  "coreThesis": "Preservation-oriented field-evidence and Change Ledger system converting unstructured observations into reviewable, uncertainty-labelled records.",
+  "targetSite": "Shivneri Fort",
+  "observationCategories": [
+    "POSSIBLE_CONSTRUCTION",
+    "POSSIBLE_ENCROACHMENT",
+    "PHYSICAL_DAMAGE",
+    "DUMPING_OR_WASTE",
+    "BLOCKED_ACCESS",
+    "ALTERATION_OR_OBSTRUCTION",
+    "OTHER_VISIBLE_CHANGE"
+  ],
+  "spatialClassifications": [
+    "POTENTIAL_ZONE_CONCERN",
+    "NO_SPATIAL_CONCERN_INDICATED",
+    "LOCATION_UNCERTAIN",
+    "EVIDENCE_INSUFFICIENT",
+    "SOURCE_UNAVAILABLE"
+  ],
+  "caseStatuses": [
+    "DRAFT",
+    "SUBMITTED_FOR_REVIEW",
+    "ADDITIONAL_INFORMATION_NEEDED",
+    "FIELD_VERIFICATION_RECOMMENDED",
+    "REFERRED",
+    "CLOSED_INSUFFICIENT_LOCATION_EVIDENCE",
+    "CLOSED_DUPLICATE",
+    "CLOSED_REVIEWED"
+  ],
+  "forbiddenPhrases": [
+    "illegal construction detected",
+    "encroacher identified",
+    "guilty",
+    "demolition required",
+    "noc absent",
+    "violation confirmed",
+    "criminal trespass",
+    "punishable offense"
+  ],
+  "disclaimerText": "Indicative decision support only. Heritage Pulse does not make legal determinations or verify permission status. Statutory review rests exclusively with the designated competent authority.",
+  "nonGoals": [
+    "Nationwide monument mapping in MVP",
+    "Automatic illegal construction detection",
+    "Satellite-AI enforcement",
+    "Drone surveillance",
+    "3D reconstruction or digital twin",
+    "Facial recognition or owner identification",
+    "Public accusation feed",
+    "NOC verification engine",
+    "Legal advice or police FIR workflow"
+  ]
+}

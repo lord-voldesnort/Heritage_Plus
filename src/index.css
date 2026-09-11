@@ -1,0 +1,342 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   HERITAGE PULSE — DESIGN TOKENS
+   Two full palettes (light / dark) expressed as CSS variables
+   in "R G B" form so Tailwind can apply opacity modifiers.
+   Every existing utility class (bg-canvas-bg, text-text-primary,
+   border-border-subtle, ...) already used across the app reads
+   from these variables, so toggling the `dark` class on <html>
+   re-skins the entire application in one step.
+   ============================================================ */
+:root {
+  color-scheme: light;
+
+  --canvas-bg: 248 250 252;
+  --canvas-bg-alt: 238 242 247;
+  --surface-card: 255 255 255;
+  --surface-well: 241 245 249;
+  --surface-dim: 204 219 243;
+  --surface-bright: 248 249 255;
+  --surface-container-lowest: 255 255 255;
+  --surface-container-low: 239 244 255;
+  --surface-container: 230 238 255;
+  --surface-container-high: 220 233 255;
+  --surface-container-highest: 213 227 252;
+
+  --border-subtle: 226 232 240;
+  --border-strong: 203 213 225;
+
+  --text-primary: 15 23 42;
+  --text-secondary: 71 85 105;
+  --text-muted: 148 163 184;
+
+  --primary: 163 57 0;
+  --primary-container: 204 73 0;
+  --primary-surface: 255 247 237;
+  --primary-border: 254 215 170;
+  --primary-saffron: 217 90 0;
+  --primary-fixed: 255 219 206;
+  --primary-fixed-dim: 255 181 153;
+  --on-primary: 255 255 255;
+  --on-primary-container: 255 251 255;
+
+  --secondary: 0 99 152;
+  --secondary-surface: 240 247 255;
+  --secondary-border: 184 220 255;
+  --secondary-container: 91 184 254;
+  --on-secondary: 255 255 255;
+  --on-secondary-container: 0 71 110;
+
+  --tertiary: 84 92 114;
+  --tertiary-container: 108 116 139;
+  --on-tertiary: 255 255 255;
+  --on-tertiary-container: 254 252 255;
+
+  --outline: 142 113 102;
+  --outline-variant: 226 191 178;
+
+  --error: 186 26 26;
+  --error-container: 255 218 214;
+  --on-error: 255 255 255;
+  --on-error-container: 147 0 10;
+
+  --zone-core: 220 38 38;
+  --zone-core-bg: 254 242 242;
+  --zone-core-border: 254 202 202;
+  --zone-regulated: 217 119 6;
+  --zone-regulated-bg: 255 251 235;
+  --zone-regulated-border: 253 230 138;
+  --zone-survey: 5 150 105;
+  --zone-survey-bg: 236 253 245;
+  --zone-survey-border: 167 243 208;
+
+  --interactive-focus: 234 88 12;
+
+  --accent-cyan: 8 145 178;
+  --accent-cyan-bg: 236 254 255;
+  --accent-amber: 217 119 6;
+  --accent-violet: 124 58 237;
+
+  --scrollbar-thumb: 203 213 225;
+  --scrollbar-thumb-hover: 148 163 184;
+  --grid-line: 15 23 42;
+}
+
+/* ---------- DARK "COMMAND CENTER" PALETTE ---------- */
+.dark {
+  color-scheme: dark;
+
+  --canvas-bg: 6 10 20;
+  --canvas-bg-alt: 9 14 26;
+  --surface-card: 14 21 37;
+  --surface-well: 18 27 46;
+  --surface-dim: 11 18 32;
+  --surface-bright: 22 32 58;
+  --surface-container-lowest: 9 14 26;
+  --surface-container-low: 14 21 37;
+  --surface-container: 18 27 46;
+  --surface-container-high: 25 35 58;
+  --surface-container-highest: 33 45 72;
+
+  --border-subtle: 27 40 63;
+  --border-strong: 43 61 92;
+
+  --text-primary: 227 238 250;
+  --text-secondary: 146 168 199;
+  --text-muted: 90 111 141;
+
+  --primary: 255 145 66;
+  --primary-container: 255 106 0;
+  --primary-surface: 36 22 8;
+  --primary-border: 122 61 16;
+  --primary-saffron: 255 166 77;
+  --primary-fixed: 77 42 16;
+  --primary-fixed-dim: 102 56 18;
+  --on-primary: 12 10 6;
+  --on-primary-container: 255 255 255;
+
+  --secondary: 34 211 238;
+  --secondary-surface: 8 35 48;
+  --secondary-border: 22 78 99;
+  --secondary-container: 8 145 178;
+  --on-secondary: 4 20 28;
+  --on-secondary-container: 165 243 252;
+
+  --tertiary: 146 168 199;
+  --tertiary-container: 43 61 92;
+  --on-tertiary: 8 12 20;
+  --on-tertiary-container: 227 238 250;
+
+  --outline: 58 74 104;
+  --outline-variant: 34 48 74;
+
+  --error: 248 113 113;
+  --error-container: 63 20 24;
+  --on-error: 20 6 6;
+  --on-error-container: 254 202 202;
+
+  --zone-core: 248 113 113;
+  --zone-core-bg: 42 16 19;
+  --zone-core-border: 92 34 40;
+  --zone-regulated: 251 191 36;
+  --zone-regulated-bg: 42 32 8;
+  --zone-regulated-border: 92 74 18;
+  --zone-survey: 52 211 153;
+  --zone-survey-bg: 7 42 30;
+  --zone-survey-border: 21 94 63;
+
+  --interactive-focus: 251 146 60;
+
+  --accent-cyan: 34 211 238;
+  --accent-cyan-bg: 8 35 48;
+  --accent-amber: 251 191 36;
+  --accent-violet: 167 139 250;
+
+  --scrollbar-thumb: 43 61 92;
+  --scrollbar-thumb-hover: 58 74 104;
+  --grid-line: 148 197 255;
+}
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+  html {
+    background-color: rgb(var(--canvas-bg));
+  }
+  body {
+    background-color: rgb(var(--canvas-bg));
+    color: rgb(var(--text-primary));
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  code, pre, .font-mono, .font-code-telemetry, .font-code-dossier {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  ::selection {
+    background-color: rgb(var(--primary) / 0.25);
+    color: rgb(var(--text-primary));
+  }
+}
+
+@layer utilities {
+  .bg-canvas-bg {
+    background-color: rgb(var(--canvas-bg));
+  }
+  .text-text-primary {
+    color: rgb(var(--text-primary));
+  }
+  .text-text-secondary {
+    color: rgb(var(--text-secondary));
+  }
+  .text-text-muted {
+    color: rgb(var(--text-muted));
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Command-center backdrop: faint grid + radial glow, dark mode only */
+  .command-grid-bg {
+    background-color: rgb(var(--canvas-bg));
+    background-image:
+      linear-gradient(rgb(var(--grid-line) / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--grid-line) / 0.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .dark .command-grid-bg {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgb(var(--accent-cyan) / 0.10), transparent),
+      linear-gradient(rgb(var(--grid-line) / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--grid-line) / 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 28px 28px, 28px 28px;
+  }
+
+  .panel-glow {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+  }
+  .dark .panel-glow {
+    box-shadow: 0 0 0 1px rgb(var(--accent-cyan) / 0.06), 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--scrollbar-thumb));
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--scrollbar-thumb-hover));
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Modern Dialog Backdrop */
+dialog::backdrop,
+.dialog-backdrop {
+  background: rgba(13, 28, 46, 0.45);
+  backdrop-filter: blur(4px);
+}
+.dark dialog::backdrop,
+.dark .dialog-backdrop {
+  background: rgba(2, 6, 14, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+/* Material Symbols Outlined helper */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
+}
+
+/* Custom map container styles */
+.maplibregl-canvas {
+  outline: none;
+}
+
+.maplibregl-ctrl-attrib {
+  display: none !important;
+}
+
+/* Print / PDF Export Styling — always light, regardless of app theme */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm;
+  }
+
+  html,
+  body {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  header,
+  footer,
+  nav,
+  aside,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  section,
+  article,
+  tr,
+  .print-avoid-break,
+  .evidence-packet-section {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+}
