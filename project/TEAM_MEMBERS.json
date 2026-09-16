@@ -1,0 +1,80 @@
+[
+  {
+    "id": "vishwajeet",
+    "name": "Vishwajeet",
+    "role": "Technical Foundation and Spatial Intelligence Lead",
+    "ownership": [
+      "Data model & database schema",
+      "Backend & API structure",
+      "Site & geometry records (GeoJSON)",
+      "Point-in-polygon & distance-to-boundary calculation",
+      "GPS accuracy-circle overlap uncertainty logic",
+      "Change Ledger event store & case creation",
+      "Technical testing & spatial algorithm verification"
+    ],
+    "reviewAuthority": ["schema", "api", "storage", "spatial-logic"]
+  },
+  {
+    "id": "ameya",
+    "name": "Ameya",
+    "role": "Product, Workflow, Integration, Demo, and PS-Fit Lead",
+    "ownership": [
+      "Product definition & MVP boundaries",
+      "User journeys & state transitions",
+      "Observation categories & safety guardrails",
+      "PS-Fit bridge argument & Judge Q&A (/docs/PS_FIT.md)",
+      "End-to-end integration testing",
+      "Demo scenarios & 3-minute pitch video",
+      "Final product coherence"
+    ],
+    "reviewAuthority": ["product-contract", "ps-fit", "status-labels", "demo-plan"]
+  },
+  {
+    "id": "vivek",
+    "name": "Vivek",
+    "role": "Frontend, UX, and Visible Product Lead",
+    "ownership": [
+      "Mobile-first app shell & responsive layouts",
+      "Routing & client-side navigation",
+      "Field capture studio UI & GPS accuracy HUD",
+      "Spatial result view & uncertainty verdict display",
+      "Change Ledger timeline & Case detail screens",
+      "Reviewer assessment console & packet view",
+      "Reusable design system components"
+    ],
+    "reviewAuthority": ["frontend-ui", "components", "ux-flows"]
+  },
+  {
+    "id": "person4",
+    "name": "Person 4",
+    "role": "UI & Interaction Support Engineer",
+    "reportsTo": "Vivek",
+    "ownership": [
+      "Touch feedback & responsive CSS utilities",
+      "Form validation & loading/empty states",
+      "Mobile drawer & bottom-sheet interactions"
+    ]
+  },
+  {
+    "id": "person5",
+    "name": "Person 5",
+    "role": "GIS Data & Seed Scenario Support",
+    "reportsTo": "Vishwajeet",
+    "ownership": [
+      "GeoJSON polygon boundary digitisation & verification",
+      "Seed test points (inside, outside, edge, degraded GPS)",
+      "API & test harness data sets"
+    ]
+  },
+  {
+    "id": "person6",
+    "name": "Person 6",
+    "role": "Documentation & QA Support",
+    "reportsTo": "Ameya",
+    "ownership": [
+      "QA checklist verification & regression testing",
+      "Field validation test recording",
+      "Pitch deck & demo presentation support"
+    ]
+  }
+]
