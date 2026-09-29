@@ -1,4 +1,4 @@
-# 🏛️ Heritage Pulse
+# 🏛️ Heritage Plus
 
 ### हेरिटेज पल्स
 
