@@ -2,44 +2,127 @@ name: Build Android APK
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch: {}
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
+    name: Build and Publish Heritage Pulse APK
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
+    steps:
+
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Node.js
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
-      - name: Set up JDK 17
+      # Java
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
+          cache: gradle
 
+      # Install dependencies
       - name: Install web dependencies
         run: npm ci
 
+      # Build web application
       - name: Build web app
         run: npm run build
 
+      # Sync Capacitor
       - name: Sync Capacitor Android project
         run: npx cap sync android
 
+      # Give Gradle execute permission
       - name: Grant execute permission to gradlew
         run: chmod +x android/gradlew
 
+      # Build APK
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
+      # Verify APK
+      - name: Verify APK
+        run: |
+          if [ ! -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+            echo "ERROR: APK was not generated."
+            exit 1
+          fi
+
+          echo "APK successfully generated:"
+          ls -lh android/app/build/outputs/apk/debug/app-debug.apk
+
+      # Prepare APK for release
+      - name: Prepare Heritage Pulse APK
+        run: |
+          mkdir -p release
+
+          cp \
+            android/app/build/outputs/apk/debug/app-debug.apk \
+            release/HeritagePulse.apk
+
+          sha256sum release/HeritagePulse.apk \
+            > release/HeritagePulse.apk.sha256
+
+          echo "Release files:"
+          ls -lh release/
+
+      # Keep Actions artifact
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: heritage-plus-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: release/HeritagePulse.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      # Create GitHub Release when version tag is pushed
+      - name: Publish APK to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+
+          echo "Creating GitHub Release: ${TAG}"
+
+          gh release create "${TAG}" \
+            "release/HeritagePulse.apk" \
+            "release/HeritagePulse.apk.sha256" \
+            --title "Heritage Pulse ${TAG}" \
+            --generate-notes
+
+      # Show direct download URL
+      - name: Show APK download URL
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo ""
+          echo "=============================================="
+          echo " HERITAGE PULSE APK RELEASED"
+          echo "=============================================="
+          echo ""
+          echo "Release:"
+          echo "https://github.com/lord-voldesnort/Heritage_Plus/releases/tag/${GITHUB_REF_NAME}"
+          echo ""
+          echo "DIRECT APK DOWNLOAD:"
+          echo "https://github.com/lord-voldesnort/Heritage_Plus/releases/latest/download/HeritagePulse.apk"
+          echo ""
+          echo "=============================================="
